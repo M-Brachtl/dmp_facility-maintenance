@@ -5,7 +5,7 @@ if __name__ != "__main__":
 
 import sqlite3 as sql
 
-connection = sql.connect("database.db")
+connection = sql.connect("./database.db")
 cursor = connection.cursor()
 
 ## zápisy revizí

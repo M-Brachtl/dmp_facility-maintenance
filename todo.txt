@@ -1,0 +1,1 @@
+předělat tabulku people, vezmi druhý způsob, tedy ne T/F

@@ -10,7 +10,7 @@
 * Typy dat: 
     * Strojní zařízení
     * Revize strojních zařízení (datum revize, její výsledek, poznámka, typ případné závady, pravidlo pro plánování revize, typ revize, stav stroje-likvidace)
-    * Pracovníci (jméno, aktuální proškolenost <b>(? výčet školení/u každého školení informace T/F)</b>)
+    * Pracovníci (jméno, aktuální proškolenost <b>(? výčet školení ~~/u každého školení informace T/F~~)</b>)
     * Školení dle typu revizí a činností (<b>? která bude hlavní informace, školení nebo revize/činnost</b>)
     * Plány revizí, školení <b>(! ukazovat dostupné pracovníky - ukládat/generovat)</b>; bude ve formě jsonu ve složce ./backend/database/plans
 * API:
