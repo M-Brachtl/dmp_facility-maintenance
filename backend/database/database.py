@@ -20,7 +20,10 @@ def list_machines(**params):
     output = []
     for machine in cursor.fetchall():
         # revisions = machine[5]
-        revisions = tuple(int(n) for n in machine[5].strip("[]").split(", "))
+        if machine[5] == "[]":
+            revisions = []
+        else:
+            revisions = tuple(int(n) for n in machine[5].strip("[]").split(", "))
         output.append((*machine[:5],revisions))
     return output
 def add_machine(in_num: str, name: str, type_: str, location: str, revision_array: list = []):
@@ -53,13 +56,18 @@ def add_revision_type(name: str, rule: int):
         "INSERT INTO revision_types (name, rule) VALUES (?, ?) RETURNING id;",
         (name,rule)
     )
-    cursor.execute()
-    # new_id = cursor.fetchone()
-    # cursor.execute(
-    #     "ALTER TABLE people ADD COLUMN ? INTEGER DEFAULT 0;",
-    #     (f"rev_{new_id}")
-    # )
-    # Takhle ne, protože to neexistuje
+    new_id = cursor.fetchone()[0]
+    # print(new_id)
+    cursor.execute("SELECT id, untrained_rev FROM people")
+    raw_output: str = cursor.fetchall()
+    for person in raw_output:
+        updated_untr_rev = [new_id]
+        if person[1] != "[]":
+            updated_untr_rev = [int(n) for n in person[1].strip("[]").split(", ")] + updated_untr_rev
+        cursor.execute(
+            "UPDATE people SET untrained_rev = ? WHERE id = ?;",
+            (str(updated_untr_rev), person[0])
+        )
 
     connection.commit()
     return "success"
@@ -74,16 +82,76 @@ def remove_revision_type(revision_type_id: int):
     if dependencies != []:
         raise RuntimeError("Tento typ revize využívají některé stroje.",dependencies)
 
-    cursor.execute("DELETE FROM machines WHERE id = ?;", (revision_type_id))
+    cursor.execute("DELETE FROM machines WHERE id = ?;", (revision_type_id,))
 
-    # cursor.execute(
-    #     "ALTER TABLE people ;",
-    #     (f"rev_{remove_revision_type}")
-    # )
+    cursor.execute("SELECT id, trained_rev, untrained_rev FROM people")
+    raw_output: str = cursor.fetchall()
+    for person in raw_output:
+        if person[1] != "[]":
+            updated_untr_rev = [int(n) for n in person[1].strip("[]").split(", ")].pop(revision_type_id)
+        else:
+            updated_untr_rev = []
+        if person[2] != "[]":
+            updated_tr_rev = [int(n) for n in person[2].strip("[]").split(", ")].pop(revision_type_id)
+        else:
+            updated_tr_rev = []
+        cursor.execute(
+            "UPDATE people SET trained_rev = ?, untrained_rev = ? WHERE id = ?;",
+            (str(updated_tr_rev), str(updated_untr_rev), person[0])
+        )
     connection.commit()
     return "success"
 
+def list_people(name = ""):
+    query = "SELECT * FROM people"
+    if name != "":
+        query += f" WHERE name = '{name}'"
+    cursor.execute(query + ";")
+    raw_output = cursor.fetchall()
+    output = []
+    for person in raw_output:
+        if person[3] == '[]':
+            untr_rev = []
+        else:
+            untr_rev = [int(n) for n in person[3].strip("[]").split(", ")]
+        if person[2] == '[]':
+            tr_rev = []
+        else:
+            tr_rev = [int(n) for n in person[2].strip("[]").split(", ")]
+        
+        output.append([*person[:2], tr_rev, untr_rev])
+
+    return output
+
+def add_people(name: str, trained_rev: list[int] = []):
+    cursor.execute("SELECT id FROM revision_types")
+    untr_rev = [int(row[0]) for row in cursor.fetchall()]
+    # print(untr_rev)
+    for rev_type in trained_rev:
+        print(untr_rev, rev_type)
+        untr_rev.remove(rev_type)
+    
+    cursor.execute(
+        "INSERT INTO people (name, trained_rev, untrained_rev) VALUES (?, ?, ?);",
+        (name, str(trained_rev), str(untr_rev))
+    )
+    connection.commit()
+    return "success"
+
+def remove_people(id: int):
+    cursor.execute(
+        "DELETE FROM people WHERE id = ?;",
+        (id,)
+    )
+    connection.commit()
+    return "success"
+
+
 if __name__ == "__main__":
     # print(add_machine("T_001", "Stroj A", "Test", "Lokace T", [1, 2]))
-    add_revision_type("Revize T2", 24)
-    print("Databáze:", list_revision_types(),sep="\n")
+    # add_revision_type("Revize T3-P", 48)
+    # add_people("Adam Testovač", [1])
+    # add_people("Matyk Testovač-C2")
+    # remove_people(1)
+    # remove_people(2)
+    print("Databáze:", list_people(),sep="\n")

@@ -4,8 +4,9 @@ if __name__ != "__main__":
     raise ImportError(f"Tento kód nepatří do aplikace a byl importován.\n__name__: {__name__}")
 
 import sqlite3 as sql
+import os
 
-connection = sql.connect("./database.db")
+connection = sql.connect(os.path.dirname(os.path.abspath(__file__)) + "\\database.db")
 cursor = connection.cursor()
 
 ## zápisy revizí
@@ -37,10 +38,15 @@ cursor = connection.cursor()
 #     revision_array TEXT
 # );""")
 
-# people
+# people trained_rev je json a untrained_rev je list
 # cursor.execute("""CREATE TABLE IF NOT EXISTS people (
 #     id INTEGER PRIMARY KEY,
 #     name TEXT,
-#     rev_1 INTEGER,
-#     rev_2 INTEGER
+#     trained_rev TEXT,
+#     untrained_rev TEXT
 # );""")
+
+# cursor.execute("ALTER TABLE people RENAME TO people_old;")
+# cursor.execute("UPDATE people SET untrained_rev='[1]' WHERE id=1;")
+cursor.execute("DELETE FROM revision_types WHERE id = 3;")
+connection.commit()
