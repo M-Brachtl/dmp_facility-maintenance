@@ -48,5 +48,8 @@ cursor = connection.cursor()
 
 # cursor.execute("ALTER TABLE people RENAME TO people_old;")
 # cursor.execute("UPDATE people SET untrained_rev='[1]' WHERE id=1;")
-cursor.execute("DELETE FROM revision_types WHERE id = 3;")
+# cursor.execute("DELETE FROM revision_types WHERE id = 3;")
+
+# cursor.execute("ALTER TABLE machines ADD COLUMN disposed BOOLEAN DEFAULT 0")
+cursor.execute("ALTER TABLE revision_log DROP COLUMN machine_state;")
 connection.commit()

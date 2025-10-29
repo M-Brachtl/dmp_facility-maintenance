@@ -26,6 +26,24 @@ def list_machines(**params):
             revisions = tuple(int(n) for n in machine[5].strip("[]").split(", "))
         output.append((*machine[:5],revisions))
     return output
+
+def get_machine_name(id: int, include_IN_NUM: bool = False):
+    in_num_request = ""
+    if include_IN_NUM:
+        in_num_request = ", in_num"
+    cursor.execute(
+        f"SELECT name{in_num_request} FROM machines WHERE id=?",
+        (id,)
+    )
+    raw_output = cursor.fetchone()
+    if include_IN_NUM:
+        return {
+            "name": raw_output[0],
+            "in_num": raw_output[1]
+        }
+    else:
+        return raw_output[0]
+
 def add_machine(in_num: str, name: str, type_: str, location: str, revision_array: list = []):
     cursor.execute(
         "INSERT INTO machines (in_num, name, type, location, revision_array) VALUES (?, ?, ?, ?, ?);",
@@ -146,12 +164,52 @@ def remove_people(id: int):
     connection.commit()
     return "success"
 
+def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = ""): # validní result: bez závady/malá závada/velká závada
+    query = "SELECT * FROM revision_log"
+    additional_query = ""
+    if machine_id or rev_type or result:
+        additional_query += " WHERE "
+    if machine_id:
+        additional_query += f"machine_id = {machine_id} AND "
+    if rev_type:
+        additional_query += f"type = {machine_id} AND "
+    if result:
+        if result not in ("bez závady","malá závada","velká závada"):
+            raise ValueError("Hodnota result není validní.")
+        additional_query += f"result = {result}"
+    additional_query = additional_query.strip(" AND ")
+
+    cursor.execute(query + additional_query + ";")
+    return cursor.fetchall()
+
+def add_revision_log(machine_id: int, date: str, rev_type: int, result: str, notes: str): # validní result: bez závady/malá závada/velká závada
+    if result not in ("bez závady","malá závada","velká závada"):
+        raise ValueError("Hodnota result není validní.")
+    cursor.execute(
+        "INSERT INTO revision_log (machine_id, date, type, result, notes) VALUES (?, ?, ?, ?, ?)",
+        (machine_id, date, rev_type, result, notes)
+    )
+    connection.commit()
+    return "success"
+
+def remove_revision_log(log_id: int):
+    cursor.execute(
+        "DELETE FROM revision_log WHERE id=?;",
+        (log_id,)
+    )
+    connection.commit()
+    return "success"
+
 
 if __name__ == "__main__":
+    # os.system(".\\backup.bat")
     # print(add_machine("T_001", "Stroj A", "Test", "Lokace T", [1, 2]))
     # add_revision_type("Revize T3-P", 48)
     # add_people("Adam Testovač", [1])
     # add_people("Matyk Testovač-C2")
     # remove_people(1)
-    # remove_people(2)
-    print("Databáze:", list_people(),sep="\n")
+    # remove_people()
+    # add_revision_log(1, "12/11/2025", 1, "velká závada", "test")
+    # print(get_machine_name(1, 1))
+    remove_revision_log(2)
+    print("Databáze:", list_revision_log(),sep="\n")
