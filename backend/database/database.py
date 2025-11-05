@@ -10,7 +10,8 @@ def list_machines(**params):
     query = "SELECT id, in_num, name, type, location, revision_array FROM machines"
     filters = []
     for key, value in params.items():
-        if key in ["id", "in_num", "name", "type", "location"]:
+        if key in ["_id", "in_num", "name", "type", "location"]:
+            if key == "_id": key = "id" # aby se nepletlo s pythonovskými předdefinovanými věcmi
             filters.append(f"{key} = '{value}'")
         else:
             raise KeyError(f"Neexistující parametr: {key}")
@@ -44,10 +45,10 @@ def get_machine_name(id: int, include_IN_NUM: bool = False):
     else:
         return raw_output[0]
 
-def add_machine(in_num: str, name: str, type_: str, location: str, revision_array: list = []):
+def add_machine(in_num: str, name: str, type_: str, location: str): #, revision_array: list = [] --nepoužívaný parametr //, str(revision_array)
     cursor.execute(
-        "INSERT INTO machines (in_num, name, type, location, revision_array) VALUES (?, ?, ?, ?, ?);",
-        (in_num, name, type_, location, str(revision_array))
+        "INSERT INTO machines (in_num, name, type, location) VALUES (?, ?, ?, ?);",
+        (in_num, name, type_, location)
     )
     connection.commit()
     return "success"
@@ -200,6 +201,29 @@ def remove_revision_log(log_id: int):
     connection.commit()
     return "success"
 
+def add_rev_to_machine(machine_id: int, rev_id: int, rule: int): # rule je v měsících
+    revision_array: tuple = list(list_machines(_id=machine_id)[0][5]) + [rev_id]
+    if revision_array.count(rev_id) > 1:
+        raise ValueError("Revize je už zapsaná.")
+    cursor.execute(
+        "UPDATE machines SET revision_array = ? WHERE id = ?;",
+        (str(revision_array), machine_id)
+    )
+    cursor.execute(
+        "INSERT INTO periodicity (revision_type, machine, rule) VALUES (?,?,?);",
+        (rev_id, machine_id, rule)
+    )
+    connection.commit()
+
+def remove_rev_from_machine(machine_id: int, rev_id: int):
+    revision_array = list(list_machines(_id=machine_id)[0][5])
+    revision_array.remove(rev_id)
+    cursor.execute(
+        "UPDATE machines SET revision_array = ? WHERE id = ?;",
+        (str(revision_array), machine_id)
+    )
+    connection.commit()
+
 
 if __name__ == "__main__":
     # os.system(".\\backup.bat")
@@ -211,5 +235,7 @@ if __name__ == "__main__":
     # remove_people()
     # add_revision_log(1, "12/11/2025", 1, "velká závada", "test")
     # print(get_machine_name(1, 1))
-    remove_revision_log(2)
-    print("Databáze:", list_revision_log(),sep="\n")
+    # remove_revision_log(2)
+    # remove_rev_from_machine(1,1)
+    add_rev_to_machine(1,2,24)
+    print("Databáze:", list_machines(_id=1),sep="\n")

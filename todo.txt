@@ -1,10 +1,10 @@
-Nová tabulka s kombinací stroj-revize, kde je napsaná periodicita
-Není napsaná periodicita v revision_types
+Nová tabulka s kombinací stroj-revize, kde je napsaná periodicita /
+Není napsaná periodicita v revision_types /
 
 Nová tabulka training_log, kde je historie školení (revision_type-člověk)
-Do revision_types sloupec s periodicitou školení (v měsících)
+Do revision_types sloupec s periodicitou školení (v měsících) /
 
 Fiktivní stroj "činnost", má své revize (=činnosti), které jiný stroj nevyužívá
-V revision_types je sloupec True/False zdali jde o činnost
+V revision_types je sloupec True/False zdali jde o činnost /
 
 + Editace záznamů
