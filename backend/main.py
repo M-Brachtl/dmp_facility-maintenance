@@ -1,2 +1,3 @@
 import database.database as dtb
-dtb.itsme()
+from database.database import dateDTB
+# dtb.itsme()

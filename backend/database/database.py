@@ -1,6 +1,30 @@
 import sqlite3 as sql
 import os
+import datetime as dt
+from calendar import monthrange
 ## useful later: output = [int(n) for n in test_str.strip("[]").split(", ")]
+class dateDTB(dt.date):
+    def __new__(cls, date_str: str):
+        datetime_prep = dt.datetime.strptime(date_str, "%d/%m/%Y")
+        return super().__new__(cls, datetime_prep.year, datetime_prep.month, datetime_prep.day)
+
+    def __str__(self):
+        return self.strftime("%d/%m/%Y")
+
+    @classmethod
+    def today(cls):
+        d = dt.date.today()
+        return cls(f"{d.day:02d}/{d.month:02d}/{d.year}")
+    
+    def add_months(self, months: int):
+        months_since_og_year = self.month + months
+        year = self.year + months_since_og_year // 12
+        month = months_since_og_year % 12
+
+        # Upravit na poslední den nového měsíce
+        day = min(self.day, monthrange(year, month)[1])
+
+        return dateDTB(f"{day}/{month}/{year}")
 
 connection = sql.connect(os.path.dirname(os.path.abspath(__file__)) + "\\database.db")
 cursor = connection.cursor()
@@ -214,6 +238,7 @@ def add_rev_to_machine(machine_id: int, rev_id: int, rule: int): # rule je v mě
         (rev_id, machine_id, rule)
     )
     connection.commit()
+    return "success"
 
 def remove_rev_from_machine(machine_id: int, rev_id: int):
     revision_array = list(list_machines(_id=machine_id)[0][5])
@@ -223,7 +248,67 @@ def remove_rev_from_machine(machine_id: int, rev_id: int):
         (str(revision_array), machine_id)
     )
     connection.commit()
+    return "success"
 
+def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
+    cursor.execute("SELECT validity_period FROM revision_types WHERE id = ?", (rev_type,))
+    rule = cursor.fetchone()[0]
+    expiration_date = date.add_months(rule)
+    cursor.execute(
+        "INSERT INTO training_log (revision_type, person, date, expiration_date) VALUES (?,?,?,?)",
+        (rev_type, person, str(date), str(expiration_date))
+    )
+    connection.commit()
+    return "success"
+
+def list_training_log(**params):
+    query = "SELECT * FROM training_log"
+    filters = []
+    date_filter = (None, None)
+    e_date_filter = (None, None)
+    if ("month" in params.items() and "year" not in params.items()) or ("e_month" in params.items() and "e_year" not in params.items()):
+        raise TypeError("Při filtrování dle data je nutno zadat rok.")
+    for key, value in params.items():
+        if key in ["_id", "rev_type", "person", "month", "year", "e_month", "e_year"]:
+            if key == "_id":
+                filters.append(f"id = '{value}'")
+            elif key == "month":
+                date_filter[0] = value
+            elif key == "e_month":
+                e_date_filter[0] = value
+            elif key == "year":
+                date_filter[0] = value
+            elif key == "e_year":
+                e_date_filter[0] = value
+            else:
+                filters.append(f"{key} = '{value}'")
+        else:
+            raise KeyError(f"Neexistující parametr: {key}")
+    if date_filter[1]:
+        if date_filter[0]:
+            filters.append(f"date LIKE '%/{date_filter[0]}/{date_filter[1]}'")
+        else:
+            filters.append(f"date LIKE '%/%/{date_filter[1]}'")
+    if e_date_filter[1]:
+        if e_date_filter[0]:
+            filters.append(f"expiration_date LIKE '%/{e_date_filter[0]}/{e_date_filter[1]}'")
+        else:
+            filters.append(f"expiration_date LIKE '%/%/{e_date_filter[1]}'")
+    if filters:
+        query += " WHERE " + " AND ".join(filters)
+    cursor.execute(query + ";")
+    output = cursor.fetchall()
+    for index, log in enumerate(output.copy()):
+        output[index] = list(output[index])
+        output[index][3] = dateDTB(log[3])
+        output[index][4] = dateDTB(log[4])
+        output[index] = tuple(output[index])
+    return output
+
+def remove_training_log(_id: int):
+    cursor.execute("DELETE FROM training_log WHERE id = ?;", (_id,))
+    connection.commit()
+    return "success"
 
 if __name__ == "__main__":
     # os.system(".\\backup.bat")
@@ -237,5 +322,6 @@ if __name__ == "__main__":
     # print(get_machine_name(1, 1))
     # remove_revision_log(2)
     # remove_rev_from_machine(1,1)
-    add_rev_to_machine(1,2,24)
-    print("Databáze:", list_machines(_id=1),sep="\n")
+    # add_rev_to_machine(1,2,24)
+    add_training_log(1,1)
+    print("Databáze:", list_training_log(_id=1),sep="\n")

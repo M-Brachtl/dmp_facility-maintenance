@@ -54,6 +54,15 @@ cursor = connection.cursor()
 #     rule INTEGER
 # );""")
 
+# training_log, historie školení
+# cursor.execute("""CREATE TABLE IF NOT EXISTS training_log (
+#     id INTEGER PRIMARY KEY,
+#     revision_type INTEGER,
+#     person INTEGER,
+#     date TEXT,
+#     expiration_date TEXT
+# );""")
+
 # cursor.execute("ALTER TABLE people RENAME TO people_old;")
 # cursor.execute("UPDATE people SET untrained_rev='[1]' WHERE id=1;")
 # cursor.execute("DELETE FROM revision_types WHERE id = 3;")
@@ -61,5 +70,5 @@ cursor = connection.cursor()
 # cursor.execute("ALTER TABLE machines ADD COLUMN disposed BOOLEAN DEFAULT 0")
 # cursor.execute("ALTER TABLE revision_log DROP COLUMN machine_state;")
 
-cursor.execute("ALTER TABLE revision_types ADD COLUMN facility_activity BOOLEAN DEFAULT 0") # pořád v měsících
+# cursor.execute("ALTER TABLE revision_types ADD COLUMN facility_activity BOOLEAN DEFAULT 0") # pořád v měsících
 connection.commit()
