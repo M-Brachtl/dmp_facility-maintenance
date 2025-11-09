@@ -38,12 +38,10 @@ cursor = connection.cursor()
 #     revision_array TEXT
 # );""")
 
-# people trained_rev je json a untrained_rev je list
+# people trained_rev je json a untrained_rev je list !! SLOUPCE JSOU ODEBRANÉ
 # cursor.execute("""CREATE TABLE IF NOT EXISTS people (
 #     id INTEGER PRIMARY KEY,
-#     name TEXT,
-#     trained_rev TEXT,
-#     untrained_rev TEXT
+#     name TEXT
 # );""")
 
 # kombinace stroj-revize-periodicita
@@ -71,4 +69,6 @@ cursor = connection.cursor()
 # cursor.execute("ALTER TABLE revision_log DROP COLUMN machine_state;")
 
 # cursor.execute("ALTER TABLE revision_types ADD COLUMN facility_activity BOOLEAN DEFAULT 0") # pořád v měsících
+# cursor.execute("ALTER TABLE people DROP COLUMN trained_rev;")
+# cursor.execute("ALTER TABLE people DROP COLUMN untrained_rev;")
 connection.commit()

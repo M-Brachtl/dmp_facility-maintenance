@@ -7,4 +7,8 @@ Do revision_types sloupec s periodicitou školení (v měsících) /
 Fiktivní stroj "činnost", má své revize (=činnosti), které jiný stroj nevyužívá /?/
 V revision_types je sloupec True/False zdali jde o činnost /
 
+funkce pro disposal strojů
+funkce pro výpis validních tréninků včetně data expirace
+funkce pro výpis validních revizí (včetně data expirace)
+
 + Editace záznamů
