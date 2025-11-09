@@ -71,4 +71,7 @@ cursor = connection.cursor()
 # cursor.execute("ALTER TABLE revision_types ADD COLUMN facility_activity BOOLEAN DEFAULT 0") # pořád v měsících
 # cursor.execute("ALTER TABLE people DROP COLUMN trained_rev;")
 # cursor.execute("ALTER TABLE people DROP COLUMN untrained_rev;")
+
+cursor.execute("UPDATE revision_log SET date = '2025-10-29' WHERE id = 1;")
+
 connection.commit()

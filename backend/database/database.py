@@ -10,6 +10,9 @@ class dateDTB(dt.date):
 
     def __str__(self):
         return self.strftime("%d/%m/%Y")
+    
+    def __repr__(self):
+        return self.strftime("%Y-%m-%d")
 
     @classmethod
     def today(cls):
@@ -29,6 +32,7 @@ class dateDTB(dt.date):
 connection = sql.connect(os.path.dirname(os.path.abspath(__file__)) + "\\database.db")
 cursor = connection.cursor()
 
+# region functions
 ## machines (fiktivní id=0 - facility není v databázi)
 def list_machines(**params):
     if ("_id", 0) in params.items():
@@ -194,15 +198,19 @@ def remove_people(id: int):
     connection.commit()
     return "success"
 
-def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = ""): # validní result: bez závady/malá závada/velká závada
+def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", min_date: dateDTB = None, max_date: dateDTB = None): # validní result: bez závady/malá závada/velká závada
     query = "SELECT * FROM revision_log"
     additional_query = ""
-    if machine_id or rev_type or result:
+    if machine_id or rev_type or result or min_date:
         additional_query += " WHERE "
     if machine_id:
         additional_query += f"machine_id = {machine_id} AND "
     if rev_type:
-        additional_query += f"type = {machine_id} AND "
+        additional_query += f"type = {rev_type} AND "
+    if min_date:
+        additional_query += f"date >= '{repr(min_date)}' AND "
+    if max_date:
+        additional_query += f"date <= '{repr(max_date)}' AND "
     if result:
         if result not in ("bez závady","malá závada","velká závada"):
             raise ValueError("Hodnota result není validní.")
@@ -224,7 +232,7 @@ def add_revision_log(machine_id: int, rev_type: int, result: str, notes: str = "
         raise ValueError("Hodnota result není validní.")
     cursor.execute(
         "INSERT INTO revision_log (machine_id, date, type, result, notes) VALUES (?, ?, ?, ?, ?)",
-        (machine_id, str(date), rev_type, result, notes)
+        (machine_id, repr(date), rev_type, result, notes)
     )
     connection.commit()
     return "success"
@@ -268,44 +276,56 @@ def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
     expiration_date = date.add_months(rule)
     cursor.execute(
         "INSERT INTO training_log (revision_type, person, date, expiration_date) VALUES (?,?,?,?)",
-        (rev_type, person, str(date), str(expiration_date))
+        (rev_type, person, repr(date), repr(expiration_date))
     )
     connection.commit()
     return "success"
 
 def list_training_log(**params):
-    query = "SELECT * FROM training_log"
+    query = "SELECT id, revision_type, person, strftime('%d/%m/%Y', date), strftime('%d/%m/%Y', expiration_date) FROM training_log"
     filters = []
-    date_filter = (None, None)
-    e_date_filter = (None, None)
+    # date_filter = (None, None)
+    # e_date_filter = (None, None)
     if ("month" in params.items() and "year" not in params.items()) or ("e_month" in params.items() and "e_year" not in params.items()):
         raise TypeError("Při filtrování dle data je nutno zadat rok.")
     for key, value in params.items():
-        if key in ["_id", "rev_type", "person", "month", "year", "e_month", "e_year"]:
+        if key in ["_id", "rev_type", "person", "min_date", "max_date", "min_e_date", "max_e_date"]:
             if key == "_id":
                 filters.append(f"id = '{value}'")
-            elif key == "month":
-                date_filter[0] = value
-            elif key == "e_month":
-                e_date_filter[0] = value
-            elif key == "year":
-                date_filter[0] = value
-            elif key == "e_year":
-                e_date_filter[0] = value
+            # elif key == "month":
+            #     date_filter[0] = value
+            # elif key == "e_month":
+            #     e_date_filter[0] = value
+            # elif key == "year":
+            #     date_filter[0] = value
+            # elif key == "e_year":
+            #     e_date_filter[0] = value
+            elif (key == "min_date" or key == "max_date") and isinstance(value, dateDTB):
+                date_column = "date"
+                comparator = ">="
+                if key.startswith("max_"):
+                    comparator = "<="
+                filters.append(f"{date_column} {comparator} '{repr(value)}'")
+            elif (key == "min_e_date" or key == "max_e_date") and isinstance(value, dateDTB):
+                date_column = "expiration_date"
+                comparator = ">="
+                if key.startswith("max_"):
+                    comparator = "<="
+                filters.append(f"{date_column} {comparator} '{repr(value)}'")
             else:
                 filters.append(f"{key} = '{value}'")
         else:
             raise KeyError(f"Neexistující parametr: {key}")
-    if date_filter[1]:
-        if date_filter[0]:
-            filters.append(f"date LIKE '%/{date_filter[0]}/{date_filter[1]}'")
-        else:
-            filters.append(f"date LIKE '%/%/{date_filter[1]}'")
-    if e_date_filter[1]:
-        if e_date_filter[0]:
-            filters.append(f"expiration_date LIKE '%/{e_date_filter[0]}/{e_date_filter[1]}'")
-        else:
-            filters.append(f"expiration_date LIKE '%/%/{e_date_filter[1]}'")
+    # if date_filter[1]:
+    #     if date_filter[0]:
+    #         filters.append(f"date LIKE '%/{date_filter[0]}/{date_filter[1]}'")
+    #     else:
+    #         filters.append(f"date LIKE '%/%/{date_filter[1]}'")
+    # if e_date_filter[1]:
+    #     if e_date_filter[0]:
+    #         filters.append(f"expiration_date LIKE '%/{e_date_filter[0]}/{e_date_filter[1]}'")
+    #     else:
+    #         filters.append(f"expiration_date LIKE '%/%/{e_date_filter[1]}'")
     if filters:
         query += " WHERE " + " AND ".join(filters)
     cursor.execute(query + ";")
@@ -321,6 +341,7 @@ def remove_training_log(_id: int):
     cursor.execute("DELETE FROM training_log WHERE id = ?;", (_id,))
     connection.commit()
     return "success"
+# endregion
 
 if __name__ == "__main__":
     # os.system(".\\backup.bat")
@@ -339,4 +360,4 @@ if __name__ == "__main__":
     # remove_revision_type(4)
     # remove_machine(2)
     # remove_machine(3)
-    print("Databáze:", list_machines(),sep="\n")
+    print("Databáze:", list_training_log(min_date=dateDTB("01/01/2025")),sep="\n")
