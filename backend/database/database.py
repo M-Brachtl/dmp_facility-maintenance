@@ -2,10 +2,15 @@ import sqlite3 as sql
 import os
 import datetime as dt
 from calendar import monthrange
+import backup
+
 ## useful later: output = [int(n) for n in test_str.strip("[]").split(", ")]
 class dateDTB(dt.date):
     def __new__(cls, date_str: str):
-        datetime_prep = dt.datetime.strptime(date_str, "%d/%m/%Y")
+        try:
+            datetime_prep = dt.datetime.strptime(date_str, "%d/%m/%Y")
+        except ValueError:
+            datetime_prep = dt.datetime.strptime(date_str, "%Y-%m-%d")
         return super().__new__(cls, datetime_prep.year, datetime_prep.month, datetime_prep.day)
 
     def __str__(self):
@@ -63,6 +68,8 @@ def list_machines(**params):
     return output
 
 def get_machine_name(id: int, include_IN_NUM: bool = False):
+    if id == 0:
+        return "FACILITY"
     in_num_request = ""
     if include_IN_NUM:
         in_num_request = ", in_num"
@@ -87,14 +94,20 @@ def add_machine(in_num: str, name: str, type_: str, location: str): #, revision_
     connection.commit()
     return "success"
 def remove_machine(machine_id: int):
+    cursor.execute("SELECT * FROM periodicity WHERE machine = ?;", (machine_id,))
+    if cursor.fetchall() != []:
+        raise RuntimeError("Tento stroj má na sebe vázané revize. Nejprve odstraň periodicitu revize-stroje.")
+
     cursor.execute("DELETE FROM machines WHERE id = ?;", (machine_id,))
     connection.commit()
     return "success"
 
 ## revision types
-def list_revision_types(name = "", validity_period = 0, facility_activity = False): # pravidlo se aplikuje pro přesné shody
+def list_revision_types(_id: int = 0, name: str = "", validity_period: int = 0, facility_activity: bool = False): # pravidlo se aplikuje pro přesné shody
     query = "SELECT id, name, validity_period, facility_activity FROM revision_types"
     filters = []
+    if _id:
+        filters.append(f"id = {_id}")
     if name:
         filters.append(f"name = '{name}'")
     if validity_period:
@@ -108,7 +121,7 @@ def list_revision_types(name = "", validity_period = 0, facility_activity = Fals
 
 def add_revision_type(name: str, validity_period: int, facility_activity: bool = False):
     cursor.execute(
-        "INSERT INTO revision_types (name, validity_period, facility_activity) VALUES (?, ?, ?) RETURNING id;",
+        "INSERT INTO revision_types (name, validity_period, facility_activity) VALUES (?, ?, ?);", # RETURNING id
         (name,validity_period,facility_activity)
     )
     # new_id = cursor.fetchone()[0]
@@ -199,9 +212,11 @@ def remove_people(id: int):
     return "success"
 
 def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", min_date: dateDTB = None, max_date: dateDTB = None): # validní result: bez závady/malá závada/velká závada
+    if isinstance(min_date, str) or isinstance(max_date, str):
+        raise TypeError("min_date a max_date musí být typu dateDTB nebo None.")
     query = "SELECT * FROM revision_log"
     additional_query = ""
-    if machine_id or rev_type or result or min_date:
+    if machine_id or rev_type or result or min_date or max_date:
         additional_query += " WHERE "
     if machine_id:
         additional_query += f"machine_id = {machine_id} AND "
@@ -215,8 +230,8 @@ def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", 
         if result not in ("bez závady","malá závada","velká závada"):
             raise ValueError("Hodnota result není validní.")
         additional_query += f"result = {result}"
-    additional_query = additional_query.strip(" AND ")
-
+    additional_query = " " + additional_query.strip(" AND ")
+    print(query + additional_query + ";")
     cursor.execute(query + additional_query + ";")
     output_raw = cursor.fetchall()
     output = []
@@ -246,13 +261,16 @@ def remove_revision_log(log_id: int):
     return "success"
 
 def add_rev_to_machine(machine_id: int, rev_id: int, rule: int): # rule je v měsících
-    revision_array: list = list_machines(_id=machine_id)[0][5] + [rev_id]
-    if revision_array.count(rev_id) > 1:
-        raise ValueError("Revize je už zapsaná.")
-    cursor.execute(
-        "UPDATE machines SET revision_array = ? WHERE id = ?;",
-        (str(revision_array), machine_id)
-    )
+    if machine_id != 0:
+        if list_revision_types(_id=rev_id)[0][3]: # facility_activity
+            raise ValueError("Revize je činnost, nelze přiřadit stroji.")
+        revision_array: list = list_machines(_id=machine_id)[0][5] + [rev_id]
+        if revision_array.count(rev_id) > 1:
+            raise ValueError("Revize je už zapsaná.")
+        cursor.execute(
+            "UPDATE machines SET revision_array = ? WHERE id = ?;",
+            (str(revision_array), machine_id)
+        )
     cursor.execute(
         "INSERT INTO periodicity (revision_type, machine, rule) VALUES (?,?,?);",
         (rev_id, machine_id, rule)
@@ -267,6 +285,12 @@ def remove_rev_from_machine(machine_id: int, rev_id: int):
         "UPDATE machines SET revision_array = ? WHERE id = ?;",
         (str(revision_array), machine_id)
     )
+
+    cursor.execute(
+        "DELETE FROM periodicity WHERE revision_type = ? AND machine = ?;",
+        (rev_id, machine_id)
+    )
+
     connection.commit()
     return "success"
 
@@ -343,10 +367,32 @@ def remove_training_log(_id: int):
     return "success"
 # endregion
 
+# region speciální funkce
+def clean_database(): # odstraní všechen obsah databáze (krom tabulek a jejich struktur)
+    if input("Napiš 'ANO', pokud sis zazálohoval databázi a máš 100% jistotu, že chceš pokračovat: ") != "ANO":
+        raise ValueError("!! Smazání databáze zrušeno. !!")
+    backup.backup_database()
+    if input("Zkontroluj, jestli se databáze zazálohovala ('JO'): ") != "JO":
+        raise ValueError("!! Smazání databáze zrušeno. !!")
+
+    cursor.execute("DELETE FROM machines;")
+    cursor.execute("DELETE FROM people;")
+    cursor.execute("DELETE FROM periodicity;")
+    cursor.execute("DELETE FROM revision_log;")
+    cursor.execute("DELETE FROM revision_types;")
+    cursor.execute("DELETE FROM training_log;")
+
+    connection.commit()
+    return "success"
+
+def recover_database(backup_path: str):
+    backup.restore_database(2)
+
+
 if __name__ == "__main__":
-    # os.system(".\\backup.bat")
+    # backup.backup_database()
     # print(add_machine("T_002-D", "Stroj B", "Test", "Lokace TD"))
-    # add_revision_type("Revize F1-Test", 6, True)
+    # add_revision_type("Revize New_test 1", 60)
     # add_people("Adam Testovač", [1])
     # add_people("Matyk Testovač-C2")
     # remove_people(1)
@@ -354,10 +400,13 @@ if __name__ == "__main__":
     # add_revision_log(1, "12/11/2025", 1, "velká závada", "test")
     # print(get_machine_name(1, 1))
     # remove_revision_log(2)
-    # remove_rev_from_machine(1,1)
-    # add_rev_to_machine(2,3,36)
+    # remove_rev_from_machine(2,3)
+    # add_rev_to_machine(2,5,6)
     # add_training_log(1,1)
-    # remove_revision_type(4)
+    # remove_revision_type(2)
     # remove_machine(2)
     # remove_machine(3)
-    print("Databáze:", list_training_log(min_date=dateDTB("01/01/2025")),sep="\n")
+    # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
+    # print("Databáze:", list_training_log(max_date=dateDTB("12/11/2025")),sep="\n")
+    # clean_database()
+    recover_database(3)
