@@ -44,5 +44,18 @@ def restore_database(file_number: int):
         print(f"Failed to restore: {e}", file=sys.stderr)
         sys.exit(1)
 
+def clear_backups():
+    if not backup_dir.exists() or not backup_dir.is_dir():
+        print(f"Backup directory not found: {backup_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    for p in backup_dir.iterdir():
+        if p.is_file() and p.name != ".gitkeep":
+            try:
+                p.unlink()
+                print(f"Deleted backup file: {p}")
+            except Exception as e:
+                print(f"Failed to delete {p}: {e}", file=sys.stderr)
+
 if __name__ == "__main__":
     restore_database(2)

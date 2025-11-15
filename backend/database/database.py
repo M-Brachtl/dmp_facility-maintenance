@@ -48,8 +48,8 @@ def list_machines(**params):
         if key in ["_id", "in_num", "name", "type", "location", "disposed"]:
             if key == "_id": key = "id" # aby se nepletlo s pythonovskými předdefinovanými věcmi
             filters.append(f"{key} = '{value}'")
-        elif key == "list_revisions":
-            raise NotImplementedError("Funkce ještě není implementována.")
+        elif key == "list_last_revisions" and value:
+            # raise NotImplementedError("Funkce ještě není implementována.")
             continue # posléze bude spuštěna funkce na výpis platných revizí dle tabulky revision_log
         else:
             raise KeyError(f"Neexistující parametr: {key}")
@@ -64,7 +64,22 @@ def list_machines(**params):
             revisions = []
         else:
             revisions = [int(n) for n in machine[5].strip("[]").split(", ")]
-        output.append((*machine[:5],revisions))
+
+        # přidání revizí ve formátu (log_id, rev_type, datum)
+        log_list = []
+        if key == "list_last_revisions":
+            cursor.execute("""SELECT id, type, date FROM revision_log AS og_log WHERE machine_id=? AND date=(
+                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.type=og_log.type
+                )""",
+                (machine[0],)
+            )
+            log_list = cursor.fetchall()
+            for lID, log in enumerate(log_list):
+                log_list[lID] = list(log_list[lID])
+                log_list[lID][2] = dateDTB(log[2])
+                log_list[lID] = tuple(log_list[lID])
+
+        output.append((*machine[:5],revisions, log_list))
     return output
 
 def get_machine_name(id: int, include_IN_NUM: bool = False):
@@ -170,26 +185,27 @@ def remove_revision_type(revision_type_id: int):
     connection.commit()
     return "success"
 
-def list_people(name = "", list_valid_trainings: bool = False):
-    if list_valid_trainings:
-        raise NotImplementedError("Funkce ještě není implementována.")
+def list_people(name = "", list_last_trainings: bool = False):
     query = "SELECT * FROM people"
     if name != "":
         query += f" WHERE name = '{name}'"
     cursor.execute(query + ";")
-    # raw_output = cursor.fetchall()
-    # output = []
-    # for person in raw_output:
-    #     if person[3] == '[]':
-    #         untr_rev = []
-    #     else:
-    #         untr_rev = [int(n) for n in person[3].strip("[]").split(", ")]
-    #     if person[2] == '[]':
-    #         tr_rev = []
-    #     else:
-    #         tr_rev = [int(n) for n in person[2].strip("[]").split(", ")]
-        
-    #     output.append([*person[:2], tr_rev, untr_rev])
+    
+    if list_last_trainings:
+        output = []
+        for person in cursor.fetchall():
+            cursor.execute("""SELECT id, revision_type, date FROM training_log AS og_log WHERE person=? AND date=(
+                    SELECT MAX(log.date) FROM training_log AS log WHERE log.person=og_log.person AND log.revision_type=og_log.revision_type
+                )""",
+                (person[0],)
+            )
+            log_list = cursor.fetchall()
+            for lID, log in enumerate(log_list):
+                log_list[lID] = list(log_list[lID])
+                log_list[lID][2] = dateDTB(log[2])
+                log_list[lID] = tuple(log_list[lID])
+            output.append((*person, log_list))
+        return output
 
     return cursor.fetchall() #output
 
@@ -369,11 +385,11 @@ def remove_training_log(_id: int):
 
 # region speciální funkce
 def clean_database(): # odstraní všechen obsah databáze (krom tabulek a jejich struktur)
-    if input("Napiš 'ANO', pokud sis zazálohoval databázi a máš 100% jistotu, že chceš pokračovat: ") != "ANO":
-        raise ValueError("!! Smazání databáze zrušeno. !!")
+    # if input("Napiš 'ANO', pokud sis zazálohoval databázi a máš 100% jistotu, že chceš pokračovat: ") != "ANO":
+    #     raise ValueError("!! Smazání databáze zrušeno. !!")
     backup.backup_database()
-    if input("Zkontroluj, jestli se databáze zazálohovala ('JO'): ") != "JO":
-        raise ValueError("!! Smazání databáze zrušeno. !!")
+    # if input("Zkontroluj, jestli se databáze zazálohovala ('JO'): ") != "JO":
+    #     raise ValueError("!! Smazání databáze zrušeno. !!")
 
     cursor.execute("DELETE FROM machines;")
     cursor.execute("DELETE FROM people;")
@@ -386,7 +402,11 @@ def clean_database(): # odstraní všechen obsah databáze (krom tabulek a jejic
     return "success"
 
 def recover_database(backup_path: str):
+    backup.backup_database()
     backup.restore_database(2)
+
+def clear_backups():
+    backup.clear_backups()
 
 
 if __name__ == "__main__":
@@ -401,12 +421,13 @@ if __name__ == "__main__":
     # print(get_machine_name(1, 1))
     # remove_revision_log(2)
     # remove_rev_from_machine(2,3)
-    # add_rev_to_machine(2,5,6)
+    # add_rev_to_machine(2,3,60)
     # add_training_log(1,1)
     # remove_revision_type(2)
     # remove_machine(2)
     # remove_machine(3)
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
-    # print("Databáze:", list_training_log(max_date=dateDTB("12/11/2025")),sep="\n")
+    print("Databáze:", list_people(list_last_trainings=True),sep="\n")
     # clean_database()
-    recover_database(3)
+    # recover_database(3)
+    # clear_backups()
