@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+</head>
+<body>
+    <p>Tohle je testovací HTML.</p>
+    <p>Toto bylo vytvořeno před zahájením Angular projektu.</p>
+    <button>Testovat funkce Eel</button>
+    <p>Odpověď: <span id="answer"></span></p>
+    <script type="text/javascript" src="../eel.js"></script>
+    <script>
+        document.querySelector("button").addEventListener('click',() => {
+            eel.get_test()((response)=>{
+                document.getElementById('answer').textContent = response;
+            })
+        })
+    </script>
+</body>
+</html>

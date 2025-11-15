@@ -2,7 +2,7 @@ import sqlite3 as sql
 import os
 import datetime as dt
 from calendar import monthrange
-import backup
+from . import backup
 
 ## useful later: output = [int(n) for n in test_str.strip("[]").split(", ")]
 class dateDTB(dt.date):
