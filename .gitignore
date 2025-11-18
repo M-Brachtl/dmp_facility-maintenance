@@ -3,3 +3,5 @@ test.py
 backend/database/backup/*
 !backend/database/backup/.gitkeep
 venv/
+frontend/dist/
+.vscode/

@@ -8,7 +8,7 @@ Fiktivní stroj "činnost", má své revize (=činnosti), které jiný stroj nev
 V revision_types je sloupec True/False zdali jde o činnost /
 
 funkce pro disposal strojů
-funkce pro výpis validních tréninků včetně data expirace
-funkce pro výpis validních revizí (včetně data expirace)
+funkce pro výpis validních tréninků včetně data expirace /
+funkce pro výpis validních revizí (včetně data expirace) *
 
 + Editace záznamů
