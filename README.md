@@ -1,29 +1,31 @@
 # Aplikace pro plánování údržby strojů a školení zaměstnanců
-## Setting up working environment for Angular frontend
-### Prerequisites
-- Node.js (version 16 or higher) and npm installed. Download from [nodejs.org](https://nodejs.org/).
-- Angular CLI installed globally: `npm install -g @angular/cli`.
+## Odkaz na prezentaci
+[Odkaz na prezentaci DMP](https://gamma.app/docs/Vyvoj-aplikace-pro-planovani-udrzby-stroju-a-skoleni-zamestnancu-mpsvevtk5awkbpb)
+## Nastavení pracovního prostředí pro Angular frontend
+### Předpoklady
+- Node.js (verze 16 nebo vyšší) a npm nainstalované. Stáhněte z [nodejs.org](https://nodejs.org/).
+- Angular CLI nainstalován globálně: `npm install -g @angular/cli`.
 
-### Setup Instructions
-1. Navigate to the frontend directory:
+### Pokyny pro nastavení
+1. Přejděte do adresáře frontend:
     ```
     cd ./frontend/dmp-angular
     ```
 
-2. Install dependencies:
+2. Nainstalujte závislosti:
     ```
     npm install
     ```
 
-3. Start the development server:
+3. Spusťte vývojový server:
     ```
     ng serve
     ```
-    The application will be available at `http://localhost:4200`.
+    Aplikace bude dostupná na `http://localhost:4200`.
 
-### Building for Use in Eel
-To compile and build the application:
+### Sestavení pro použití v Eel
+Pro kompilaci a sestavení aplikace:
 ```
 ng build
 ```
-The output will be in the `./frontend/dist/browser` directory.
+Výstup bude v adresáři `./frontend/dist/browser`.

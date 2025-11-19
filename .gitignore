@@ -5,3 +5,4 @@ backend/database/backup/*
 venv/
 frontend/dist/
 .vscode/
+dist.zip
