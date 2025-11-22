@@ -2,7 +2,10 @@ import sqlite3 as sql
 import os
 import datetime as dt
 from calendar import monthrange
-from . import backup
+try:
+    from . import backup
+except ImportError:
+    import backup
 
 ## useful later: output = [int(n) for n in test_str.strip("[]").split(", ")]
 class dateDTB(dt.date):
@@ -33,15 +36,20 @@ class dateDTB(dt.date):
         day = min(self.day, monthrange(year, month)[1])
 
         return dateDTB(f"{day}/{month}/{year}")
+    
+    def convert_to_date(self):
+        return dt.date(self.year, self.month, self.day)
 
 connection = sql.connect(os.path.dirname(os.path.abspath(__file__)) + "\\database.db")
 cursor = connection.cursor()
 
 # region functions
 ## machines (fiktivní id=0 - facility není v databázi)
-def list_machines(**params):
-    if ("_id", 0) in params.items():
-        return [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [])]
+def list_machines(list_last_revisions=False, **params):
+    # if ("_id", 0) in params.items():
+    #     return [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [])]
+    if list_last_revisions:
+        params["list_last_revisions"] = True
     query = "SELECT id, in_num, name, type, location, revision_array, disposed FROM machines"
     filters = []
     for key, value in params.items():
@@ -56,9 +64,11 @@ def list_machines(**params):
     if filters:
         query += " WHERE " + " AND ".join(filters)
     cursor.execute(query + ";")
-    # print(cursor.fetchall())
+    output_raw = cursor.fetchall()
+    # if ("_id", 0) in params.items():
+    output_raw = [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", str(list_facility_activities()), 0)] + output_raw
     output = []
-    for machine in cursor.fetchall():
+    for machine in output_raw:
         # revisions = machine[5]
         if machine[5] == "[]":
             revisions = []
@@ -295,12 +305,13 @@ def add_rev_to_machine(machine_id: int, rev_id: int, rule: int): # rule je v mě
     return "success"
 
 def remove_rev_from_machine(machine_id: int, rev_id: int):
-    revision_array = list(list_machines(_id=machine_id)[0][5])
-    revision_array.remove(rev_id)
-    cursor.execute(
-        "UPDATE machines SET revision_array = ? WHERE id = ?;",
-        (str(revision_array), machine_id)
-    )
+    if machine_id != 0:
+        revision_array = list(list_machines(_id=machine_id)[0][5])
+        revision_array.remove(rev_id)
+        cursor.execute(
+            "UPDATE machines SET revision_array = ? WHERE id = ?;",
+            (str(revision_array), machine_id)
+        )
 
     cursor.execute(
         "DELETE FROM periodicity WHERE revision_type = ? AND machine = ?;",
@@ -381,6 +392,16 @@ def remove_training_log(_id: int):
     cursor.execute("DELETE FROM training_log WHERE id = ?;", (_id,))
     connection.commit()
     return "success"
+
+def get_periodicity(machine_id: int, rev_id: int) -> int:
+    cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine=?;",(rev_id,machine_id))
+    return cursor.fetchone()[0]
+
+def list_facility_activities() -> list[int]:
+    cursor.execute("SELECT revision_type FROM periodicity WHERE machine=0;")
+    raw_output = cursor.fetchall()
+    return [rev[0] for rev in raw_output]
+
 # endregion
 
 # region speciální funkce
@@ -421,13 +442,15 @@ if __name__ == "__main__":
     # print(get_machine_name(1, 1))
     # remove_revision_log(2)
     # remove_rev_from_machine(2,3)
-    # add_rev_to_machine(2,3,60)
+    # add_rev_to_machine(0,4,18)
     # add_training_log(1,1)
     # remove_revision_type(2)
     # remove_machine(2)
     # remove_machine(3)
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
-    print("Databáze:", list_people(list_last_trainings=True),sep="\n")
+    # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
+    # print("Databáze:", get_periodicity(1,2),sep="\n")
+    print("Databáze - facility činnosti:", list_people(list_last_trainings=True),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()
