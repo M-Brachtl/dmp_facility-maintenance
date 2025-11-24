@@ -7,4 +7,4 @@ frontend/dist/
 .vscode/
 dist.zip
 test/
-plans/*.json
+backend/database/plans/*.json
