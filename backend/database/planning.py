@@ -11,7 +11,25 @@ from json import dump, load
 
 today = dateDTB.today()
 
-def generate_plan(years: int = 10):
+def test_exists(file_name: str) -> bool:
+    return os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name))
+
+def generate_plan_name():
+    file_name = f"gen_plan_{today.year}_{today.month}_{today.day}"
+    # zkontroluj jestli file_name neexistuje
+    increment = 1
+    while test_exists(file_name + ".json"):
+        file_name = f"gen_plan_{today.year}_{today.month}_{today.day}_{increment}"
+        increment += 1
+    return file_name
+
+def generate_plan(years: int = 10, file_name: str = "gen_default") -> dict:
+    if file_name == "" or file_name is None or file_name.strip() == "" or file_name.startswith("gen_") or test_exists(file_name + ".json"):
+        if file_name == "gen_default":
+            file_name = generate_plan_name()
+        else:
+            raise ValueError("Neplatný název souboru pro plán.")
+    file_name += ".json"
     plan = {
         "machines": [], # pro každá index: None | (di, in_num, name, seznam plánovaných revizí(rev_id, rev_type, datum, edited))
         "people": [] # pro každá index: None | (name, seznam plánovaných tréninků(rev_id, rev_type, datum, edited))
@@ -57,12 +75,12 @@ def generate_plan(years: int = 10):
             del work_date
         plan["people"].append([*person[:2], planned_trainings])
 
-    file_name = f"plan_{today.year}_{today.month}_{today.day}.json"
-    # zkontroluj jestli file_name neexistuje
-    increment = 1
-    while os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name)):
-        file_name = f"plan_{today.year}_{today.month}_{today.day}_{increment}.json"
-        increment += 1
+    # f"plan_{today.year}_{today.month}_{today.day}.json"
+    # # zkontroluj jestli file_name neexistuje
+    # increment = 1
+    # while os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name)):
+    #     file_name = f"plan_{today.year}_{today.month}_{today.day}_{increment}.json"
+    #     increment += 1
 
     dump(plan, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "w", encoding="utf-8"), ensure_ascii=False)
     return plan
@@ -82,4 +100,4 @@ def save_plan(plan: dict, file_name: str):
         print(f"Error při kontrole uloženého plánu: {e}, soubor může být poškozen.")
 
 if __name__ == "__main__":
-    generate_plan()
+    generate_plan(file_name="test_plan")
