@@ -77,7 +77,7 @@ def list_machines(list_last_revisions=False, **params):
 
         # přidání revizí ve formátu (log_id, rev_type, datum)
         log_list = []
-        if key == "list_last_revisions":
+        if list_last_revisions:
             cursor.execute("""SELECT id, type, date FROM revision_log AS og_log WHERE machine_id=? AND date=(
                     SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.type=og_log.type
                 )""",
@@ -89,7 +89,7 @@ def list_machines(list_last_revisions=False, **params):
                 log_list[lID][2] = dateDTB(log[2])
                 log_list[lID] = tuple(log_list[lID])
 
-        output.append((*machine[:5],revisions, log_list))
+        output.append((*machine[:5],revisions, machine[6], log_list))
     return output
 
 def get_machine_name(id: int, include_IN_NUM: bool = False):
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
-    print("Databáze - facility činnosti:", list_people(list_last_trainings=True),sep="\n")
+    print("Databáze - machines:", list_machines(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

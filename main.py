@@ -24,6 +24,67 @@ def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše 
         return {"status": "success", "message": "Plán byl úspěšně vygenerován."}
     else:
         return {"status": "error", "message": "Při generování plánu došlo k chybě."}
+    
+#region Database functions exposed to Eel
+# dir(dtb) = ['add_machine', 'add_people', 'add_rev_to_machine', 'add_revision_log', 'add_revision_type', 'add_training_log', 'get_machine_name', 'get_periodicity', 'list_facility_activities', 'list_machines', 'list_people', 'list_revision_log', 'list_revision_types', 'list_training_log', 'remove_machine', 'remove_people', 'remove_rev_from_machine', 'remove_revision_log', 'remove_revision_type', 'remove_training_log']
+@eel.expose
+def list_machines(params: dict = {}):
+    list_last_revisions = params.pop("list_last_revisions", False)
+    return dtb.list_machines(list_last_revisions, **params)
+@eel.expose
+def add_machine(in_num: str, name: str, type: str, location: str):
+    return dtb.add_machine(in_num, name, type, location)
+@eel.expose
+def remove_machine(machine_id: int):
+    return dtb.remove_machine(machine_id=machine_id)
+@eel.expose
+def add_people(name: str):
+    return dtb.add_people(name)
+@eel.expose
+def list_people(params: dict = {}):
+    list_last_trainings = params.pop("list_last_trainings", False)
+    return dtb.list_people(list_last_trainings, **params)
+@eel.expose
+def remove_people(people_id: int):
+    return dtb.remove_people(id=people_id)
+@eel.expose
+def get_periodicity(machine_id: int, revision_type_id: int):
+    return dtb.get_periodicity(machine_id, revision_type_id)
+@eel.expose
+def add_rev_to_machine(machine_id: int, revision_type_id: int, periodicity_months: int):
+    return dtb.add_rev_to_machine(machine_id, revision_type_id, periodicity_months)
+@eel.expose
+def remove_rev_from_machine(machine_id: int, revision_type_id: int):
+    return dtb.remove_rev_from_machine(machine_id, revision_type_id)
+@eel.expose
+def add_revision_log(machine_id: int, revision_type_id: int, result: str, notes: str = ""):
+    return dtb.add_revision_log(machine_id, revision_type_id, result, notes)
+@eel.expose
+def remove_revision_log(log_id: int):
+    return dtb.remove_revision_log(log_id)
+@eel.expose
+def list_revision_log(machine_id: int = None, revision_type_id: int = None, result: str = None, date_from: str = None, date_to: str = None):
+    return dtb.list_revision_log(machine_id, revision_type_id, result, date_from, date_to)
+@eel.expose
+def add_revision_type(name: str, validity_period: int, facility_activity: bool = False):
+    return dtb.add_revision_type(name, validity_period, facility_activity)
+@eel.expose
+def remove_revision_type(revision_type_id: int):
+    return dtb.remove_revision_type(revision_type_id)
+@eel.expose
+def list_revision_types(_id: int = None, name: str = None, validity_period: int = None, facility_activity: bool = None):
+    return dtb.list_revision_types(_id, name, validity_period, facility_activity)
+@eel.expose
+def add_training_log(people_id: int, revision_type_id: int, date: str):
+    return dtb.add_training_log(people_id, revision_type_id, dateDTB(date))
+@eel.expose
+def remove_training_log(log_id: int):
+    return dtb.remove_training_log(log_id)
+@eel.expose
+def list_training_log(_id: int = None, person: int = None, min_date: str = None, max_date: str = None, min_e_date: str = None, max_e_date: str = None):
+    # key in ["_id", "rev_type", "person", "min_date", "max_date", "min_e_date", "max_e_date"]
+    return dtb.list_training_log(_id, person, min_date, max_date, min_e_date, max_e_date)
+#endregion
 
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")
