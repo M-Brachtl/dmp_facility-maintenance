@@ -57,6 +57,7 @@ Výstup bude v adresáři `./frontend/dist/browser`.
 
 #### Použití stažené kompilované verze
 Umístěte obsah do složky `./frontend/dist`.
+V souboru `main.py` nastavte proměnnou `testing_no_angular` na `False`.
 
 ## O aplikaci
 Tato aplikace slouží k plánování údržby strojů a školení zaměstnanců ve firmě. Umožňuje evidovat strojní zařízení, jejich revize, pracovníky a plánovat školení a revize na základě zadaných pravidel.  
