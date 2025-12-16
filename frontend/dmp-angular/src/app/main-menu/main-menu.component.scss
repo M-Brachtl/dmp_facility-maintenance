@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.karta-nadpis {
+  @apply text-xl font-semibold m-1;
+}
+
+.karta-item {
+  @apply list-item hover:bg-blue-500 p-1 pl-3 cursor-pointer select-none;
+}

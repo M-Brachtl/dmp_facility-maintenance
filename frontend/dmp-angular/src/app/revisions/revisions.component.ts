@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-revisions',
@@ -7,5 +8,11 @@ import { Component } from '@angular/core';
   styleUrl: './revisions.component.scss'
 })
 export class RevisionsComponent {
+  constructor(private route: ActivatedRoute) {}
+  ngOnInit() {
+    this.route.url.subscribe(url => {
+      console.log('Current route:', url);
+    });
+  }
 
 }
