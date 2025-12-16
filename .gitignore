@@ -8,3 +8,5 @@ frontend/dist/
 dist.zip
 test/
 backend/database/plans/*.json
+node_modules/
+dmp-angular-legacy/
