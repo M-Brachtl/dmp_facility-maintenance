@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ModeService } from './mode.service';
 // import { trigger, transition, style, query, animate, group } from '@angular/animations';
 
 declare const eel: any;
@@ -15,7 +16,9 @@ declare const eel: any;
 
 export class AppComponent {
   title = 'Hlavní menu';
-  constructor(private router: Router) {}
+  mode!: 'list' | 'add' | 'remove';
+
+  constructor(private router: Router, private modeService: ModeService) {}
 
   ngOnInit() {
     this.router.events
@@ -24,6 +27,9 @@ export class AppComponent {
         console.log('Route changed:', event.url);
         this.title = this.getTitle(event.url);
       });
+    this.modeService.mode$.subscribe(mode => {
+      this.mode = mode;
+    });
   }
   getTitle(url: string): string {
     switch (url) {

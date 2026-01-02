@@ -3,36 +3,36 @@
         <h2 class="karta-nadpis">Stroje</h2>
         <!-- <p class="text-sm text-gray-600">Popis karty 1</p> -->
         <ul class="list-disc list-inside">
-            <a draggable="false" [routerLink]="['/machines']"><li class="karta-item">přidat</li></a>
-            <a draggable="false" [routerLink]="['/machines']"><li class="karta-item">odebrat</li></a>
-            <a draggable="false" [routerLink]="['/machines']"><li class="karta-item">vypsat</li></a>
+            <a draggable="false" [routerLink]="['/machines']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
+            <a draggable="false" [routerLink]="['/machines']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
+            <a draggable="false" [routerLink]="['/machines']" (click)="switchMode('list')"><li class="karta-item">vypsat</li></a>
         </ul>
     </div>
     <div class="bg-blue-200 rounded-lg p-4 shadow-md">
         <h2 class="karta-nadpis">Typy revizí</h2>
         <!-- <p class="text-sm text-gray-600">Popis karty 1</p> -->
         <ul class="list-disc list-inside">
-            <a draggable="false" [routerLink]="['/rev-types']"><li class="karta-item">přidat</li></a>
-            <a draggable="false" [routerLink]="['/rev-types']"><li class="karta-item">odebrat</li></a>
-            <a draggable="false" [routerLink]="['/rev-types']"><li class="karta-item">vypsat</li></a>
+            <a draggable="false" [routerLink]="['/rev-types']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
+            <a draggable="false" [routerLink]="['/rev-types']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
+            <a draggable="false" [routerLink]="['/rev-types']" (click)="switchMode('list')"><li class="karta-item">vypsat</li></a>
         </ul>
     </div>
     <div class="bg-blue-200 rounded-lg p-4 shadow-md">
         <h2 class="karta-nadpis">Záznamy revizí</h2>
         <!-- <p class="text-sm text-gray-600">Popis karty 1</p> -->
         <ul class="list-disc list-inside">
-            <a draggable="false" [routerLink]="['/revisions']"><li class="karta-item">přidat</li></a>
-            <a draggable="false" [routerLink]="['/revisions']"><li class="karta-item">odebrat</li></a>
-            <a draggable="false" [routerLink]="['/revisions']"><li class="karta-item">vypsat</li></a>
+            <a draggable="false" [routerLink]="['/revisions']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
+            <a draggable="false" [routerLink]="['/revisions']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
+            <a draggable="false" [routerLink]="['/revisions']" (click)="switchMode('list')"><li class="karta-item">vypsat</li></a>
         </ul>
     </div>
     <div class="bg-blue-200 rounded-lg p-4 shadow-md">
         <h2 class="karta-nadpis">Školení</h2>
         <!-- <p class="text-sm text-gray-600">Popis karty 1</p> -->
         <ul class="list-disc list-inside">
-            <a draggable="false" [routerLink]="['/trainings']"><li class="karta-item">přidat</li></a>
-            <a draggable="false" [routerLink]="['/trainings']"><li class="karta-item">odebrat</li></a>
-            <a draggable="false" [routerLink]="['/trainings']"><li class="karta-item">vypsat</li></a>
+            <a draggable="false" [routerLink]="['/trainings']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
+            <a draggable="false" [routerLink]="['/trainings']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
+            <a draggable="false" [routerLink]="['/trainings']" (click)="switchMode('list')"><li class="karta-item">vypsat</li></a>
         </ul>
     </div>
 </div>

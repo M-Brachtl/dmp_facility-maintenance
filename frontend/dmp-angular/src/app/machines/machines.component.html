@@ -1,1 +1,12 @@
-<p>machines works!</p>
+<app-header-btns />
+<main>
+    @if (mode == 'add') {
+        <p>adding</p>
+    }
+    @else if (mode == 'remove') {
+        <p>removing</p>
+    }
+    @else if (mode == 'list') {
+        <p>listing</p>
+    }
+</main>

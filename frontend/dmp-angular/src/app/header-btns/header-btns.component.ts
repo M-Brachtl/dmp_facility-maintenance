@@ -1,20 +1,16 @@
 import { Component } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ModeService } from '../mode.service';
 
 @Component({
-  selector: 'app-main-menu',
-  imports: [RouterLink],
-  templateUrl: './main-menu.component.html',
-  styleUrl: './main-menu.component.scss'
+  selector: 'app-header-btns',
+  imports: [],
+  templateUrl: './header-btns.component.html',
+  styleUrl: './header-btns.component.scss',
 })
-export class MainMenuComponent {
+export class HeaderBtnsComponent {
   mode!: 'list' | 'add' | 'remove';
-  constructor(private route: ActivatedRoute, private modeService: ModeService) {}
+  constructor(private modeService: ModeService) {}
   ngOnInit() {
-    this.route.url.subscribe(url => {
-      console.log('Current route:', url);
-    });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
     });
