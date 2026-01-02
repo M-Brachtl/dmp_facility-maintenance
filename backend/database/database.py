@@ -112,6 +112,11 @@ def get_machine_name(id: int, include_IN_NUM: bool = False):
         return raw_output[0]
 
 def add_machine(in_num: str, name: str, type_: str, location: str): #, revision_array: list = [] --nepoužívaný parametr //, str(revision_array)
+    # check for duplicate in_num
+    cursor.execute("SELECT id FROM machines WHERE in_num = ?;", (in_num,))
+    if cursor.fetchall() != []:
+        raise RuntimeError("Stroj s tímto inventárním číslem už existuje.")
+    
     cursor.execute(
         "INSERT INTO machines (in_num, name, type, location, revision_array) VALUES (?, ?, ?, ?, '[]');",
         (in_num, name, type_, location)
