@@ -10,3 +10,6 @@ bootstrapApplication(AppComponent, {
   ]
 })
   .catch((err) => console.error(err));
+
+declare const eel: any;
+eel.set_host('ws://localhost:8000');

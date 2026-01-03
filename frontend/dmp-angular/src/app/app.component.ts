@@ -46,3 +46,8 @@ export class AppComponent {
     }
   }
 }
+
+// eel
+// export const eel = window.eel
+// eel.set_host( 'ws://localhost:8000' )
+// eel.say_hello_py( 'Javascript World!' )
