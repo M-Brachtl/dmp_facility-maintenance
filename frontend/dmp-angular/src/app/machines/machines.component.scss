@@ -1,17 +1,21 @@
 @import "tailwindcss";
 
-div.max-table-h-filter-shown {
-    height: 42vh;
+.max-table-h-filter-shown {
+    max-height: 42vh;
 }
-div.max-table-h-filter-hidden {
-    height: 55vh;
+.max-table-h-filter-hidden {
+    max-height: 55vh;
 }
-tbody.max-table-h-filter-shown.overflowing {
-    @apply relative top-4;
-}
-tbody.max-table-h-filter-shown.nonoverflowing {
-    @apply relative top-0;
-}
-tbody.max-table-h-filter-hidden {
-    @apply relative top-0;
+// tbody.max-table-h-filter-shown.overflowing {
+//     @apply relative top-4;
+// }
+// tbody.max-table-h-filter-shown.nonoverflowing {
+//     @apply relative top-4;
+// }
+// tbody.max-table-h-filter-hidden {
+//     @apply relative top-0;
+// }
+
+.add-form-input {
+    @apply border border-gray-300 rounded px-2 py-1 w-full mb-4;
 }

@@ -90,6 +90,7 @@ def list_machines(list_last_revisions=False, **params):
                 log_list[lID] = tuple(log_list[lID])
 
         output.append((*machine[:5],revisions, machine[6], log_list))
+        # struktura výstupu: (id, in_num, name, type, location, [rev_type_ids], disposed, [(log_id, rev_type, date), ...])
     return output
 
 def get_machine_name(id: int, include_IN_NUM: bool = False):

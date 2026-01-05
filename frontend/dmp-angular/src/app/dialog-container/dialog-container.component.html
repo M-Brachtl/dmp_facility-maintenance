@@ -1,0 +1,9 @@
+<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-gray-100/90 shadow-2xl">
+    <!-- <button (click)="close()">X</button> -->
+    <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-md">
+        <ng-content></ng-content>
+        <div class="mt-6 text-right">
+            <button (click)="close()" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">OK</button>
+        </div>
+    </div>
+</div>
