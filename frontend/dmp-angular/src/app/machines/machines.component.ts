@@ -13,18 +13,19 @@ declare const eel: any;
   styleUrl: './machines.component.scss'
 })
 export class MachinesComponent {
-
   @ViewChild('tableContainer') tableContainer!: ElementRef;
+
   isOverflowing(): boolean {
     const el = this.tableContainer.nativeElement;
     return el.scrollHeight > el.clientHeight+20; // pro miniaturní scrollovací lištu
   }
 
-  eel_on: boolean = false;
+  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
   mode!: 'list' | 'add' | 'remove';
   machinesList: any[] = [];
   typesList: string[] = [];
   locationsList: string[] = [];
+
 
   // filter values
   nameFilter: string = '';
@@ -38,7 +39,9 @@ export class MachinesComponent {
     'assets/show.svg',
     'assets/hide.svg',
   ]
-  get filterHiddenStyle(): string {
+
+  filterHiddenStyleValue: string = '';
+  filterHiddenStyle(): void {
     let isOverflowing = false;
     try {
       isOverflowing = this.isOverflowing();
@@ -46,7 +49,7 @@ export class MachinesComponent {
       isOverflowing = false;
     };
     const shownOption = isOverflowing ? 'max-table-h-filter-shown overflowing' : 'max-table-h-filter-shown nonoverflowing';
-    return this.filtersShow ? shownOption : 'max-table-h-filter-hidden';
+    this.filterHiddenStyleValue = this.filtersShow ? shownOption : 'max-table-h-filter-hidden';
   }
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
@@ -61,6 +64,7 @@ export class MachinesComponent {
     this.getMachines();
     this.getTypes();
     this.getLocations();
+    setInterval(() => this.filterHiddenStyle(), 50);
   }
   
   getMachines() {
@@ -133,5 +137,12 @@ export class MachinesComponent {
     } else {
       return true;
     }
+  }
+
+  deleteFilters() {
+    this.nameFilter = '';
+    this.inNumFilter = '';
+    this.typeFilter = '';
+    this.locationFilter = '';
   }
 }
