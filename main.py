@@ -36,7 +36,13 @@ def add_machine(in_num: str, name: str, type: str, location: str):
     return dtb.add_machine(in_num, name, type, location)
 @eel.expose
 def remove_machine(machine_id: int):
-    return dtb.remove_machine(machine_id=machine_id)
+    try:
+        return dtb.remove_machine(machine_id=machine_id)
+    except RuntimeError as e:
+        if str(e) == "Tento stroj má na sebe vázané revize. Nejprve odstraň periodicitu revize-stroje.":
+            return {"status": "error", "message": "DependentRevisions"}
+        else:
+            raise e
 @eel.expose
 def add_people(name: str):
     return dtb.add_people(name)

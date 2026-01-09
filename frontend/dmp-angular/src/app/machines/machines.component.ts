@@ -16,7 +16,7 @@ declare const eel: any;
 })
 export class MachinesComponent {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
-
+  @ViewChild('machineRem') machineRem!: ElementRef;
   eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
   mode!: 'list' | 'add' | 'remove';
   machinesList: any[] = [];
@@ -67,22 +67,19 @@ export class MachinesComponent {
         [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
         [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
         [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
-        [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
-        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
-        [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
-        [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
-        [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
-        [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
-        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
-        [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
-        [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
-        [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
-        [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
-        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
-        [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
-        [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
-        [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
-        [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [5, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [6, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [7, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [8, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [9, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [10, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [11, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [12, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [13, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [14, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [15, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [16, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [17, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
       ];
     } else {
       eel.list_machines()().then((result: any) => {
@@ -190,5 +187,55 @@ export class MachinesComponent {
   }
   closeDialog() {
     this.showDialog = false;
+  }
+
+  removeMachine() {
+    const machineId = this.machineRem.nativeElement.value;
+    console.log("Odebírám stroj s ID:", machineId);
+    // if does not exist, return
+    if (!this.machinesList.some(machine => machine[0] == machineId) || machineId === null || machineId === undefined || machineId === '' || machineId === 0) {
+      this.showDialog = true;
+      this.dialogContent = "errorMachineNotExist";
+      return;
+    }
+    if (this.eel_on) {
+      eel.remove_machine(machineId)().then((result: any) => {
+        if (result.status === "error" && result.message === "DependentRevisions") {
+          this.showDialog = true;
+          this.dialogContent = "DependentRevisions";
+          return;
+        }
+        console.log("Stroj odebrán:", result);
+        this.getMachines();
+      });
+    } else {
+      this.machinesList = this.machinesList.filter(machine => machine[0] != machineId);
+      this.inNumList = this.machinesList.map(machine => machine[1]);
+    }
+    this.showDialog = true;
+    this.dialogContent = "removeSuccess";
+  }
+
+  selectedMachineName: string = '';
+  selectedMachineInNum: string = '';
+  selectedMachineType: string = '';
+  selectedMachineLocation: string = '';
+
+  // Update selected machine details when the dropdown value changes
+  onMachineSelectionChange() {
+    const machineId = this.machineRem?.nativeElement.value;
+    const machine = this.machinesList.find(machine => machine[0] == machineId);
+
+    if (machine) {
+      this.selectedMachineName = machine[2];
+      this.selectedMachineInNum = machine[1];
+      this.selectedMachineType = machine[3];
+      this.selectedMachineLocation = machine[4];
+    } else {
+      this.selectedMachineName = '';
+      this.selectedMachineInNum = '';
+      this.selectedMachineType = '';
+      this.selectedMachineLocation = '';
+    }
   }
 }
