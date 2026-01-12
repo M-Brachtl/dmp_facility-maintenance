@@ -456,7 +456,7 @@ if __name__ == "__main__":
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
-    print("Databáze - machines:", list_machines(),sep="\n")
+    print("Databáze - machines:", list_revision_types(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

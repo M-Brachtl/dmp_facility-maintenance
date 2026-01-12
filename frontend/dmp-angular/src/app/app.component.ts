@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd, RouterLink } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ModeService } from './mode.service';
 // import { trigger, transition, style, query, animate, group } from '@angular/animations';
@@ -7,7 +7,7 @@ import { ModeService } from './mode.service';
 declare const eel: any;
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   animations: [

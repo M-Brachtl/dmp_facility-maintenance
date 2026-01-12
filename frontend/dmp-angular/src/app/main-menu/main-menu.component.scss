@@ -5,5 +5,5 @@
 }
 
 .karta-item {
-  @apply list-item hover:bg-blue-500 p-1 pl-3 cursor-pointer select-none;
+  @apply list-item hover:bg-blue-500 p-1 pl-3 cursor-pointer select-none transition-colors duration-100 rounded;
 }
