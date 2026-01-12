@@ -1,19 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
-// import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
+import { SafeHtml } from '@angular/platform-browser';
+import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 
 declare const eel: any;
 
 @Component({
   selector: 'app-rev-types',
-  imports: [HeaderBtnsComponent, FormsModule],
+  imports: [HeaderBtnsComponent, FormsModule, DialogContainerComponent],
   templateUrl: './rev-types.component.html',
   styleUrl: './rev-types.component.scss'
 })
 export class RevTypesComponent {
+  @ViewChild('revTypeRem') revTypeRem!: ElementRef;
+
   mode!: 'list' | 'add' | 'remove';
   revTypesList: any[] = [];
   facilityRevTypesList: any[] = [];
@@ -30,6 +33,12 @@ export class RevTypesComponent {
 
   nameFilter: string = '';
   typeFilter: string = 'all'; // is/is not facility/all
+
+  showDialog: boolean = false;
+  dialogContent: SafeHtml = '';
+  form_training_length: number = 0;
+
+  detailedBtnsShow: number = 1;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   ngOnInit() {
@@ -84,5 +93,86 @@ export class RevTypesComponent {
   toggleFilters() {
     this.filtersShow = 1-this.filtersShow;
     this.filterHiddenStyle();
+  }
+  toggleDetailedButtons() {
+    this.detailedBtnsShow = 1 - this.detailedBtnsShow;
+  }
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+    const target = event.target as HTMLFormElement;
+    const name = (target.querySelector('#name') as HTMLInputElement).value;
+    const facility = (target.querySelector('#facility') as HTMLInputElement).checked;
+    // const this.form_training_length = this.form_training_length;
+    
+    // Validace
+    if (!name) {
+      // alert('Prosím vyplňte všechna pole.');
+      this.showDialog = true;
+      this.dialogContent = "errorMissingFields";
+      return;
+    }
+    if (isNaN(Number(this.form_training_length)) || Number(this.form_training_length) <= 0 || !Number.isInteger(Number(this.form_training_length))) {
+      this.showDialog = true;
+      this.dialogContent = "errorInvalidthis.form_training_length";
+      console.log("Invalid training length:", this.form_training_length);
+      console.log("Type of training length:", typeof this.form_training_length);
+      return;
+    }
+    if (this.eel_on) {
+      eel.add_revision_type(name, facility, this.form_training_length)().then((result: any) => {
+        console.log("Revize přidána:", result);
+        this.getRevTypes();
+      });
+    } else {
+      const newRevType = [this.revTypesList.length, name, this.form_training_length, facility ? 1 : 0];
+      this.revTypesList.push(newRevType);
+    }
+    // alert('Stroj úspěšně přidán.');
+    this.showDialog = true;
+    this.dialogContent = "addSuccess";
+    
+    // promažeme formulář
+    console.log(target.children);
+    Array.from(target.children).forEach(element => {
+      if (element instanceof HTMLInputElement) {
+        element.value = '';
+      } else if (element instanceof HTMLDivElement) {
+        const checkbox = element.querySelector('#facility') as HTMLInputElement;
+        if (checkbox) {
+          checkbox.checked = false;
+        }
+      }
+    });
+    this.form_training_length = 0;
+    return;
+  }
+
+  removeRevType() {
+    const revTypeId = this.revTypeRem.nativeElement.value;
+    if (!revTypeId) {
+      this.showDialog = true;
+      this.dialogContent = "errorNoSelection";
+      return;
+    }
+    console.log("Odebírám typ revize s ID:", revTypeId);
+    // if does not exist, return
+    if (!this.revTypesList.some(revType => revType[0] == revTypeId) || revTypeId === null || revTypeId === undefined || revTypeId === '' || revTypeId === 0) {
+      this.showDialog = true;
+      this.dialogContent = "errorRevTypeNotExist";
+      return;
+    }
+    if (this.eel_on) {
+      eel.remove_revision_type(revTypeId)().then((result: any) => {
+        if (result.status === "error" && result.message === "DependentMachines") {
+          this.showDialog = true;
+          this.dialogContent = "DependentMachines";
+          return;
+        }
+        this.getRevTypes();
+      });
+    } else {
+      this.revTypesList = this.revTypesList.filter(revType => revType[0] != revTypeId);
+    }
   }
 }

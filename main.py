@@ -76,7 +76,13 @@ def add_revision_type(name: str, validity_period: int, facility_activity: bool =
     return dtb.add_revision_type(name, validity_period, facility_activity)
 @eel.expose
 def remove_revision_type(revision_type_id: int):
-    return dtb.remove_revision_type(revision_type_id)
+    try:
+        return dtb.remove_revision_type(revision_type_id)
+    except RuntimeError as e:
+        if str(e).startswith("Tento typ revize využívají některé stroje."):
+            return {"status": "error", "message": "DependentMachines", "details": e.args[1]}
+        else:
+            raise e
 @eel.expose
 def list_revision_types(_id: int = None, name: str = None, validity_period: int = None, facility_activity: bool = None):
     return dtb.list_revision_types(_id, name, validity_period, facility_activity)
