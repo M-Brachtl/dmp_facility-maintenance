@@ -1,1 +1,114 @@
-<p>employees works!</p>
+<app-header-btns />
+<main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
+    @if (mode == 'add') {
+        <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">
+            <label for="name" class="block mb-2 font-semibold">Jméno a příjmení:</label>
+            <input required autocomplete="off" type="text" id="name" class="add-form-input w-full" />
+            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Přidat zaměstnance</button>
+        </form>
+        <!-- <p>adding</p> -->
+    }
+    @else if (mode == 'remove') {
+        <div>
+            <h2 class="text-xl font-bold mb-4">Vyber zaměstnance k odebrání</h2>
+            <select #employeeRem id="employee_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <option value="" selected disabled></option>
+                @for (employee of employeesList; track $index) {
+                    <option value="{{ employee[0] }}">{{ employee[1] }}</option>
+                }
+            </select>
+            <div class="text-center mt-5">
+                <button (click)="removeEmployee()" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-red-800 transition-colors duration-200">Odebrat zaměstnance</button>
+            </div>
+        </div>
+    }
+    @else if (mode == 'list') {
+        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
+            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+                    <img [src]="filterI.iconGet" alt="Schovat filtry"
+                        class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
+                        (click)="filterI.toggleInterface()"
+                    />
+                <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
+                <span></span>
+            </div>
+            @if (filterI.showing) {
+                <div class="col-span-2">
+                    <label for="nameFilter" class="mr-2 font-semibold">Název:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['nameFilter']" type="text" id="nameFilter" class="border border-gray-300 rounded px-2 py-1" placeholder="Jméno zaměstnance" />
+                </div>
+            }
+        </div>
+        <div class="text-center mb-5">
+            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+        </div>
+        <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
+            <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
+                <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
+                    <thead class="bg-indigo-500 text-white h-7 w-full sticky top-0 z-10">
+                        <tr>
+                            <th>Název</th>
+                            <!-- <th colspan="2">
+                                <img [src]="filterI.iconGet.slice(0,-4) + '_white.svg'" alt="Podrobný popis tlačítek"
+                                    class="w-5 inline fill-white left-1/13 shadow bg-indigo-600 p-0.5 rounded-xs cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
+                                    (click)="toggleDetailedButtons()"
+                                />
+                            </th> -->
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody #tbody class="order-separate border-spacing-0 w-full">
+                        @for (employee of employeesList; track $index) {
+                            @if (rowFiltered(employee)) {
+                                <tr class="even:bg-indigo-200 h-7">
+                                    <td class="w-5/6">{{ employee[1] }}</td> <!-- Název -->
+                                    <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
+                                        hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
+                                        aria-disabled:hover:bg-indigo-500">
+                                        <button class="cursor-pointer">Školení</button>
+                                    </td>
+                                <!-- <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
+                                    hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
+                                    aria-disabled:hover:bg-indigo-500 aria-disabled:active:bg-indigo-500 aria-disabled:cursor-not-allowed
+                                    "><button class="cursor-pointer
+                                        disabled:opacity-50 disabled:cursor-not-allowed">
+                                        @if (!detailedBtnsShow) {
+                                            <img src="assets/trainee.svg" alt="Vyškolení zaměstnanci" class="w-5 inline mx-auto" />
+                                        } @else {
+                                            Vyškolení zaměstnanci
+                                        }
+                                    </button></td> -->
+                            </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</main>
+@if (showDialog) {
+<app-dialog-container (closeDialog)="showDialog = false">
+    @switch (dialogContent) {
+        @default {
+            <p>Tohle by se zobrazit nemělo.</p>
+        }
+        @case ('addSuccess') {
+            <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+            <p>Zaměstnanec úspěšně přidán.</p>
+        }
+        @case ('errorMissingFields') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Prosím napište jméno a příjmení zaměstnance.</p>
+        }
+        @case ('errorEmployeeNotExist') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Vybraný zaměstnanec neexistuje.</p>
+        }
+        @case ('errorNoSelection') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Prosím vyberte zaměstnance k odebrání.</p>
+        }
+    }
+</app-dialog-container>
+}

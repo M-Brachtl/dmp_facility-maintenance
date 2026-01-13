@@ -170,7 +170,7 @@ export class MachinesComponent {
     const location = (target.querySelector('#location') as HTMLInputElement).value;
     
     // Validace
-    if (!inNum || !name || !type || !location) {
+    if (!inNum.trim() || !name.trim() || !type || !location) {
       // alert('Prosím vyplňte všechna pole.');
       this.showDialog = true;
       this.dialogContent = "errorMissingFields";

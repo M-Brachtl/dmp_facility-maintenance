@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
-import { SafeHtml } from '@angular/platform-browser';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 
 import { filterInterface } from '../filterInterface';
@@ -26,7 +25,7 @@ export class RevTypesComponent {
   filterI = new filterInterface();
   eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
-  dialogContent: SafeHtml = '';
+  dialogContent: string = '';
   form_training_length: number = 0;
 
   detailedBtnsShow: number = 1;
@@ -92,7 +91,7 @@ export class RevTypesComponent {
     // const this.form_training_length = this.form_training_length;
     
     // Validace
-    if (!name) {
+    if (!name.trim()) {
       // alert('Prosím vyplňte všechna pole.');
       this.showDialog = true;
       this.dialogContent = "errorMissingFields";
@@ -100,7 +99,7 @@ export class RevTypesComponent {
     }
     if (isNaN(Number(this.form_training_length)) || Number(this.form_training_length) <= 0 || !Number.isInteger(Number(this.form_training_length))) {
       this.showDialog = true;
-      this.dialogContent = "errorInvalidthis.form_training_length";
+      this.dialogContent = "errorInvalidTrainingLength";
       console.log("Invalid training length:", this.form_training_length);
       console.log("Type of training length:", typeof this.form_training_length);
       return;
