@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 
+import { filterInterface } from '../filterInterface';
+
 declare const eel: any;
 
 @Component({
@@ -20,20 +22,9 @@ export class RevTypesComponent {
   mode!: 'list' | 'add' | 'remove';
   revTypesList: any[] = [];
   facilityRevTypesList: any[] = [];
-  filtersShow: number = 1;
+  // filtersShow: number = 1;
+  filterI = new filterInterface();
   eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
-  filterHiddenStyleValue: string = '';
-  filterHiddenStyle(): void {
-    this.filterHiddenStyleValue = this.filtersShow ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden';
-  }
-  filtersShowHideIcons: string[] = [
-    'assets/show.svg',
-    'assets/hide.svg',
-  ]
-
-  nameFilter: string = '';
-  typeFilter: string = 'all'; // is/is not facility/all
-
   showDialog: boolean = false;
   dialogContent: SafeHtml = '';
   form_training_length: number = 0;
@@ -49,7 +40,9 @@ export class RevTypesComponent {
       this.mode = mode;
     });
     this.getRevTypes();
-    this.filterHiddenStyle();
+    this.filterI.hiddenStyleUpdate();
+    this.filterI.filterValues['typeFilter'] = 'all';
+    this.filterI.filterValues['nameFilter'] = '';
   }
   getRevTypes() {
     if (this.eel_on) {
@@ -70,17 +63,14 @@ export class RevTypesComponent {
     this.facilityRevTypesList = this.revTypesList.filter(rt => rt[3] == 1);
   }
 
-  deleteFilters() {
-    this.nameFilter = '';
-    this.typeFilter = 'all';
-  }
-
   rowFiltered(revType: any): boolean { // vrací true, pokud řádek vyhovuje filtrům
-    if (this.nameFilter && !revType[1].toLowerCase().includes(this.nameFilter.toLowerCase())) {
+    const nameFilter = this.filterI.filterValues['nameFilter'] || '';
+    const typeFilter = this.filterI.filterValues['typeFilter'] || 'all';
+    if (nameFilter && !revType[1].toLowerCase().includes(nameFilter.toLowerCase())) {
       return false;
-    } else if (this.typeFilter === 'is' && revType[3] != 1) {
+    } else if (typeFilter === 'is' && revType[3] != 1) {
       return false;
-    } else if (this.typeFilter === 'is not' && revType[3] != 0) {
+    } else if (typeFilter === 'is not' && revType[3] != 0) {
       return false;
     }
     return true;
@@ -90,10 +80,6 @@ export class RevTypesComponent {
     return revType[3] == 1 ? 'text-indigo-700 font-bold' : '';
   }
 
-  toggleFilters() {
-    this.filtersShow = 1-this.filtersShow;
-    this.filterHiddenStyle();
-  }
   toggleDetailedButtons() {
     this.detailedBtnsShow = 1 - this.detailedBtnsShow;
   }

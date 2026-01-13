@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 import { SafeHtml } from '@angular/platform-browser';
 
+import { filterInterface } from '../filterInterface';
+
 declare const eel: any;
 
 @Component({
@@ -26,23 +28,26 @@ export class MachinesComponent {
   showDialog: boolean = false;
   dialogContent: SafeHtml = '';
 
+  // debug: nahrazení původních metod a proměnných pro filtraci
+  filterI = new filterInterface();
+
   // filter values
-  nameFilter: string = '';
+  /*nameFilter: string = '';////
   inNumFilter: string = '';
   typeFilter: string = '';
-  locationFilter: string = '';
+  locationFilter: string = '';*/
 
   // filter display control
-  filtersShow: number = 1;
-  filtersShowHideIcons: string[] = [
-    'assets/show.svg',
-    'assets/hide.svg',
-  ]
+  // filtersShow: number = 1;////
+  // filtersShowHideIcons: string[] = [
+  //   'assets/show.svg',
+  //   'assets/hide.svg',
+  // ]
 
-  filterHiddenStyleValue: string = '';
-  filterHiddenStyle(): void {
-    this.filterHiddenStyleValue = this.filtersShow ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden';
-  }
+  // filterHiddenStyleValue: string = ''; ////
+  // filterHiddenStyle(): void {
+  //   this.filterHiddenStyleValue = this.filtersShow ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden';
+  // }
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   
@@ -52,11 +57,20 @@ export class MachinesComponent {
     });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
-      this.filterHiddenStyle();
+      // this.filterHiddenStyle();
+      this.filterI.hiddenStyleUpdate();
     });
     this.getMachines();
     this.getTypes();
     this.getLocations();
+
+    // initialize filter style
+    this.filterI.filterValues = {
+      nameFilter: '',
+      inNumFilter: '',
+      typeFilter: '',
+      locationFilter: ''
+    };
   }
   
   getMachines() {
@@ -112,31 +126,36 @@ export class MachinesComponent {
     }
   }
 
-  toggleFilters() {
-    this.filtersShow = 1-this.filtersShow;
-    this.filterHiddenStyle();
-  }
+  // toggleFilters() {////
+  //   this.filtersShow = 1-this.filtersShow;
+  //   this.filterHiddenStyle();
+  // }
 
   rowFiltered(machine: any[]): boolean {
-    if (this.nameFilter && !machine[2].toLowerCase().includes(this.nameFilter.toLowerCase())) {
+    // debug: zatím vytvořím proměnné, abych nemusel nahrazovat, později nahradím
+    const nameFilter = this.filterI.filterValues['nameFilter'];
+    const inNumFilter = this.filterI.filterValues['inNumFilter'];
+    const typeFilter = this.filterI.filterValues['typeFilter'];
+    const locationFilter = this.filterI.filterValues['locationFilter'];
+    if (nameFilter && !machine[2].toLowerCase().includes(nameFilter.toLowerCase())) {
       return false;
-    } else if (this.inNumFilter && !machine[1].toLowerCase().includes(this.inNumFilter.toLowerCase())) {
+    } else if (inNumFilter && !machine[1].toLowerCase().includes(inNumFilter.toLowerCase())) {
       return false;
-    } else if (this.typeFilter && machine[3] !== this.typeFilter) {
+    } else if (typeFilter && machine[3] !== typeFilter) {
       return false;
-    } else if (this.locationFilter && machine[4] !== this.locationFilter) {
+    } else if (locationFilter && machine[4] !== locationFilter) {
       return false;
     } else {
       return true;
     }
   }
 
-  deleteFilters() {
-    this.nameFilter = '';
-    this.inNumFilter = '';
-    this.typeFilter = '';
-    this.locationFilter = '';
-  }
+  // deleteFilters() {////
+  //   this.nameFilter = '';
+  //   this.inNumFilter = '';
+  //   this.typeFilter = '';
+  //   this.locationFilter = '';
+  // }
 
   isDisposed(machine: any[]): string {
     return machine[6] ? 'line-through text-gray-500' : '';

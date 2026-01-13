@@ -25,37 +25,27 @@
                     <option value="{{ revType[0] }}">{{ revType[1] }}</option>
                 }
             </select>
-            <!-- <div>
-                <p class="mt-4"><strong>Název:</strong> {{ selectedMachineName }}</p>
-                <p><strong>Inventární číslo:</strong> {{ selectedMachineInNum }}</p>
-                <p><strong>Typ:</strong> {{ selectedMachineType }}</p>
-                <p><strong>Lokace:</strong> {{ selectedMachineLocation }}</p>
-            </div> -->
             <div class="text-center mt-5">
                 <button (click)="removeRevType()" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-red-800 transition-colors duration-200">Odebrat stroj</button>
             </div>
         </div>
-        <!-- <p>removing</p> -->
     }
     @else if (mode == 'list') {
-        <!-- <div class="flex justify-center mb-2 space-x-5 flex-wrap"> Filtry -->
         <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
             <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
-                <!-- <button class=" h-3" title="Schovat filtry"> -->
-                    <img [src]="filtersShowHideIcons[filtersShow]" alt="Schovat filtry"
+                    <img [src]="filterI.iconGet" alt="Schovat filtry"
                         class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
-                        (click)="toggleFilters()"
+                        (click)="filterI.toggleInterface()"
                     />
-                <!-- </button> -->
                 <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
                 <span></span>
             </div>
-            @if (filtersShow) {
+            @if (filterI.showing) {
                 <div>
                     <label for="nameFilter" class="mr-2 font-semibold">Název:</label>
-                    <input autocomplete="off" [(ngModel)]="nameFilter" type="text" id="nameFilter" class="border border-gray-300 rounded px-2 py-1" placeholder="Název revize" />
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['nameFilter']" type="text" id="nameFilter" class="border border-gray-300 rounded px-2 py-1" placeholder="Název revize" />
                 </div>
-                <select [(ngModel)]="typeFilter" id="typeFilter" class="border border-gray-300 rounded px-2 py-1">
+                <select [(ngModel)]="filterI.filterValues['typeFilter']" id="typeFilter" class="border border-gray-300 rounded px-2 py-1">
                     <option value="all" selected>Vše</option>
                     <option value="is">Facility činnosti</option>
                     <option value="is not">Běžné revize</option>
@@ -63,19 +53,16 @@
             }
         </div>
         <div class="text-center mb-5">
-            <button (click)="deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
         </div>
         <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
-            <div [class]="filterHiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
+            <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
                 <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
                     <thead class="bg-indigo-500 text-white h-7 w-full sticky top-0 z-10">
                         <tr>
-                            <!-- <th>Inventární číslo</th> -->
                             <th>Název</th>
-                            <!-- <th>Typ</th>
-                            <th>Lokace</th> -->
                             <th colspan="2">
-                                <img [src]="filtersShowHideIcons[detailedBtnsShow].slice(0,-4) + '_white.svg'" alt="Podrobný popis tlačítek"
+                                <img [src]="filterI.iconGet.slice(0,-4) + '_white.svg'" alt="Podrobný popis tlačítek"
                                     class="w-5 inline fill-white left-1/13 shadow bg-indigo-600 p-0.5 rounded-xs cursor-pointer hover:bg-indigo-700 transition-colors duration-200"
                                     (click)="toggleDetailedButtons()"
                                 />
