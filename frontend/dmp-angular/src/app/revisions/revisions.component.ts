@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
@@ -8,7 +8,7 @@ import { DialogContainerComponent } from '../dialog-container/dialog-container.c
 import { filterInterface } from '../filterInterface';
 
 declare const eel: any;
-
+// Periodicita
 @Component({
   selector: 'app-revisions',
   imports: [HeaderBtnsComponent, DialogContainerComponent, FormsModule],
@@ -16,6 +16,10 @@ declare const eel: any;
   styleUrl: './revisions.component.scss'
 })
 export class RevisionsComponent {
+  @ViewChild('revTypeAdd') revTypeAddRef!: ElementRef;
+  @ViewChild('machineAdd') machineAddRef!: ElementRef;
+  @ViewChild('periodRem') periodRemRef!: ElementRef;
+
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   revTypesList: any[] = [];
@@ -27,6 +31,7 @@ export class RevisionsComponent {
   facilityRevTypesList: any[] = [];
   periodicities: any[] = [];
   toggleMachineColText: number = 0;
+  form_period_length: number = 0;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   ngOnInit() {
@@ -49,6 +54,18 @@ export class RevisionsComponent {
       maxPeriod: ''
     }
   }
+  
+  // cross table getters
+  periodGet = {
+    revType: (periodicity: any[]): string => {
+      return this.revTypesList[periodicity[1]-1]
+    },
+    machine: (periodicity: any[]): string => {
+      return this.machinesList[periodicity[2]]
+    }
+  };
+
+
 
   getMachines() {
     if (!this.eel_on) {
@@ -106,12 +123,100 @@ export class RevisionsComponent {
     }
   }
 
-  rowFiltered(entry: any[]){
-    return true;
+  rowFiltered(entry: any[]){ // ID, revtypeName, machineName, machineInNum, periodicityMonths
+    const revTypeName = this.periodGet.revType(entry)[1];
+    const machineName = this.periodGet.machine(entry)[2];
+    const machineInNum = this.periodGet.machine(entry)[1];
+    const periodicityMonths = entry[3];
+    
+    /* this.filterI.filterValues = {
+      machineName: '',
+      machineInNum: '',
+      revType: '',
+      minPeriod: '',
+      maxPeriod: ''
+    }*/
+
+    if (
+      (revTypeName && !revTypeName.toLowerCase().includes(this.filterI.filterValues['revType'].toLowerCase())) ||
+      (machineName && !machineName.toLowerCase().includes(this.filterI.filterValues['machineName'].toLowerCase())) ||
+      (machineInNum && !machineInNum.toLowerCase().includes(this.filterI.filterValues['machineInNum'].toLowerCase()) )||
+      (this.filterI.filterValues['minPeriod'] && periodicityMonths < parseInt(this.filterI.filterValues['minPeriod'])) ||
+      (this.filterI.filterValues['maxPeriod'] && periodicityMonths > parseInt(this.filterI.filterValues['maxPeriod']))
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   isFacility(revTypeID: number){
     return '';
   }
 
+  onSubmit(event: any) {
+    event.preventDefault();
+    const revTypeID = this.revTypeAddRef.nativeElement.value;
+    const machineID = this.machineAddRef.nativeElement.value;
+    
+    if (!revTypeID || !machineID || !this.form_period_length) {
+      this.dialogContent = 'errorMissingFields';
+      this.showDialog = true;
+      return;
+    } else if (this.form_period_length <= 0) {
+      this.dialogContent = 'errorInvalidPeriod';
+      this.showDialog = true;
+      return;
+    }
+
+    if (this.eel_on) {
+      eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
+        console.log("Výsledek přidání periodicity:", result);
+        if (result.success) {
+          this.dialogContent = 'successAddPeriodicity';
+          this.showDialog = true;
+          this.getPeriodicities();
+        } else {
+          this.dialogContent = 'errorAddPeriodicity';
+          this.showDialog = true;
+          return;
+        }
+      });
+    } else {
+      const newID = this.periodicities.length + 1;
+      this.periodicities.push([newID, parseInt(revTypeID), parseInt(machineID), this.form_period_length]);
+      this.dialogContent = 'addSuccess';
+      this.showDialog = true;
+    }
+
+    this.revTypeAddRef.nativeElement.value = '';
+    this.machineAddRef.nativeElement.value = '';
+    this.form_period_length = 0;
+  }
+  removePeriodicity() {
+    const periodicityID = parseInt(this.periodRemRef.nativeElement.value);
+    if (!periodicityID) {
+      this.dialogContent = 'errorMissingFields';
+      this.showDialog = true;
+      return;
+    }
+    if (this.eel_on) {
+      eel.remove_periodicity(periodicityID)().then((result: any) => {
+        console.log("Výsledek odstranění periodicity:", result);
+        if (result.success) {
+          this.dialogContent = 'removeSuccess';
+          this.showDialog = true;
+          this.getPeriodicities();
+        } else {
+          this.dialogContent = 'errorRemovePeriodicity';
+          this.showDialog = true;
+          return;
+        }
+      });
+    } else {
+      this.periodicities = this.periodicities.filter(p => p[0] !== periodicityID);
+      this.dialogContent = 'removeSuccess';
+      this.showDialog = true;
+    }
+  }
 }
