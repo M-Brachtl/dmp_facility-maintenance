@@ -5,7 +5,7 @@ import { RevisionsComponent } from './revisions/revisions.component';
 import { RevTypesComponent } from './rev-types/rev-types.component';
 import { TrainingsComponent } from './trainings/trainings.component';
 import { EmployeesComponent } from './employees/employees.component';
-import { RevMachineComponent } from './rev-machine/rev-machine.component';
+import { PeriodicitiesComponent } from './periodicities/periodicities.component';
 import { PlansComponent } from './plans/plans.component';
 
 export const routes: Routes = [
@@ -34,8 +34,8 @@ export const routes: Routes = [
         component: EmployeesComponent
     },
     {
-        path: 'rev-machine',
-        component: RevMachineComponent
+        path: 'periodities',
+        component: PeriodicitiesComponent
     },
     {
         path: 'plans',
