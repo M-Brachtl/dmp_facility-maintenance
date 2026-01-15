@@ -40,7 +40,8 @@ cursor = connection.cursor()
 # people trained_rev je json a untrained_rev je list !! SLOUPCE JSOU ODEBRANÉ
 # cursor.execute("""CREATE TABLE IF NOT EXISTS people (
 #     id INTEGER PRIMARY KEY,
-#     name TEXT
+#     name TEXT,
+#     active BOOLEAN DEFAULT 1
 # );""")
 
 # kombinace stroj-revize-periodicita
@@ -98,5 +99,10 @@ cursor = connection.cursor()
 # (2, '2025-07-19', 5, 'bez závady', 'TEST - Zátěžový test OK.'),
 # (2, '2025-09-01', 5, 'velká závada', 'TEST - Přehřívání motoru – čeká na náhradní díl.');""")
 
+# cursor.execute("ALTER TABLE people ADD COLUMN active BOOLEAN DEFAULT 1;")
+# cursor.execute("INSERT INTO people (name, active) VALUES ('Jára Cimrman', 1);")
+# cursor.execute("UPDATE people SET active = 0 WHERE id = 3;")
+
+# cursor.execute("DELETE FROM people WHERE id = 5;")
 
 connection.commit()

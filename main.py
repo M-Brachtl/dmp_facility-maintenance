@@ -57,6 +57,9 @@ def remove_people(people_id: int):
 def get_periodicity(machine_id: int, revision_type_id: int):
     return dtb.get_periodicity(machine_id, revision_type_id)
 @eel.expose
+def list_periodicity(machine_id: int = None, revision_type_id: int = None):
+    return dtb.list_periodicity(machine_id, revision_type_id)
+@eel.expose
 def add_rev_to_machine(machine_id: int, revision_type_id: int, periodicity_months: int):
     return dtb.add_rev_to_machine(machine_id, revision_type_id, periodicity_months)
 @eel.expose

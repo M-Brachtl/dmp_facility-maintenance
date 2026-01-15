@@ -35,6 +35,7 @@ export class EmployeesComponent {
     this.getEmployees();
     this.filterI.hiddenStyleUpdate();
     this.filterI.filterValues['nameFilter'] = '';
+    this.filterI.filterValues['activeFilter'] = 'all'; // all/active/inactive
   }
 
   getEmployees() {
@@ -46,11 +47,12 @@ export class EmployeesComponent {
       return;
     } else {
       this.employeesList = [
-        [1, 'Adam Testovač'],
-        [2, 'Matyk Testovač-C2'],
-        [3, 'Jana Příkladová'],
-        [4, 'Petr Ukázkový'],
-        [5, 'Eva Demoová']
+        [1, 'Adam Testovač', 1],
+        [2, 'Matyk Testovač-C2', 1],
+        [3, 'Jana Příkladová', 1],
+        [4, 'Petr Ukázkový', 1],
+        [5, 'Eva Demoová', 1],
+        [6, 'Jára Cimrman', 0],
       ];
     }
   }
@@ -67,22 +69,36 @@ export class EmployeesComponent {
     if (this.eel_on) {
       const empID = this.employeeRem.nativeElement.value;
       eel.remove_employee(empID)().then((result: any) => {
-        console.log("Výsledek odebrání zaměstnance:", result);
+        if (result.error) {
+          this.showDialog = true;
+          this.dialogContent = 'serverError';
+          return;
+        }
         this.showDialog = true;
         this.dialogContent = 'removeSuccess';
-        this.dialogContent = `Zaměstnanec s ID ${empID} byl úspěšně odebrán.`;
         this.getEmployees();
       });
     } else {
       const empID = this.employeeRem.nativeElement.value;
-      this.employeesList = this.employeesList.filter(emp => emp[0] != empID);
+      this.employeesList = this.employeesList.map(emp => {
+        if (emp[0] == empID) {
+          emp[2] = 0; // nastavení na neaktivní
+        }
+        return emp;
+      });
       this.showDialog = true;
       this.dialogContent = 'removeSuccess';
-      this.dialogContent = `Zaměstnanec s ID ${empID} byl úspěšně odebrán.`;
     }
   }
   rowFiltered(employee: any): boolean {
+    if (this.filterI.filterValues['activeFilter'] === '') {
+      this.filterI.filterValues['activeFilter'] = 'all';
+    }
     if (this.filterI.filterValues['nameFilter'] && !employee[1].toLowerCase().includes(this.filterI.filterValues['nameFilter'].toLowerCase())) {
+      return false;
+    } else if (this.filterI.filterValues['activeFilter'] === 'active' && employee[2] == 0) {
+      return false;
+    } else if (this.filterI.filterValues['activeFilter'] === 'inactive' && employee[2] == 1) {
       return false;
     } else {
       return true;
@@ -110,5 +126,11 @@ export class EmployeesComponent {
       this.showDialog = true;
       this.dialogContent = 'addSuccess';
     }
+  }
+  isActive(employee: any[]): string {
+    return employee[2] ? '' : 'line-through text-gray-500';
+  }
+  get activeEmployees() {
+    return this.employeesList.filter(emp => emp[2] === 1);
   }
 }

@@ -118,8 +118,18 @@ export class PeriodicitiesComponent {
 
   getPeriodicities() {
     if (!this.eel_on){
-      this.periodicities = [[1, 1, 1, 12], [2, 2, 1, 24], [3, 5, 2, 6], [4, 3, 2, 60], [5, 4, 0, 18]];
+      this.periodicities = [
+        [1, 1, 1, 12],
+        [2, 2, 1, 24],
+        [3, 5, 2, 6],
+        [4, 3, 2, 60],
+        [5, 4, 0, 18],];
       return;
+    } else {
+      eel.list_periodicities()().then((result: any) => {
+        console.log("Výsledek:", result);
+        this.periodicities = result;
+      });
     }
   }
 

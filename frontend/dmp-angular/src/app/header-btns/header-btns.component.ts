@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ModeService } from '../mode.service';
 
 @Component({
@@ -8,6 +8,8 @@ import { ModeService } from '../mode.service';
   styleUrl: './header-btns.component.scss',
 })
 export class HeaderBtnsComponent {
+  @Input('disposable') disposable: boolean = false;
+
   mode!: 'list' | 'add' | 'remove';
   constructor(private modeService: ModeService) {}
   ngOnInit() {

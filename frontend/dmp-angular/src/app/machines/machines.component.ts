@@ -69,7 +69,8 @@ export class MachinesComponent {
       nameFilter: '',
       inNumFilter: '',
       typeFilter: '',
-      locationFilter: ''
+      locationFilter: '',
+      statusFilter: ''
     };
   }
   
@@ -137,6 +138,7 @@ export class MachinesComponent {
     const inNumFilter = this.filterI.filterValues['inNumFilter'];
     const typeFilter = this.filterI.filterValues['typeFilter'];
     const locationFilter = this.filterI.filterValues['locationFilter'];
+    const statusFilter = this.filterI.filterValues['statusFilter'];
     if (nameFilter && !machine[2].toLowerCase().includes(nameFilter.toLowerCase())) {
       return false;
     } else if (inNumFilter && !machine[1].toLowerCase().includes(inNumFilter.toLowerCase())) {
@@ -145,6 +147,14 @@ export class MachinesComponent {
       return false;
     } else if (locationFilter && machine[4] !== locationFilter) {
       return false;
+    } else if (statusFilter) {
+      if (statusFilter === 'active' && machine[6]) {
+        return false;
+      } else if (statusFilter === 'disposed' && !machine[6]) {
+        return false;
+      } else {
+        return true;
+      }
     } else {
       return true;
     }

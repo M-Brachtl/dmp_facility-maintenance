@@ -1,4 +1,4 @@
-<app-header-btns />
+<app-header-btns [disposable]="true" />
 <main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
     @if (mode == 'add') {
         <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">
@@ -39,8 +39,8 @@
     }
     @else if (mode == 'list') {
         <!-- <div class="flex justify-center mb-2 space-x-5 flex-wrap"> Filtry -->
-        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
-            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+        <div class="grid grid-cols-6 gap-1.5 mb-2 pb-4 place-items-center bg-gray-200">
+            <div class="col-span-6 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
                 <!-- <button class=" h-3" title="Schovat filtry"> -->
                     <img [src]="filterI.iconGet" alt="Schovat filtry"
                         class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
@@ -51,15 +51,15 @@
                 <span></span>
             </div>
             @if (filterI.showing) {
-                <div>
+                <div class="col-span-3 my-2">
                     <label for="nameFilter" class="mr-2 font-semibold">Název:</label>
                     <input autocomplete="off" [(ngModel)]="filterI.filterValues['nameFilter']" type="text" id="nameFilter" class="border border-gray-300 rounded px-2 py-1" placeholder="Název stroje" />
                 </div>
-                <div>
+                <div class="col-span-3">
                     <label for="inNumFilter" class="mr-2 font-semibold">Inventární číslo:</label>
                     <input autocomplete="off" [(ngModel)]="filterI.filterValues['inNumFilter']" type="text" id="inNumFilter" class="border border-gray-300 rounded px-2 py-1" placeholder="Inventární číslo" />
                 </div>
-                <div>
+                <div class="col-span-2">
                     <label for="typeFilter" class="mr-2 font-semibold">Typ:</label>
                     <select [(ngModel)]="filterI.filterValues['typeFilter']" id="typeFilter" class="border border-gray-300 rounded px-2 py-1">
                         <option value="">Vše</option>
@@ -68,13 +68,21 @@
                         }
                     </select>
                 </div>
-                <div class="transition-all duration-1000">
+                <div class="col-span-2">
                     <label for="locationFilter" class="mr-2 font-semibold">Lokace:</label>
                     <select [(ngModel)]="filterI.filterValues['locationFilter']" id="locationFilter" class="border border-gray-300 rounded px-2 py-1">
                         <option value="">Vše</option>
                         @for (location of locationsList; track $index) {
                             <option value="{{ location }}">{{ location }}</option>
                         }
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label for="statusFilter" class="mr-2 font-semibold">Stav:</label>
+                    <select [(ngModel)]="filterI.filterValues['statusFilter']" id="statusFilter" class="border border-gray-300 rounded px-2 py-1">
+                        <option value="">Vše</option>
+                        <option value="active">Aktivní</option>
+                        <option value="disposed">Likvidované</option>
                     </select>
                 </div>
             }

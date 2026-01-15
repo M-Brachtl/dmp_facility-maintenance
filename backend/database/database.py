@@ -238,7 +238,7 @@ def add_people(name: str): #, trained_rev: list = [] - nepoužívaný parametr
 
 def remove_people(id: int):
     cursor.execute(
-        "DELETE FROM people WHERE id = ?;",
+        "UPDATE people SET active = 0 WHERE id = ?;",
         (id,)
     )
     connection.commit()
@@ -328,7 +328,28 @@ def remove_rev_from_machine(machine_id: int, rev_id: int):
     connection.commit()
     return "success"
 
-def list_periodicity():
+def list_periodicity(machine_id: int = None, revision_type_id: int = None):
+    if machine_id and revision_type_id:
+        cursor.execute(
+            "SELECT * FROM periodicity WHERE machine = ? AND revision_type = ?;",
+            (machine_id, revision_type_id)
+        )
+        output = cursor.fetchall()
+        return output
+    elif machine_id:
+        cursor.execute(
+            "SELECT * FROM periodicity WHERE machine = ?;",
+            (machine_id,)
+        )
+        output = cursor.fetchall()
+        return output
+    elif revision_type_id:
+        cursor.execute(
+            "SELECT * FROM periodicity WHERE revision_type = ?;",
+            (revision_type_id,)
+        )
+        output = cursor.fetchall()
+        return output
     cursor.execute(
         "SELECT * FROM periodicity"
     )
@@ -449,7 +470,7 @@ if __name__ == "__main__":
     # print(add_machine("T_002-D", "Stroj B", "Test", "Lokace TD"))
     # add_revision_type("Revize New_test 1", 60)
     # add_people("Adam Testovač", [1])
-    # add_people("Matyk Testovač-C2")
+    add_people("Jára Cimrman")
     # remove_people(1)
     # remove_people()
     # add_revision_log(1, "12/11/2025", 1, "velká závada", "test")
@@ -464,7 +485,7 @@ if __name__ == "__main__":
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
-    print("Databáze - machines:", list_periodicity(),sep="\n")
+    print("Databáze - machines:", list_people(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()
