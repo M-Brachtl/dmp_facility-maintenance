@@ -43,8 +43,10 @@ export class AppComponent {
         return 'Záznamy školení';
       case '/employees':
         return 'Zaměstnanci';
-      case '/rev-machine':
+      case '/periodicities':
         return 'Periodicity revizí';
+      case '/plans':
+        return 'Plány revizí';
       default:
         return 'Hlavní menu';
     }

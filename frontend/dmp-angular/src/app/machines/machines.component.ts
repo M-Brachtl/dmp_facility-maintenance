@@ -210,7 +210,7 @@ export class MachinesComponent {
 
   removeMachine() {
     const machineId = this.machineRem.nativeElement.value;
-    console.log("Odebírám stroj s ID:", machineId);
+    console.log("Likviduji stroj s ID:", machineId);
     // if does not exist, return
     if (!this.machinesList.some(machine => machine[0] == machineId) || machineId === null || machineId === undefined || machineId === '' || machineId === 0) {
       this.showDialog = true;
@@ -219,17 +219,23 @@ export class MachinesComponent {
     }
     if (this.eel_on) {
       eel.remove_machine(machineId)().then((result: any) => {
-        if (result.status === "error" && result.message === "DependentRevisions") {
+        // if (result.status === "error" && result.message === "DependentRevisions") {
+        //   this.showDialog = true;
+        //   this.dialogContent = "DependentRevisions";
+        //   return;
+        // }
+        if (result.status === "error") {
           this.showDialog = true;
-          this.dialogContent = "DependentRevisions";
+          this.dialogContent = "unknownError";
           return;
         }
-        console.log("Stroj odebrán:", result);
+        console.log("Stroj likvidován:", result);
         this.getMachines();
       });
     } else {
-      this.machinesList = this.machinesList.filter(machine => machine[0] != machineId);
-      this.inNumList = this.machinesList.map(machine => machine[1]);
+      // this.machinesList = this.machinesList.filter(machine => machine[0] != machineId);
+      // this.inNumList = this.machinesList.map(machine => machine[1]);
+      this.machinesList[machineId][6] = 1; // nastavíme jako likvidovaný
     }
     this.showDialog = true;
     this.dialogContent = "removeSuccess";
@@ -256,5 +262,9 @@ export class MachinesComponent {
       this.selectedMachineType = '';
       this.selectedMachineLocation = '';
     }
+  }
+
+  get notDisposedMachines(): any[] {
+    return this.machinesList.filter(machine => !machine[6]).slice(1);
   }
 }

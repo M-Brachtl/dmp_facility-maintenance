@@ -19,10 +19,10 @@
     }
     @else if (mode == 'remove') {
         <div>
-            <h2 class="text-xl font-bold mb-4">Vyber stroj k odebrání</h2>
+            <h2 class="text-xl font-bold mb-4">Vyber stroj k likvidaci</h2>
             <select #machineRem id="machine_rem" class="border border-gray-300 rounded px-2 py-1 w-full" (change)="onMachineSelectionChange()">
                 <option value="" selected disabled></option>
-                @for (machine of machinesList.slice(1); track $index) {
+                @for (machine of notDisposedMachines; track $index) {
                     <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
                 }
             </select>
@@ -33,7 +33,7 @@
                 <p><strong>Lokace:</strong> {{ selectedMachineLocation }}</p>
             </div>
             <div class="text-center mt-5">
-                <button (click)="removeMachine()" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-red-800 transition-colors duration-200">Odebrat stroj</button>
+                <button (click)="removeMachine()" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-red-800 transition-colors duration-200">Likvidovat stroj</button>
             </div>
         </div>
     }
@@ -125,8 +125,8 @@
                 <p>Nový stroj byl úspěšně přidán do seznamu strojů.</p>
             }
             @case ('removeSuccess') {
-                <h2 class="text-xl font-bold mb-4">Stroj úspěšně odebrán.</h2>
-                <p>Stroj byl úspěšně odebrán ze seznamu strojů.</p>
+                <h2 class="text-xl font-bold mb-4">Stroj úspěšně likvidován.</h2>
+                <p>Stroj byl úspěšně likvidován.</p>
             }
             @case ('errorMissingFields'){
                 <h2 class="text-xl font-bold mb-4">Chyba</h2>

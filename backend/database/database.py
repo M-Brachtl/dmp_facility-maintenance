@@ -125,11 +125,12 @@ def add_machine(in_num: str, name: str, type_: str, location: str): #, revision_
     connection.commit()
     return "success"
 def remove_machine(machine_id: int):
-    cursor.execute("SELECT * FROM periodicity WHERE machine = ?;", (machine_id,))
-    if cursor.fetchall() != []:
-        raise RuntimeError("Tento stroj má na sebe vázané revize. Nejprve odstraň periodicitu revize-stroje.")
+    # cursor.execute("SELECT * FROM periodicity WHERE machine = ?;", (machine_id,))
+    # if cursor.fetchall() != []:
+    #     raise RuntimeError("Tento stroj má na sebe vázané revize. Nejprve odstraň periodicitu revize-stroje.")
 
-    cursor.execute("DELETE FROM machines WHERE id = ?;", (machine_id,))
+    # cursor.execute("DELETE FROM machines WHERE id = ?;", (machine_id,))
+    cursor.execute("UPDATE machines SET disposed = 1 WHERE id = ?;", (machine_id,))
     connection.commit()
     return "success"
 
