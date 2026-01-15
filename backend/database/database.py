@@ -327,6 +327,13 @@ def remove_rev_from_machine(machine_id: int, rev_id: int):
     connection.commit()
     return "success"
 
+def list_periodicity():
+    cursor.execute(
+        "SELECT * FROM periodicity"
+    )
+    output = cursor.fetchall()
+    return output
+
 def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
     cursor.execute("SELECT validity_period FROM revision_types WHERE id = ?", (rev_type,))
     rule = cursor.fetchone()[0]
@@ -456,7 +463,7 @@ if __name__ == "__main__":
     # add_machine("NM-001", "New Test Machine vz.1", "Test", "New Testing Facility")
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
-    print("Databáze - machines:", list_people(),sep="\n")
+    print("Databáze - machines:", list_periodicity(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()
