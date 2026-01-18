@@ -73,7 +73,15 @@ def remove_revision_log(log_id: int):
     return dtb.remove_revision_log(log_id)
 @eel.expose
 def list_revision_log(machine_id: int = None, revision_type_id: int = None, result: str = None, date_from: str = None, date_to: str = None):
-    return dtb.list_revision_log(machine_id, revision_type_id, result, date_from, date_to)
+    raw_output = dtb.list_revision_log(machine_id, revision_type_id, result, date_from, date_to)
+    # seřazení výstupu podle data sestupně
+    raw_output.sort(key=lambda x: x[2], reverse=True)
+
+    for i, entry in enumerate(raw_output.copy()):
+        entry = list(entry)
+        entry[2] = entry[2].__repr__()
+        raw_output[i] = tuple(entry)        
+    return raw_output
 @eel.expose
 def add_revision_type(name: str, validity_period: int, facility_activity: bool = False):
     return dtb.add_revision_type(name, validity_period, facility_activity)
