@@ -34,7 +34,7 @@ export const routes: Routes = [
         component: EmployeesComponent
     },
     {
-        path: 'periodities',
+        path: 'periodicities',
         component: PeriodicitiesComponent
     },
     {

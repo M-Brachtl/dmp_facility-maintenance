@@ -1,4 +1,4 @@
-<app-header-btns [disposable]="true" />
+<app-header-btns [altText]="['Přidat', 'Likvidovat', 'Vypsat']" />
 <main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
     @if (mode == 'add') {
         <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">

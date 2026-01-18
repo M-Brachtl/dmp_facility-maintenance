@@ -1,5 +1,5 @@
 <header class="flex gap-4 justify-center">
-    <button class="btn_zalozky" (click)="switchMode('add')">Přidat</button>
-    <button class="btn_zalozky" (click)="switchMode('remove')">@if (disposable) {Likvidovat} @else {Odebrat}</button>
-    <button class="btn_zalozky" (click)="switchMode('list')">Vypsat</button>
+    <button class="btn_zalozky" (click)="switchMode('add')">{{alternativeText[0]}}</button>
+    <button class="btn_zalozky" (click)="switchMode('remove')">{{alternativeText[1]}}</button>
+    <button class="btn_zalozky" (click)="switchMode('list')">{{alternativeText[2]}}</button>
 </header>

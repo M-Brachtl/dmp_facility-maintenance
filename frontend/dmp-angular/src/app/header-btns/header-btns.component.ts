@@ -8,7 +8,7 @@ import { ModeService } from '../mode.service';
   styleUrl: './header-btns.component.scss',
 })
 export class HeaderBtnsComponent {
-  @Input('disposable') disposable: boolean = false;
+  @Input('altText') alternativeText: string[] = ["Přidat", "Odebrat", "Vypsat"];
 
   mode!: 'list' | 'add' | 'remove';
   constructor(private modeService: ModeService) {}
