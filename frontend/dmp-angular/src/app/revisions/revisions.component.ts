@@ -29,9 +29,16 @@ export class RevisionsComponent {
   machinesList: any[] = [];
   inNumList: string[] = [];
   facilityRevTypesList: any[] = [];
-  periodicities: any[] = [];
+  logs: Array<[number, number, string | Date, number, string, string]> = [];
   toggleMachineColText: number = 0;
   form_period_length: number = 0;
+  detailedLog: any = null;
+
+  showDetails(logID: number) {
+    this.detailedLog = this.logs.find(log => log[0] === logID);
+    this.dialogContent = 'details';
+    this.showDialog = true;
+  }
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   ngOnInit() {
@@ -44,24 +51,28 @@ export class RevisionsComponent {
     });
     this.getMachines();
     this.getRevTypes();
-    this.getPeriodicities();
+    this.getLogs();
 
     this.filterI.filterValues = {
       machineName: '',
       machineInNum: '',
       revType: '',
-      minPeriod: '',
-      maxPeriod: ''
+      minDate: '',
+      maxDate: '',
+      result: ''
     }
   }
   
   // cross table getters
-  periodGet = {
-    revType: (periodicity: any[]): string => {
-      return this.revTypesList[periodicity[1]-1]
+  logGet = {
+    revType: (log: any[]): string => {
+      return this.revTypesList[log[3]-1][1];
     },
-    machine: (periodicity: any[]): string => {
-      return this.machinesList[periodicity[2]]
+    machine: (log: any[]): string => {
+      return this.machinesList[log[1]][2];
+    },
+    machineInNum: (log: any[]): string => {
+      return this.machinesList[log[1]][1];
     }
   };
 
@@ -116,18 +127,39 @@ export class RevisionsComponent {
     this.facilityRevTypesList = this.revTypesList.filter(rt => rt[3] == 1);
   }
 
-  getPeriodicities() {
+  getLogs() {
     if (!this.eel_on){
-      this.periodicities = [[1, 1, 1, 12], [2, 2, 1, 24], [3, 5, 2, 6], [4, 3, 2, 60], [5, 4, 0, 18]];
+      this.logs = [ // ID, machineID, date, revTypeID, status, notes
+        [2, 1, "2025-01-12", 1, 'bez závady', 'TEST - Vše proběhlo hladce.'],
+        [6, 2, "2025-02-10", 3, 'bez závady', 'TEST - Kontrola bez zjištěných problémů.'],
+        [3, 1, "2025-03-08", 1, 'malá závada', 'TEST - Opotřebený filtr – vyměněno.'],
+        [4, 1, "2025-04-15", 2, 'bez závady', 'TEST - Parametry v normě.'],
+        [7, 2, "2025-05-03", 3, 'malá závada', 'TEST - Vyosený modul – seřízeno.'],
+        [5, 1, "2025-06-21", 2, 'velká závada', 'TEST - Chyba řídící jednotky – nutný servis.'],
+        [8, 2, "2025-07-19", 5, 'bez závady', 'TEST - Zátěžový test OK.'],
+        [9, 2, "2025-09-01", 5, 'velká závada', 'TEST - Přehřívání motoru – čeká na náhradní díl.'],
+        [1, 1, "2025-10-29", 2, 'bez závady', 'test'],
+      ];
+      this.logs.map(log => {
+        log[2] = new Date(log[2]);
+      });
       return;
     }
   }
 
-  rowFiltered(entry: any[]){ // ID, revtypeName, machineName, machineInNum, periodicityMonths
-    const revTypeName = this.periodGet.revType(entry)[1];
-    const machineName = this.periodGet.machine(entry)[2];
-    const machineInNum = this.periodGet.machine(entry)[1];
-    const periodicityMonths = entry[3];
+  strDate(dateObj: Date | string): string {
+    if (typeof dateObj === 'string') {
+      dateObj = new Date(dateObj);
+    }
+    return new Intl.DateTimeFormat('cs-CZ', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(dateObj);
+  }
+
+  rowFiltered(entry: any[]){
+    const revTypeName = this.logGet.revType(entry);
+    const machineName = this.logGet.machine(entry);
+    const machineInNum = this.logGet.machineInNum(entry);
+    const date = entry[2];
+    const result = entry[4];
     
     /* this.filterI.filterValues = {
       machineName: '',
@@ -141,8 +173,9 @@ export class RevisionsComponent {
       (revTypeName && !revTypeName.toLowerCase().includes(this.filterI.filterValues['revType'].toLowerCase())) ||
       (machineName && !machineName.toLowerCase().includes(this.filterI.filterValues['machineName'].toLowerCase())) ||
       (machineInNum && !machineInNum.toLowerCase().includes(this.filterI.filterValues['machineInNum'].toLowerCase()) )||
-      (this.filterI.filterValues['minPeriod'] && periodicityMonths < parseInt(this.filterI.filterValues['minPeriod'])) ||
-      (this.filterI.filterValues['maxPeriod'] && periodicityMonths > parseInt(this.filterI.filterValues['maxPeriod']))
+      (this.filterI.filterValues['minDate'] && date < new Date(this.filterI.filterValues['minDate'])) ||
+      (this.filterI.filterValues['maxDate'] && date > new Date(this.filterI.filterValues['maxDate'])) ||
+      (result && !result.toLowerCase().includes(this.filterI.filterValues['result'].toLowerCase()))
     ) {
       return false;
     } else {
@@ -150,73 +183,95 @@ export class RevisionsComponent {
     }
   }
 
-  isFacility(revTypeID: number){
-    return '';
-  }
+  // isFacility(revTypeID: number){
+  //   return '';
+  // }
 
   onSubmit(event: any) {
     event.preventDefault();
-    const revTypeID = this.revTypeAddRef.nativeElement.value;
-    const machineID = this.machineAddRef.nativeElement.value;
+    // const revTypeID = this.revTypeAddRef.nativeElement.value;
+    // const machineID = this.machineAddRef.nativeElement.value;
     
-    if (!revTypeID || !machineID || !this.form_period_length) {
-      this.dialogContent = 'errorMissingFields';
-      this.showDialog = true;
-      return;
-    } else if (this.form_period_length <= 0) {
-      this.dialogContent = 'errorInvalidPeriod';
-      this.showDialog = true;
-      return;
-    }
+    // if (!revTypeID || !machineID || !this.form_period_length) {
+    //   this.dialogContent = 'errorMissingFields';
+    //   this.showDialog = true;
+    //   return;
+    // } else if (this.form_period_length <= 0) {
+    //   this.dialogContent = 'errorInvalidPeriod';
+    //   this.showDialog = true;
+    //   return;
+    // }
 
     if (this.eel_on) {
-      eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
-        console.log("Výsledek přidání periodicity:", result);
-        if (result.success) {
-          this.dialogContent = 'successAddPeriodicity';
-          this.showDialog = true;
-          this.getPeriodicities();
-        } else {
-          this.dialogContent = 'errorAddPeriodicity';
-          this.showDialog = true;
-          return;
-        }
-      });
+      // eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
+      //   console.log("Výsledek přidání periodicity:", result);
+      //   if (result.success) {
+      //     this.dialogContent = 'successAddPeriodicity';
+      //     this.showDialog = true;
+      //     this.getLogs();
+      //   } else {
+      //     this.dialogContent = 'errorAddPeriodicity';
+      //     this.showDialog = true;
+      //     return;
+      //   }
+      // });
     } else {
-      const newID = this.periodicities.length + 1;
-      this.periodicities.push([newID, parseInt(revTypeID), parseInt(machineID), this.form_period_length]);
-      this.dialogContent = 'addSuccess';
-      this.showDialog = true;
+      
     }
 
     this.revTypeAddRef.nativeElement.value = '';
     this.machineAddRef.nativeElement.value = '';
     this.form_period_length = 0;
   }
-  removePeriodicity() {
-    const periodicityID = parseInt(this.periodRemRef.nativeElement.value);
-    if (!periodicityID) {
-      this.dialogContent = 'errorMissingFields';
-      this.showDialog = true;
-      return;
-    }
-    if (this.eel_on) {
-      eel.remove_periodicity(periodicityID)().then((result: any) => {
-        console.log("Výsledek odstranění periodicity:", result);
-        if (result.success) {
-          this.dialogContent = 'removeSuccess';
-          this.showDialog = true;
-          this.getPeriodicities();
-        } else {
-          this.dialogContent = 'errorRemovePeriodicity';
-          this.showDialog = true;
-          return;
-        }
-      });
-    } else {
-      this.periodicities = this.periodicities.filter(p => p[0] !== periodicityID);
-      this.dialogContent = 'removeSuccess';
-      this.showDialog = true;
-    }
+  // removePeriodicity() {
+  //   const periodicityID = parseInt(this.periodRemRef.nativeElement.value);
+  //   if (!periodicityID) {
+  //     this.dialogContent = 'errorMissingFields';
+  //     this.showDialog = true;
+  //     return;
+  //   }
+  //   if (this.eel_on) {
+  //     eel.remove_periodicity(periodicityID)().then((result: any) => {
+  //       console.log("Výsledek odstranění periodicity:", result);
+  //       if (result.success) {
+  //         this.dialogContent = 'removeSuccess';
+  //         this.showDialog = true;
+  //         this.getPeriodicities();
+  //       } else {
+  //         this.dialogContent = 'errorRemovePeriodicity';
+  //         this.showDialog = true;
+  //         return;
+  //       }
+  //     });
+  //   } else {
+  //     this.periodicities = this.periodicities.filter(p => p[0] !== periodicityID);
+  //     this.dialogContent = 'removeSuccess';
+  //     this.showDialog = true;
+  //   }
+  // }
+}
+
+export function getRevLogs(eel_on: boolean) {
+  if (!eel_on){
+    return [ // ID, machineID, date, revTypeID, status, notes
+      [2, 1, "2025-01-12", 1, 'bez závady', 'TEST - Vše proběhlo hladce.'],
+      [6, 2, "2025-02-10", 3, 'bez závady', 'TEST - Kontrola bez zjištěných problémů.'],
+      [3, 1, "2025-03-08", 1, 'malá závada', 'TEST - Opotřebený filtr – vyměněno.'],
+      [4, 1, "2025-04-15", 2, 'bez závady', 'TEST - Parametry v normě.'],
+      [7, 2, "2025-05-03", 3, 'malá závada', 'TEST - Vyosený modul – seřízeno.'],
+      [5, 1, "2025-06-21", 2, 'velká závada', 'TEST - Chyba řídící jednotky – nutný servis.'],
+      [8, 2, "2025-07-19", 5, 'bez závady', 'TEST - Zátěžový test OK.'],
+      [9, 2, "2025-09-01", 5, 'velká závada', 'TEST - Přehřívání motoru – čeká na náhradní díl.'],
+      [1, 1, "2025-10-29", 2, 'bez závady', 'test'],
+    ].map((log: any[]) => {
+      log[2] = new Date(log[2]);
+      return log;
+    });
+  } else {
+    eel.list_revision_logs()().then((result: any) => {
+      console.log("Výsledek:", result);
+      return result;
+    });
   }
+  return ["Problém s eel."];
 }

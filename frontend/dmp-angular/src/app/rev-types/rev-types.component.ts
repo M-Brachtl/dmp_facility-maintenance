@@ -161,3 +161,24 @@ export class RevTypesComponent {
     }
   }
 }
+
+export function getRevTypes(eel_on: boolean): any[] {
+  let revTypesList: any[] = [];
+  if (eel_on) {
+      eel.list_revision_types()().then((result: any) => {
+        console.log("Výsledek:", result);
+        revTypesList = result;
+      });
+      return revTypesList;
+    } else {
+      revTypesList = [
+        [1, 'Revize T1', 12, 0],
+        [2, 'Revize T2', 24, 0],
+        [3, 'Revize T3-P', 48, 0],
+        [4, 'Revize F1-Test', 6, 1],
+        [5, 'Revize New_test 1', 60, 0]
+      ];
+    }
+    // this.facilityRevTypesList = revTypesList.filter(rt => rt[3] == 1);
+    return revTypesList;
+}
