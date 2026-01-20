@@ -134,3 +134,24 @@ export class EmployeesComponent {
     return this.employeesList.filter(emp => emp[2] === 1);
   }
 }
+
+export function getEmployees(eel_on: boolean) {
+  let employeesList: any[] = [];
+  if (eel_on) {
+      eel.list_employees()().then((result: any) => {
+        console.log("Výsledek:", result);
+        employeesList = result;
+      });
+      return;
+    } else {
+      employeesList = [
+        [1, 'Adam Testovač', 1],
+        [2, 'Matyk Testovač-C2', 1],
+        [3, 'Jana Příkladová', 1],
+        [4, 'Petr Ukázkový', 1],
+        [5, 'Eva Demoová', 1],
+        [6, 'Jára Cimrman', 0],
+      ];
+    }
+  return employeesList;
+}

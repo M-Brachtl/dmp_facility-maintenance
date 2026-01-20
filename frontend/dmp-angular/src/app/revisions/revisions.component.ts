@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 
 import { filterInterface } from '../filterInterface';
+import { getEmployees } from '../employees/employees.component';
 
 declare const eel: any;
 // Periodicita
@@ -18,7 +19,17 @@ declare const eel: any;
 export class RevisionsComponent {
   @ViewChild('revTypeAdd') revTypeAddRef!: ElementRef;
   @ViewChild('machineAdd') machineAddRef!: ElementRef;
-  @ViewChild('periodRem') periodRemRef!: ElementRef;
+  @ViewChild('employeeAdd') employeeAddRef!: ElementRef;
+  // @ViewChild('employeeRem') employeeRemRef!: ElementRef;
+  @ViewChild('dateAdd') dateAddRef!: ElementRef;
+  @ViewChild('resultAdd') resultAddRef!: ElementRef;
+  @ViewChild('notesAdd') notesAddRef!: ElementRef;
+  @ViewChild('logRem') logRemRef!: ElementRef;
+  
+  // @ViewChild('revTypeRem') revTypeRemRef!: ElementRef;
+  // @ViewChild('machineRem') machineRemRef!: ElementRef;
+  revTypeRem = '';
+  machineRem = '';
 
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
@@ -29,10 +40,12 @@ export class RevisionsComponent {
   machinesList: any[] = [];
   inNumList: string[] = [];
   facilityRevTypesList: any[] = [];
-  logs: Array<[number, number, string | Date, number, string, string]> = [];
+  logs: Array<[number, number, string | Date, number, string, string, number]> = [];
   toggleMachineColText: number = 0;
   form_period_length: number = 0;
   detailedLog: any = null;
+  orderingAsc: boolean = false; // true platí pro řazení od nejstarších po nejnovější
+
 
   showDetails(logID: number) {
     this.detailedLog = this.logs.find(log => log[0] === logID);
@@ -73,10 +86,28 @@ export class RevisionsComponent {
     },
     machineInNum: (log: any[]): string => {
       return this.machinesList[log[1]][1];
+    },
+    employeeFromLog: (log: any[]): string => {
+      const employees = getEmployees(this.eel_on);
+      if (!employees) {
+        return 'Chyba načtení zaměstnanců';
+      }
+      const emp = employees.find(e => e[0] === log[6]);
+      return emp ? emp[1] : 'Neznámý zaměstnanec';
+    },
+    employee: (employee: any[]): string => {
+      const employees = getEmployees(this.eel_on);
+      if (!employees) {
+        return 'Chyba načtení zaměstnanců';
+      }
+      const emp = employees.find(e => e[0] === employee[0]);
+      return emp ? emp[1] : 'Neznámý zaměstnanec';
     }
   };
 
-
+  get employeesList() {
+    return getEmployees(this.eel_on);
+  }
 
   getMachines() {
     if (!this.eel_on) {
@@ -129,22 +160,25 @@ export class RevisionsComponent {
 
   getLogs() {
     if (!this.eel_on){
-      this.logs = [ // ID, machineID, date, revTypeID, status, notes
-        [2, 1, "2025-01-12", 1, 'bez závady', 'TEST - Vše proběhlo hladce.'],
-        [6, 2, "2025-02-10", 3, 'bez závady', 'TEST - Kontrola bez zjištěných problémů.'],
-        [3, 1, "2025-03-08", 1, 'malá závada', 'TEST - Opotřebený filtr – vyměněno.'],
-        [4, 1, "2025-04-15", 2, 'bez závady', 'TEST - Parametry v normě.'],
-        [7, 2, "2025-05-03", 3, 'malá závada', 'TEST - Vyosený modul – seřízeno.'],
-        [5, 1, "2025-06-21", 2, 'velká závada', 'TEST - Chyba řídící jednotky – nutný servis.'],
-        [8, 2, "2025-07-19", 5, 'bez závady', 'TEST - Zátěžový test OK.'],
-        [9, 2, "2025-09-01", 5, 'velká závada', 'TEST - Přehřívání motoru – čeká na náhradní díl.'],
-        [1, 1, "2025-10-29", 2, 'bez závady', 'test'],
+      this.logs = [
+        [2, 1, '2025-01-12', 1, 'bez závady', 'TEST - Vše proběhlo hladce.', 1],
+        [6, 2, '2025-02-10', 3, 'bez závady', 'TEST - Kontrola bez zjištěných problémů.', 2],
+        [3, 1, '2025-03-08', 1, 'malá závada', 'TEST - Opotřebený filtr – vyměněno.', 2],
+        [4, 1, '2025-04-15', 2, 'bez závady', 'TEST - Parametry v normě.', 2],
+        [7, 2, '2025-05-03', 3, 'malá závada', 'TEST - Vyosený modul – seřízeno.', 3],
+        [5, 1, '2025-06-21', 2, 'velká závada', 'TEST - Chyba řídící jednotky – nutný servis.', 1],
+        [8, 2, '2025-07-19', 5, 'bez závady', 'TEST - Zátěžový test OK.', 3],
+        [9, 2, '2025-09-01', 5, 'velká závada', 'TEST - Přehřívání motoru – čeká na náhradní díl.', 1],
+        [1, 1, '2025-10-29', 2, 'bez závady', 'test', 1],
       ];
       this.logs.map(log => {
         log[2] = new Date(log[2]);
       });
       return;
     }
+  }
+  switchOrder() {
+    this.logs.reverse();
   }
 
   strDate(dateObj: Date | string): string {
@@ -189,66 +223,100 @@ export class RevisionsComponent {
 
   onSubmit(event: any) {
     event.preventDefault();
-    // const revTypeID = this.revTypeAddRef.nativeElement.value;
-    // const machineID = this.machineAddRef.nativeElement.value;
-    
-    // if (!revTypeID || !machineID || !this.form_period_length) {
-    //   this.dialogContent = 'errorMissingFields';
-    //   this.showDialog = true;
-    //   return;
-    // } else if (this.form_period_length <= 0) {
-    //   this.dialogContent = 'errorInvalidPeriod';
-    //   this.showDialog = true;
-    //   return;
-    // }
+    const revTypeID = this.revTypeAddRef.nativeElement.value;
+    const machineID = this.machineAddRef.nativeElement.value;
+    const employeeID = this.employeeAddRef.nativeElement.value;
+    const date = this.dateAddRef.nativeElement.value;
+    const result = this.resultAddRef.nativeElement.value;
+    const notes = this.notesAddRef.nativeElement.value;
+
+    if (!revTypeID || !machineID || !employeeID || !date || !result) {
+      this.dialogContent = 'errorMissingFields';
+      this.showDialog = true;
+      return;
+    } else if (date > new Date().toISOString().split('T')[0]) {
+      this.dialogContent = 'errorInvalidDate';
+      this.showDialog = true;
+      return;
+    }
+
 
     if (this.eel_on) {
-      // eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
-      //   console.log("Výsledek přidání periodicity:", result);
-      //   if (result.success) {
-      //     this.dialogContent = 'successAddPeriodicity';
-      //     this.showDialog = true;
-      //     this.getLogs();
-      //   } else {
-      //     this.dialogContent = 'errorAddPeriodicity';
-      //     this.showDialog = true;
-      //     return;
-      //   }
-      // });
+      eel.add_revision_log(parseInt(revTypeID), parseInt(machineID), date, parseInt(employeeID), result, notes)().then((result: any) => {
+        console.log("Výsledek přidání revize:", result);
+        if (result.success) {
+          this.dialogContent = 'addSuccess';
+          this.showDialog = true;
+          this.getLogs();
+        } else {
+          this.dialogContent = 'unknownError';
+          this.showDialog = true;
+          return;
+        }
+      });
     } else {
-      
+      this.logs.push([
+        this.logs.length + 1,
+        parseInt(machineID),
+        new Date(date),
+        parseInt(revTypeID),
+        result,
+        notes,
+        parseInt(employeeID)
+      ]);
+      this.dialogContent = 'addSuccess';
+      this.showDialog = true;
     }
 
     this.revTypeAddRef.nativeElement.value = '';
     this.machineAddRef.nativeElement.value = '';
-    this.form_period_length = 0;
+    this.employeeAddRef.nativeElement.value = '';
+    this.dateAddRef.nativeElement.value = '';
+    this.resultAddRef.nativeElement.value = '';
+    this.notesAddRef.nativeElement.value = '';
   }
-  // removePeriodicity() {
-  //   const periodicityID = parseInt(this.periodRemRef.nativeElement.value);
-  //   if (!periodicityID) {
-  //     this.dialogContent = 'errorMissingFields';
-  //     this.showDialog = true;
-  //     return;
-  //   }
-  //   if (this.eel_on) {
-  //     eel.remove_periodicity(periodicityID)().then((result: any) => {
-  //       console.log("Výsledek odstranění periodicity:", result);
-  //       if (result.success) {
-  //         this.dialogContent = 'removeSuccess';
-  //         this.showDialog = true;
-  //         this.getPeriodicities();
-  //       } else {
-  //         this.dialogContent = 'errorRemovePeriodicity';
-  //         this.showDialog = true;
-  //         return;
-  //       }
-  //     });
-  //   } else {
-  //     this.periodicities = this.periodicities.filter(p => p[0] !== periodicityID);
-  //     this.dialogContent = 'removeSuccess';
-  //     this.showDialog = true;
-  //   }
-  // }
+  removeLog() {
+    const logID = this.logRemRef.nativeElement.value;
+    if (!logID) {
+      this.dialogContent = 'errorMissingFields';
+      this.showDialog = true;
+      return;
+    }
+    if (this.eel_on) {
+      eel.remove_revision_log(logID)().then((result: any) => {
+        // console.log("Výsledek odstranění periodicity:", result);
+        if (result.success) {
+          this.dialogContent = 'removeSuccess';
+          this.showDialog = true;
+          this.getLogs();
+        } else {
+          this.dialogContent = 'unknownEelError';
+          this.showDialog = true;
+          return;
+        }
+      });
+    } else {
+      this.logs = this.logs.filter(p => p[0] != logID);
+      this.dialogContent = 'removeSuccess';
+      this.showDialog = true;
+    }
+    this.revTypeRem = '';
+    this.machineRem = '';
+    this.logRemRef.nativeElement.value = '';
+  }
+
+  remFilter(log: any[]){
+    const machineID = this.machineRem;
+    const revTypeID = this.revTypeRem;
+    if (
+      (machineID && log[1] != machineID) ||
+      (revTypeID && log[3] != revTypeID)
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 export function getRevLogs(eel_on: boolean) {
