@@ -5,17 +5,17 @@ import eel
 
 testing_no_angular = True
 if testing_no_angular:
-    eel.init('frontend/test')
+    eel.init('frontend/test', js_result_timeout=5000)
 else:
-    eel.init('frontend/dist/browser')
+    eel.init('frontend/dist/browser', js_result_timeout=5000)
 
 @eel.expose
 def get_test():
     return "Test successful!"
 
 @eel.expose
-def close_window():
-    exit()
+def close_window(*args, **kwargs):
+    exit(0)
 
 @eel.expose
 def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše nebo defaultuje nula, nezapíše se nic do argumentů funkce -> použije se výchozích 10 let
@@ -66,8 +66,10 @@ def add_rev_to_machine(machine_id: int, revision_type_id: int, periodicity_month
 def remove_rev_from_machine(machine_id: int, revision_type_id: int):
     return dtb.remove_rev_from_machine(machine_id, revision_type_id)
 @eel.expose
-def add_revision_log(machine_id: int, revision_type_id: int, result: str, notes: str = ""):
-    return dtb.add_revision_log(machine_id, revision_type_id, result, notes)
+def add_revision_log(machine_id: int, revision_type_id: int, result: str, notes: str = "", date: str = None):
+    if date is not None:
+        date = dateDTB(date)
+    return dtb.add_revision_log(machine_id, revision_type_id, result, notes, date)
 @eel.expose
 def remove_revision_log(log_id: int):
     return dtb.remove_revision_log(log_id)
@@ -98,18 +100,25 @@ def remove_revision_type(revision_type_id: int):
 def list_revision_types(_id: int = None, name: str = None, validity_period: int = None, facility_activity: bool = None):
     return dtb.list_revision_types(_id, name, validity_period, facility_activity)
 @eel.expose
-def add_training_log(people_id: int, revision_type_id: int, date: str):
-    return dtb.add_training_log(people_id, revision_type_id, dateDTB(date))
+def add_training_log(people_id: int, revision_type_id: int, date: str = None):
+    if date is not None:
+        date = dateDTB(date)
+    return dtb.add_training_log(people_id, revision_type_id, date)
 @eel.expose
 def remove_training_log(log_id: int):
     return dtb.remove_training_log(log_id)
 @eel.expose
 def list_training_log(_id: int = None, person: int = None, min_date: str = None, max_date: str = None, min_e_date: str = None, max_e_date: str = None):
     # key in ["_id", "rev_type", "person", "min_date", "max_date", "min_e_date", "max_e_date"]
-    return dtb.list_training_log(_id, person, min_date, max_date, min_e_date, max_e_date)
+    output: list[any] = dtb.list_training_log(_id, person, min_date, max_date, min_e_date, max_e_date)
+    # seřazení výstupu podle data sestupně
+    for i, entry in enumerate(output.copy()):
+        entry = list(entry)
+        entry[2] = entry[2].__repr__()
+        output[i] = tuple(entry)
+    return output
 #endregion
-
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")
 
-eel.start('index.html', size=(800, 600), mode='edge')
+eel.start('index.html', size=(800, 600), mode='edge', close_callback=close_window)

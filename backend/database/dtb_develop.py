@@ -16,6 +16,7 @@ cursor = connection.cursor()
 #     machine_id INTEGER,
 #     date TEXT,
 #     type INTEGER,
+#     person_id INTEGER,
 #     result TEXT, # bez závady/malá závada/velká závada
 #     notes TEXT
 # );""")
@@ -104,5 +105,7 @@ cursor = connection.cursor()
 # cursor.execute("UPDATE people SET active = 0 WHERE id = 3;")
 
 # cursor.execute("DELETE FROM people WHERE id = 5;")
+
+cursor.execute("ALTER TABLE revision_log ADD COLUMN person_id INTEGER;")
 
 connection.commit()
