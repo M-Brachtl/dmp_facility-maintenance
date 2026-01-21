@@ -3,49 +3,50 @@
     @if (mode == 'add') {
         <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">
             <div class="flex gap-2 mb-4">
-            <label for="machine" class="block mb-2 font-semibold w-2/5">Stroj:</label>
-            <select #machineAdd id="machine_add" class="border border-gray-300 rounded px-2 py-1 w-full">
-                <option value="" selected disabled></option>
-                @for (machine of machinesList; track $index) {
-                    <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
-                }
-            </select>
+                <label for="machine" class="block mb-2 font-semibold w-2/5">Stroj:</label>
+                <select #machineAdd id="machine_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                    <option value="" selected disabled></option>
+                    @for (machine of machinesList; track $index) {
+                        <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
+                    }
+                </select>
             </div>
             <div class="flex gap-2 mb-4">
-            <label for="name" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
-            <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
-                <option value="" selected disabled></option>
-                @for (revType of revTypesList; track $index) {
-                    <option value="{{ revType[0] }}">{{ revType[1] }}</option>
-                }
-            </select>
+                <label for="name" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
+                <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                    <option value="" selected disabled></option>
+                    @for (revType of revTypesList; track $index) {
+                        <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                    }
+                </select>
             </div>
             <div class="flex gap-2 mb-4">
-            <label for="name" class="block mb-2 font-semibold w-2/5">Zaměstnanec:</label>
-            <select #employeeAdd id="employee_add" class="border border-gray-300 rounded px-2 py-1 w-full">
-                <option value="" selected disabled></option>
-                @for (employee of employeesList; track $index) {
-                    <option value="{{ employee[0] }}">{{ logGet.employee(employee) }}</option>
-                }
-            </select></div>
-            <div class="flex gap-2 mb-4">
-            <label for="date" class="block mb-2 font-semibold w-2/5">Datum revize:</label>
-            <input #dateAdd type="date" id="date_add" class="border border-gray-300 rounded px-2 py-1 w-full mb-4" />
+                <label for="name" class="block mb-2 font-semibold w-2/5">Zaměstnanec:</label>
+                <select #employeeAdd id="employee_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                    <option value="" selected disabled></option>
+                    @for (employee of employeesList; track $index) {
+                        <option value="{{ employee[0] }}">{{ logGet.employee(employee) }}</option>
+                    }
+                </select>
             </div>
             <div class="flex gap-2 mb-4">
-            <label for="result" class="block mb-2 font-semibold w-2/5">Výsledek revize:</label>
-            <select #resultAdd id="result_add" class="border border-gray-300 rounded px-2 py-1 w-full mb-4">
-                <option value="" selected disabled></option>
-                <option value="bez závady">Bez závady</option>
-                <option value="malá závada">Malá závada</option>
-                <option value="velká závada">Velká závada</option>
-            </select>
+                <label for="date" class="block mb-2 font-semibold w-2/5">Datum revize:</label>
+                <input #dateAdd type="date" id="date_add" class="border border-gray-300 rounded px-2 py-1 w-full mb-4" />
+            </div>
+            <div class="flex gap-2 mb-4">
+                <label for="result" class="block mb-2 font-semibold w-2/5">Výsledek revize:</label>
+                <select #resultAdd id="result_add" class="border border-gray-300 rounded px-2 py-1 w-full mb-4">
+                    <option value="" selected disabled></option>
+                    <option value="bez závady">Bez závady</option>
+                    <option value="malá závada">Malá závada</option>
+                    <option value="velká závada">Velká závada</option>
+                </select>
             </div>
 
             <label for="notes" class="block mb-2 font-semibold">Poznámky:</label>
             <textarea #notesAdd id="notes_add" rows="4" class="border border-gray-300 rounded px-2 py-1 w-full mb-4"></textarea>
 
-            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Přidat revizi ke stroji</button>
+            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Zapsat revizi</button>
         </form>
     }
     @else if (mode == 'remove') {
@@ -53,32 +54,32 @@
             <h2 class="text-xl font-bold mb-4">Vyber stroj k odebrání</h2>
             <h3 class="text-lg">Filtry:</h3>
             <div class="border border-gray-300 p-2 pt-4 rounded mb-4 shadow-inner shadow-gray-200">
-            <div class="flex gap-2 mb-4">
-            <label for="machine_rem" class="block mb-2 font-semibold w-2/5">Stroj:</label>
-            <select [(ngModel)]="machineRem" id="machine_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
-                <option value="" selected></option>
-                @for (machine of machinesList; track $index) {
-                    <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
-                }
-            </select>
-            </div>
-            <div class="flex gap-2 mb-4">
-            <label for="rev_type_rem" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
-            <select [(ngModel)]="revTypeRem" id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
-                <option value="" selected></option>
-                @for (revType of revTypesList; track $index) {
-                    <option value="{{ revType[0] }}">{{ revType[1] }}</option>
-                }
-            </select>
-            </div>
-            <div class="text-center mt-2 mb-4">
-                <button (click)="machineRem = ''; revTypeRem = ''" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-blue-800 transition-colors duration-200">Smazat filtry</button>
-            </div>
+                <div class="flex gap-2 mb-4">
+                    <label for="machine_rem" class="block mb-2 font-semibold w-2/5">Stroj:</label>
+                    <select [(ngModel)]="machineRem" id="machine_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                        <option value="" selected></option>
+                        @for (machine of machinesList; track $index) {
+                            <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
+                        }
+                    </select>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <label for="rev_type_rem" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
+                    <select [(ngModel)]="revTypeRem" id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                        <option value="" selected></option>
+                        @for (revType of revTypesList; track $index) {
+                            <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="text-center mt-2 mb-4">
+                    <button (click)="machineRem = ''; revTypeRem = ''" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-blue-800 transition-colors duration-200">Smazat filtry</button>
+                </div>
             </div>
             <h3 class="text-lg">Zde vyberte záznam</h3>
             <select #logRem id="log_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
-                @for (log of logs; track $index) {
+                @for (log of logs.reverse(); track $index) {
                     @if (remFilter(log)) {
                         <option value="{{ log[0] }}">{{ logGet.revType(log) }} - {{ logGet.machine(log) }} - {{ strDate(log[2]) }}</option>
                     }

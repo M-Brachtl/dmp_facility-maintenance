@@ -278,3 +278,36 @@ export class MachinesComponent {
     return this.machinesList.filter(machine => !machine[6]).slice(1);
   }
 }
+
+export function getMachines(eel_on: boolean): [any[], string[]] {
+  let machinesList: any[] = [];
+  let inNumList: string[] = [];
+  if (!eel_on) {
+      machinesList = [ // ID, Inventory Number, Name, Type, Location, Location IDs, ...
+        [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
+        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [5, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [6, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [7, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [8, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [9, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [10, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [11, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [12, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [13, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [14, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
+        [15, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
+        [16, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+        [17, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
+      ];
+    } else {
+      eel.list_machines()().then((result: any) => {
+        console.log("Výsledek:", result);
+        machinesList = result;
+      });
+    }
+    return [machinesList, inNumList];
+}

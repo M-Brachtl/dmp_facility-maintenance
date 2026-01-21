@@ -1,2 +1,198 @@
 <app-header-btns />
-<p>trainings works!</p>
+<main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
+    @if (mode == 'add') {
+        <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">
+            <!-- <div class="flex gap-2 mb-4"> -->
+            <label for="name" class="block mt-2 font-semibold w-2/5">Typ revize:</label>
+            <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <option value="" selected disabled></option>
+                @for (revType of revTypesList; track $index) {
+                    <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                }
+            </select>
+            <!-- </div> -->
+            <!-- <div class="flex gap-2 mb-4"> -->
+            <label for="name" class="block mt-2 font-semibold w-2/5">Zaměstnanec:</label>
+            <select #employeeAdd id="employee_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <option value="" selected disabled></option>
+                @for (employee of employeesList; track $index) {
+                    <option value="{{ employee[0] }}">{{ logGet.employee(employee) }}</option>
+                }
+            </select>
+            <!-- </div>
+            <div class="flex gap-2 mb-4"> -->
+            <label for="date" class="block mt-2 font-semibold w-2/5">Datum školení:</label>
+            <input #dateAdd type="date" id="date_add" class="border border-gray-300 rounded px-2 py-1 w-full mb-4" />
+            <!-- </div> -->
+            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Zapsat školení</button>
+        </form>
+    }
+    @else if (mode == 'remove') {
+        <div>
+            <h2 class="text-xl font-bold mb-4">Vyber stroj k odebrání</h2>
+            <h3 class="text-lg">Filtry:</h3>
+            <div class="border border-gray-300 p-2 pt-4 rounded mb-4 shadow-inner shadow-gray-200">
+                <div class="flex gap-2 mb-4">
+                    <label for="rev_type_rem" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
+                    <select [(ngModel)]="revTypeRem" id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                        <option value="" selected></option>
+                        @for (revType of revTypesList; track $index) {
+                            <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <label for="employee_rem" class="block mb-2 font-semibold w-2/5">Zaměstnanec:</label>
+                    <select [(ngModel)]="employeeRem" id="employee_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                        <option value="" selected></option>
+                        @for (employee of employeesList; track $index) {
+                            <option value="{{ employee[0] }}">{{ employee[1] }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="text-center mt-2 mb-4">
+                    <button (click)="employeeRem = ''; revTypeRem = ''" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-blue-800 transition-colors duration-200">Smazat filtry</button>
+                </div>
+            </div>
+            <h3 class="text-lg">Zde vyberte záznam</h3>
+            <select #logRem id="log_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <option value="" selected disabled></option>
+                @for (log of TLogs.reverse(); track $index) {
+                    @if (remFilter(log)) {
+                        <option value="{{ log[0] }}">{{ logGet.revType(log) }} - {{ logGet.employeeFromLog(log) }} - {{ strDate(log[3]) }}</option>
+                    }
+                }
+            </select>
+            <div class="text-center mt-5">
+                <button (click)="removeLog()" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer active:bg-red-800 transition-colors duration-200">Odebrat záznam</button>
+            </div>
+        </div>
+    }
+    @else if (mode == 'list') {
+        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
+            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+                    <img [src]="filterI.iconGet" alt="Schovat filtry"
+                        class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
+                        (click)="filterI.toggleInterface()"
+                    />
+                <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
+                <span></span>
+            </div>
+            @if (filterI.showing) {
+                <div>
+                    <label for="revType" class="mr-2 font-semibold">Název revize:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['revType']" type="text" id="revType" class="border border-gray-300 rounded px-2 py-1" placeholder="Název revize" />
+                </div>
+                <div>
+                    <label for="employee" class="mr-2 font-semibold">Jméno zaměstnance:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['employee']" type="text" id="employee" class="border border-gray-300 rounded px-2 py-1" placeholder="Jméno zaměstnance" />
+                </div>
+                <div>
+                    <label for="minDate" class="mr-2 font-semibold">Minimální datum školení:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['minDate']" type="date" min="0" id="minDate" class="border border-gray-300 rounded px-2 py-1" placeholder="min. datum" />
+                </div>
+                <div>
+                    <label for="maxDate" class="mr-2 font-semibold">Maximální datum školení:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['maxDate']" type="date" min="0" id="maxDate" class="border border-gray-300 rounded px-2 py-1" placeholder="max. datum" />
+                </div>
+                <div>
+                    <label for="minEDate" class="mr-2 font-semibold">Minimální datum expirace:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['minEDate']" type="date" min="0" id="minEDate" class="border border-gray-300 rounded px-2 py-1" placeholder="min. datum" />
+                </div>
+                <div>
+                    <label for="maxEDate" class="mr-2 font-semibold">Maximální datum expirace:</label>
+                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['maxEDate']" type="date" min="0" id="maxEDate" class="border border-gray-300 rounded px-2 py-1" placeholder="max. datum" />
+                </div>
+            }
+        </div>
+        <div class="text-center mb-5">
+            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+        </div>
+        <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
+            <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
+                <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
+                    <thead class="bg-indigo-500 text-white h-7 w-full sticky top-0 z-10">
+                        <tr>
+                            <th>Zaměstnanec</th>
+                            <th>Typ revize</th>
+                            <th><span (click)="switchSorter(3)" class="cursor-pointer select-none hover:bg-indigo-600 rounded transition-colors duration-200 px-2 pb-0.5">Datum školení</span>
+                                @if (orderingAsc) {
+                                    <img src="assets/arrow_up.svg" alt="Řazeno vzestupně" class="w-3 inline ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                        (click)="orderingAsc = false; switchOrder()" />
+                                } @else {
+                                    <img src="assets/arrow_down.svg" alt="Řazeno sestupně" class="w-3 inline ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                        (click)="orderingAsc = true; switchOrder()" />
+                                }
+                            </th>
+                            <th><span (click)="switchSorter(4)" class="cursor-pointer select-none hover:bg-indigo-600 rounded transition-colors duration-200 px-2 pb-0.5">Datum expirace</span>
+                                @if (orderingAsc) {
+                                    <img src="assets/arrow_up.svg" alt="Řazeno vzestupně" class="w-3 inline ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                        (click)="orderingAsc = false; switchOrder()" />
+                                } @else {
+                                    <img src="assets/arrow_down.svg" alt="Řazeno sestupně" class="w-3 inline ml-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                                        (click)="orderingAsc = true; switchOrder()" />
+                                }
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody #tbody class="order-separate border-spacing-0 w-full">
+                        @for (log of TLogs; track $index) {
+                            @if (rowFiltered(log)) {
+                                <tr class="even:bg-indigo-200 h-7" [class]="">
+                                    <td class="w-1/4">{{ logGet.employeeFromLog(log) }}</td> <!-- Zaměstnanec -->
+                                    <td class="w-1/4">{{ logGet.revType(log) }}</td> <!-- Typ revize -->
+                                    <td class="w-1/4">{{ strDate(log[3]) }}</td> <!-- Datum -->
+                                    <td class="w-1/4">{{ strDate(log[4]) }}</td> <!-- Datum expirace -->
+                                    <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
+                                        hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
+                                        "><button class="cursor-pointer" (click)="showDetails(log[0])">
+                                            Detaily
+                                        </button></td>
+                            </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</main>
+@if (showDialog) {
+<app-dialog-container (closeDialog)="showDialog = false">
+    @switch (dialogContent) {
+        @default {
+            <p>Tohle by se zobrazit nemělo.</p>
+            <p>Error: {{ dialogContent }}</p>
+        }
+        @case ('addSuccess') {
+            <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+            <p>Záznam úspěšně přidán.</p>
+        }
+        @case ('removeSuccess') {
+            <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+            <p>Záznam úspěšně odebrán.</p>
+        }
+        @case ('errorMissingFields') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Prosím vyplňte všechna pole.</p>
+        }
+        @case ('errorInvalidDate') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Prosím zadejte platné datum revize.</p>
+        }
+        <!-- @case ('errorNoSelection') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Prosím vyberte typ revize k odebrání.</p>
+        } -->
+        @case ('details') {
+            <h2 class="text-xl font-bold mb-4">Detaily školení</h2>
+            <p><b>Typ revize:</b> {{ logGet.revType(detailedLog) }}</p>
+            <p><b>Školený zaměstnanec:</b> {{ logGet.employeeFromLog(detailedLog) }}</p>
+            <p><b>Periodicita:</b> {{ logGet.periodicity(detailedLog) }}</p>
+            <p><b>Datum:</b> {{ strDate(detailedLog[3]) }}</p>
+            <p><b>Datum expirace:</b> {{ strDate(detailedLog[4]) }}</p>
+        }
+    }
+</app-dialog-container>
+}

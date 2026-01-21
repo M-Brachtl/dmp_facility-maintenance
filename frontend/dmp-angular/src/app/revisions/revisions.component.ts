@@ -194,14 +194,6 @@ export class RevisionsComponent {
     const machineInNum = this.logGet.machineInNum(entry);
     const date = entry[2];
     const result = entry[4];
-    
-    /* this.filterI.filterValues = {
-      machineName: '',
-      machineInNum: '',
-      revType: '',
-      minPeriod: '',
-      maxPeriod: ''
-    }*/
 
     if (
       (revTypeName && !revTypeName.toLowerCase().includes(this.filterI.filterValues['revType'].toLowerCase())) ||
