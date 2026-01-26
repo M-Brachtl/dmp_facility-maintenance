@@ -488,7 +488,7 @@ if __name__ == "__main__":
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
     # print("Test porovnání dat:", dateDTB('03/06/2025') < dateDTB('02/05/2025'),sep="\n")
-    print("Databáze - machines:", list_training_log(),sep="\n")
+    print("Databáze - machines:", list_people(list_last_trainings=True),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

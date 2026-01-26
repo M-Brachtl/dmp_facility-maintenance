@@ -23,14 +23,18 @@ def generate_plan_name():
         increment += 1
     return file_name
 
-def generate_plan(years: int = 10, file_name: str = "gen_default") -> dict:
+def generate_plan(years: int = 10, file_name: str = "gen_default", title: str = "") -> dict:
     if file_name == "" or file_name is None or file_name.strip() == "" or file_name.startswith("gen_") or test_exists(file_name + ".json"):
         if file_name == "gen_default":
             file_name = generate_plan_name()
         else:
             raise ValueError("Neplatný název souboru pro plán.")
     file_name += ".json"
+    if title == "" or title is None or title.strip() == "":
+        title = file_name.replace(".json","")
     plan = {
+        "title": title,
+        "active": False,
         "machines": [], # pro každá index: None | (di, in_num, name, seznam plánovaných revizí(rev_id, rev_type, datum, edited))
         "people": [] # pro každá index: None | (name, seznam plánovaných tréninků(rev_id, rev_type, datum, edited))
     }
@@ -41,7 +45,7 @@ def generate_plan(years: int = 10, file_name: str = "gen_default") -> dict:
         planned_revs = []
         for rev_type in machine[5]: # projeď každou revizi daného stroje
             periodicity = dtb.get_periodicity(machine[0],rev_type)
-            for last_log in machine[6]: # hledání data poslední revize
+            for last_log in machine[7]: # hledání data poslední revize
                 if last_log[1] == rev_type:
                     work_date: dateDTB = last_log[2]
             try:
@@ -61,7 +65,7 @@ def generate_plan(years: int = 10, file_name: str = "gen_default") -> dict:
         list_of_revs = [rev[0] for rev in dtb.list_revision_types()] # získej všechny tréninky, protože lidé musí dělat všechny
         for training_type in list_of_revs: # projeď každý trénink dané osoby
             periodicity = dtb.list_revision_types(_id=training_type)[0][2]
-            for last_log in person[2]: # hledání data posledního tréninku
+            for last_log in person[3]: # hledání data posledního tréninku
                 if last_log[1] == training_type:
                     work_date: dateDTB = last_log[2]
             try:
