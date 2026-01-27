@@ -17,6 +17,31 @@ export class PlansComponent {
   eel_on: boolean = false;
   current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
   calendar: { [key: string]: { machines: string[][]; people: string[][] } } = {};
+  fill_used = true;
+  filter_showing = true;
+  min_date?: string;
+  max_date?: string;
+  
+  keyIsToday(key: string){
+    const [year, month] = key.split('-').map(Number);
+    const today = new Date();
+    return year === today.getFullYear() && month === (today.getMonth() + 1);
+  }
+
+  get iconPath(): string {
+    return this.filter_showing ? 'assets/hide.svg' : 'assets/show.svg';
+  }
+
+  get tableMaxHeightClass(): string {
+    return this.filter_showing ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden';
+  }
+
+  deleteFilters(): void {
+    this.fill_used = true;
+    this.min_date = undefined;
+    this.max_date = undefined;
+    this.parsePlan();
+  }
 
   constructor(private modeService: ModeService) {}
   async ngOnInit() {
@@ -48,8 +73,18 @@ export class PlansComponent {
         });
     }
   }
-
-  parsePlan() {
+  applyFilters(min_date_str?: string, max_date_str?: string): void {
+    let custom_min_date: Date | undefined;
+    let custom_max_date: Date | undefined;
+    if (min_date_str) {
+      custom_min_date = new Date(min_date_str);
+    }
+    if (max_date_str) {
+      custom_max_date = new Date(max_date_str);
+    }
+    this.parsePlan(this.fill_used, custom_min_date, custom_max_date);
+  }
+  parsePlan(fill_unused: boolean = true, custom_min_date?: Date, custom_max_date?: Date): void {
     // dates are updated so unused months are filled after parsing
     let min_date = new Date(); // set to current date initially
     let max_date = min_date; // set to current date initially
@@ -81,14 +116,40 @@ export class PlansComponent {
       });
     });
 
-    // fill unused months
-    let date_generator = new Date(min_date.getFullYear(), min_date.getMonth(), 1);
-    while (date_generator <= max_date) {
-      const month_key = `${date_generator.getFullYear()}-${date_generator.getMonth() + 1}`;
-      if (!calendar[month_key]) {
-        calendar[month_key] = { machines: [], people: [] };
+    if (custom_min_date) {
+      min_date = custom_min_date;
+      // delete all months before custom_min_date
+      for (const key in calendar) {
+        const [year, month] = key.split('-').map(Number);
+        const key_date = new Date(year, month - 1, 1);
+        if (key_date < custom_min_date) {
+          delete calendar[key];
+        }
       }
-      date_generator.setMonth(date_generator.getMonth() + 1);
+    }
+
+    if (custom_max_date) {
+      max_date = custom_max_date;
+      // delete all months after custom_max_date
+      for (const key in calendar) {
+        const [year, month] = key.split('-').map(Number);
+        const key_date = new Date(year, month - 1, 1);
+        if (key_date > custom_max_date) {
+          delete calendar[key];
+        }
+      }
+    }
+    
+    // fill unused months
+    if (fill_unused){
+      let date_generator = new Date(min_date.getFullYear(), min_date.getMonth(), 1);
+      while (date_generator <= max_date) {
+        const month_key = `${date_generator.getFullYear()}-${date_generator.getMonth() + 1}`;
+        if (!calendar[month_key]) {
+          calendar[month_key] = { machines: [], people: [] };
+        }
+        date_generator.setMonth(date_generator.getMonth() + 1);
+      }
     }
     this.calendar = calendar;
   }
@@ -115,5 +176,12 @@ export class PlansComponent {
       groupedKeys[groupedKeys.length - 1].push(key);
     });
     return groupedKeys;
+  }
+
+  showCurrentMonth(): void {
+    const element = document.querySelector(`.today-cell`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 }
