@@ -46,7 +46,7 @@ export class AppComponent {
       case '/periodicities':
         return 'Periodicity revizí';
       case '/plans':
-        return 'Plány revizí';
+        return 'Plány revizí a školení';
       default:
         return 'Hlavní menu';
     }

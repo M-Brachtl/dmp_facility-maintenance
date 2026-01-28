@@ -1,7 +1,50 @@
-<app-header-btns [altText]="['###', 'Měsíční výhled', 'Celý plán']" />
+<app-header-btns [altText]="['Školení', 'REV - Měsíční výhled', 'REV - Celý plán']" />
 <main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
     @if (mode === "add") {
-        <p>adding</p>
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-left gap-1">
+                <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
+                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
+                <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
+            </div>
+            <!-- <div class="flex">
+                <label for="limit" class="mr-2 font-semibold">Týdenní limit:</label>
+                <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
+                    class="w-8 bg-white rounded spin-btn"
+                    (change)="markOverflowWeeks()"
+                />
+                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
+                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
+            </div> -->
+        </div>
+        <div class="overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300 max-h-table">
+            <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
+                <thead>
+                    <tr class="bg-indigo-400"><th class="w-min">Datum</th><th class="w-1/2">Typ revize</th><th class="w-1/2">Zaměstnanec</th></tr>
+                </thead>
+                <tbody>
+                @for (yearList of calendarKeyList; track $index; let indexY = $index) {
+                    <!-- <tr class="border-t-2 border-black text-lg font-bold text-left bg-indigo-400"><td colspan="4" class="pl-1">{{ yearList[0].split('-')[0] }}</td></tr> -->
+                    @for (month of yearList; track $index; let evenM = $even) {
+                        <!-- <tr class="border-t border-gray-400 text-left bg-indigo-200" [class]="keyIsToday(month) ? 'today-cell' : ''"><td colspan="4" class="pl-1">{{ month.split('-')[1] }}</td></tr> -->
+                        <!-- @if (next_month_cal[month].machines.length > 0) {
+                            <tr><hr><hr></tr>
+                        } -->
+                        @for (entry of calendar[month].people; track $index) {
+                            <tr>
+                                <td class="text-nowrap px-2" [class]="($index === 0 ? 'border-t' : '')  + ' ' +isBeforeToday(entry[0])">{{ strDate(entry[0]) }}</td>
+                                <!-- <td [class]="($index === 0 ? 'border-t' : '') + ' ' + (inMarkedWeek(entry[0]) ? 'bg-amber-600' : '')">{{ getISOWeekNumber(entry[0]) }}</td> -->
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ entry[1] }}</td>
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ entry[2] }}</td>
+                                <!-- <td [class]="$index === 0 ? 'border-t' : ''">{{ weekKey(entry[0]) }} -- {{ inMarkedWeek(entry[0]) }}</td> -->
+                                <!-- <td><button class="flex items-center justify-center p-1 rounded cursor-pointer hover:bg-gray-200 active:bg-gray-300 transition-colors duration-150"><img src="assets/edit.svg" alt="Edit" class="w-4 h-4" /></button></td> -->
+                            </tr>
+                        }
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
     }
     @else if (mode === "remove") {
         <div class="flex items-center justify-between mb-2">
@@ -11,7 +54,7 @@
                 <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
             </div>
             <div class="flex">
-                <label for="limit" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
+                <label for="limit" class="mr-2 font-semibold">Týdenní limit:</label>
                 <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
                     class="w-8 bg-white rounded spin-btn"
                     (change)="markOverflowWeeks()"
