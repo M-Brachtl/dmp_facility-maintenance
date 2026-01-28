@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
-.max-table-h-filter-shown {
-    max-height: 40vh;
-}
-.max-table-h-filter-hidden {
+// .max-table-h-filter-shown {
+//     max-height: 40vh;
+// }
+.max-h-table {
     max-height: 52vh;
 }
 .today-cell {
     @apply bg-yellow-200;
 }
 
-.add-form-input {
-    @apply border border-gray-300 rounded px-2 py-1 mb-4;
+.is-even-td td {
+    @apply bg-indigo-500;
+}
+
+.spin-btn::-webkit-inner-spin-button,
+.spin-btn::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
