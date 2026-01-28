@@ -18,7 +18,7 @@ export class PlansComponent {
   current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
   calendar: { [key: string]: { machines: string[][]; people: string[][] } } = {};
   fill_used = true;
-  filter_showing = true;
+  filter_showing = false;
   min_date?: string;
   max_date?: string;
   

@@ -29,7 +29,7 @@
             }
         </div>
         @if (filter_showing) {
-            <div class="flex gap-2 justify-center">
+            <div class="flex gap-2 justify-center" [@slideInOut]>
                 <div class="text-center mb-5">
                     <button (click)="applyFilters(min_date, max_date)" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Aplikovat filtry</button>
                 </div>
