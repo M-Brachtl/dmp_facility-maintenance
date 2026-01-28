@@ -1,15 +1,52 @@
-<app-header-btns [altText]="['Vytvořit', 'Přepnout', 'Zobrazit']" />
+<app-header-btns [altText]="['###', 'Měsíční výhled', 'Celý plán']" />
 <main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
     @if (mode === "add") {
         <p>adding</p>
     }
     @else if (mode === "remove") {
-        <p>removing</p>
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-left gap-1">
+                <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
+                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
+                <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
+            </div>
+            <!-- <div>
+                <button class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Aplikovat změny</button>
+            </div> -->
+        </div>
+        <div [class]="'overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300 ' + tableMaxHeightClass">
+            <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
+                <thead>
+                    <tr class="bg-indigo-100"><th class="w-min">Datum</th><th class="w-min">Týden</th><th class="w-1/3">Typ revize</th><th>Inv. č. stroje</th><th class="w-1/3">Název stroje</th></tr>
+                </thead>
+                <tbody>
+                @for (yearList of calNextMonthKeyList; track $index) {
+                    <!-- <tr class="border-t-2 border-black text-lg font-bold text-left bg-indigo-400"><td colspan="4" class="pl-1">{{ yearList[0].split('-')[0] }}</td></tr> -->
+                    @for (month of yearList; track $index) {
+                        <!-- <tr class="border-t border-gray-400 text-left bg-indigo-200" [class]="keyIsToday(month) ? 'today-cell' : ''"><td colspan="4" class="pl-1">{{ month.split('-')[1] }}</td></tr> -->
+                        <!-- @if (next_month_cal[month].machines.length > 0) {
+                            <tr><hr><hr></tr>
+                        } -->
+                        @for (entry of next_month_cal[month].machines; track $index) {
+                            <tr>
+                                <td [class]="($index === 0 ? 'border-t' : '')  + ' ' +isBeforeToday(entry[0])">{{ strDate(entry[0]) }}</td>
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ getISOWeekNumber(entry[0]) }}</td>
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ entry[1] }}</td>
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ entry[2] }}</td>
+                                <td [class]="$index === 0 ? 'border-t' : ''">{{ entry[3] }}</td>
+                                <!-- <td><button class="flex items-center justify-center p-1 rounded cursor-pointer hover:bg-gray-200 active:bg-gray-300 transition-colors duration-150"><img src="assets/edit.svg" alt="Edit" class="w-4 h-4" /></button></td> -->
+                            </tr>
+                        }
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
     }
     @else if (mode == 'list') {
-        <h3 class="text-lg font-bold text-center mb-4">{{ current_plan.title }}</h3>
-        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
-            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+        <!-- <h3 class="text-lg font-bold text-center mb-4">{{ current_plan.title }}</h3> -->
+        <!-- <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
+            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full">
                     <img [src]="iconPath" alt="Schovat filtry"
                         class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
                         (click)="filter_showing = !filter_showing"
@@ -37,11 +74,11 @@
                     <button (click)="deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
                 </div>
             </div>
-        }
+        } -->
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center justify-left gap-1">
-                <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
-                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" />
+                <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
+                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
                 <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
             </div>
             <div>
@@ -55,15 +92,16 @@
                     <tr class="border-t-2 border-black text-lg font-bold text-left bg-indigo-400"><td colspan="4" class="pl-1">{{ yearList[0].split('-')[0] }}</td></tr> <!-- rok -->
                     @for (month of yearList; track $index) {
                         @if (calendar[month].machines.length > 0 || fill_used || keyIsToday(month)) {
-                            <tr class="border-t border-gray-400 text-left bg-indigo-200" [class]="keyIsToday(month) ? 'today-cell' : ''"><td colspan="4" class="pl-1">{{ month.split('-')[1] }}</td></tr>
+                            <!-- <tr class="border-t border-gray-400 text-left bg-indigo-200" [class]="keyIsToday(month) ? 'today-cell' : ''"><td colspan="4" class="pl-1">{{ month.split('-')[1] }}</td></tr> -->
                             @if (calendar[month].machines.length > 0) {
-                                <tr class="bg-indigo-100"><th class="w-1/3">Typ revize</th><th>Inv. č. stroje</th><th class="w-1/3">Název stroje</th><th class="w-8"></th></tr>
+                                <tr class="bg-indigo-100"><th class="w-min">Datum</th><th class="w-1/3">Typ revize</th><th>Inv. č. stroje</th><th class="w-1/3">Název stroje</th><th class="w-8"></th></tr>
                             }
                             @for (entry of calendar[month].machines; track $index) {
                                 <tr>
-                                    <td>{{entry[0]}}</td>
-                                    <td>{{entry[1]}}</td>
-                                    <td>{{entry[2]}}</td>
+                                    <td>{{ strDate(entry[0]) }}</td>
+                                    <td>{{ entry[1] }}</td>
+                                    <td>{{ entry[2] }}</td>
+                                    <td>{{ entry[3] }}</td>
                                     <td><button class="flex items-center justify-center p-1 rounded cursor-pointer hover:bg-gray-200 active:bg-gray-300 transition-colors duration-150"><img src="assets/edit.svg" alt="Edit" class="w-4 h-4" /></button></td>
                                 </tr>
                             }

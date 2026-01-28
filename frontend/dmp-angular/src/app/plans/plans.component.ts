@@ -17,8 +17,9 @@ export class PlansComponent {
   eel_on: boolean = false;
   current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
   calendar: { [key: string]: { machines: string[][]; people: string[][] } } = {};
-  fill_used = true;
-  filter_showing = true;
+  next_month_cal: { [key: string]: { machines: string[][]; people: string[][] } } = {};
+  fill_used = false;
+  filter_showing = false;
   min_date?: string;
   max_date?: string;
   
@@ -49,7 +50,8 @@ export class PlansComponent {
       this.mode = mode;
     });
     await this.loadPlan('test_plan.json');
-    this.parsePlan();
+    this.parsePlan(false);
+    this.parsePlan(true);
     console.log('Calendar:', this.calendar);
   }
 
@@ -73,6 +75,31 @@ export class PlansComponent {
         });
     }
   }
+  strDate(dateObj: Date | string): string {
+    if (typeof dateObj === 'string') {
+      dateObj = new Date(dateObj);
+    }
+    return new Intl.DateTimeFormat('cs-CZ', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(dateObj);
+  }
+  getISOWeekNumber(date: any): number {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  
+    // Set to nearest Thursday (ISO week starts Monday)
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  
+    // Year start
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  
+    // Calculate week number
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  }
+
+  isBeforeToday(date: any){
+    console.log(date, date < new Date())
+    return date <new  Date() ? 'bg-red-500' : '';
+  }
+
   applyFilters(min_date_str?: string, max_date_str?: string): void {
     let custom_min_date: Date | undefined;
     let custom_max_date: Date | undefined;
@@ -82,9 +109,9 @@ export class PlansComponent {
     if (max_date_str) {
       custom_max_date = new Date(max_date_str);
     }
-    this.parsePlan(this.fill_used, custom_min_date, custom_max_date);
+    this.parsePlan(false, this.fill_used, custom_min_date, custom_max_date);
   }
-  parsePlan(fill_unused: boolean = true, custom_min_date?: Date, custom_max_date?: Date): void {
+  parsePlan(nextMonth: boolean = false, fill_unused: boolean = true, custom_min_date?: Date, custom_max_date?: Date): void {
     // dates are updated so unused months are filled after parsing
     let min_date = new Date(); // set to current date initially
     let max_date = min_date; // set to current date initially
@@ -98,7 +125,7 @@ export class PlansComponent {
         if (!calendar[month_key]) {
           calendar[month_key] = { machines: [], people: [] };
         }
-        calendar[month_key].machines.push([rev[1],...machine_info]);
+        calendar[month_key].machines.push([rev_date, rev[1],...machine_info]);
         if (rev_date < min_date) min_date = rev_date; // update min_date
         if (rev_date > max_date) max_date = rev_date; // update max_date
       });
@@ -110,13 +137,13 @@ export class PlansComponent {
         if (!calendar[month_key]) {
           calendar[month_key] = { machines: [], people: [] };
         }
-        calendar[month_key].people.push([training[1], person[1]]); // training type, name
+        calendar[month_key].people.push([training_date, training[1], person[1]]); // training type, name
         if (training_date < min_date) min_date = training_date; // update min_date
         if (training_date > max_date) max_date = training_date; // update max_date
       });
     });
 
-    if (custom_min_date) {
+    if (custom_min_date && !nextMonth) {
       min_date = custom_min_date;
       // delete all months before custom_min_date
       for (const key in calendar) {
@@ -127,8 +154,19 @@ export class PlansComponent {
         }
       }
     }
-
-    if (custom_max_date) {
+    if (nextMonth){
+      max_date = new Date()
+      max_date.setMonth(max_date.getMonth() + 2);
+      console.log("Next month cal:", max_date)
+      // delete all months after custom_max_date
+      for (const key in calendar) {
+        const [year, month] = key.split('-').map(Number);
+        const key_date = new Date(year, month - 1, 1);
+        if (key_date > max_date) {
+          delete calendar[key];
+        }
+      }
+    } else if (custom_max_date) {
       max_date = custom_max_date;
       // delete all months after custom_max_date
       for (const key in calendar) {
@@ -151,7 +189,11 @@ export class PlansComponent {
         date_generator.setMonth(date_generator.getMonth() + 1);
       }
     }
-    this.calendar = calendar;
+    if (nextMonth){
+      this.next_month_cal = calendar
+    } else {
+      this.calendar = calendar
+    }
   }
 
   get calendarKeyList(): string[][] {
@@ -161,6 +203,30 @@ export class PlansComponent {
       [2027-01, 2027-02, ...],
     */
     const keys = Object.keys(this.calendar).sort((a, b) => {
+      const [aYear, aMonth] = a.split('-').map(Number);
+      const [bYear, bMonth] = b.split('-').map(Number);
+      return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
+    });
+    const groupedKeys: string[][] = [];
+    let currentYear = '';
+    keys.forEach(key => {
+      const [year, month] = key.split('-');
+      if (year !== currentYear) {
+        currentYear = year;
+        groupedKeys.push([]);
+      }
+      groupedKeys[groupedKeys.length - 1].push(key);
+    });
+    return groupedKeys;
+  }
+
+  get calNextMonthKeyList(): string[][] {
+    /*
+      [2025-11, 2025-12, ...],
+      [2026-01, 2026-02, ...],
+      [2027-01, 2027-02, ...],
+    */
+    const keys = Object.keys(this.next_month_cal).sort((a, b) => {
       const [aYear, aMonth] = a.split('-').map(Number);
       const [bYear, bMonth] = b.split('-').map(Number);
       return aYear !== bYear ? aYear - bYear : aMonth - bMonth;
