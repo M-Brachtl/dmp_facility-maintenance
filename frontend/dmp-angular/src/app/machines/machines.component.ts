@@ -19,7 +19,7 @@ declare const eel: any;
 export class MachinesComponent {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
   @ViewChild('machineRem') machineRem!: ElementRef;
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   mode!: 'list' | 'add' | 'remove';
   machinesList: any[] = [];
   typesList: string[] = [];
@@ -59,6 +59,9 @@ export class MachinesComponent {
       this.mode = mode;
       // this.filterHiddenStyle();
       this.filterI.hiddenStyleUpdate();
+    });
+    this.modeService.eel_on$.subscribe(eel_on => {
+      this.eel_on = eel_on;
     });
     this.getMachines();
     this.getTypes();
@@ -105,26 +108,20 @@ export class MachinesComponent {
     this.inNumList = this.machinesList.map(machine => machine[1]);
   }
 
-  getTypes() {
-    if (!this.eel_on) {
-      this.typesList = ["Fictive - Facility", "Test", "Test - A2", "Non-present Test"];
-    } else {
-      eel.list_types()().then((result: any) => {
-        console.log("Výsledek:", result);
-        this.typesList = result;
-      });
-    }
+  getTypes(machinesList: any[] = this.machinesList) {
+    const typesSet: Set<string> = new Set();
+    machinesList.forEach(machine => {
+      typesSet.add(machine[3]);
+    });
+    this.typesList = Array.from(typesSet);
   }
 
-  getLocations() {
-    if (!this.eel_on) {
-      this.locationsList = ["Lokace T", "New Testing Facility", "No Location", "Non-present Location", "Location - A2"];
-    } else {
-      eel.list_locations()().then((result: any) => {
-        console.log("Výsledek:", result);
-        this.locationsList = result;
-      });
-    }
+  getLocations(machinesList: any[] = this.machinesList) {
+    const locationsSet: Set<string> = new Set();
+    machinesList.forEach(machine => {
+      locationsSet.add(machine[4]);
+    });
+    this.locationsList = Array.from(locationsSet);
   }
 
   // toggleFilters() {////

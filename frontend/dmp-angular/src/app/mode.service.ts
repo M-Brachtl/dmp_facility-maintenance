@@ -13,4 +13,7 @@ export class ModeService {
     getMode() {
         return this.modeSubject.getValue();
     }
+
+    private eel_on: boolean = true;
+    eel_on$ = new BehaviorSubject<boolean>(this.eel_on).asObservable();
 }

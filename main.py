@@ -20,8 +20,8 @@ def close_window(*args, **kwargs):
 @eel.expose
 def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše nebo defaultuje nula, nezapíše se nic do argumentů funkce -> použije se výchozích 10 let
     kwargs = {key: value for key, value in zip(("years", "file_name"), (years,file_name)) if value}
-    if planning.generate_plan(**kwargs):
-        return {"status": "success", "message": "Plán byl úspěšně vygenerován."}
+    if plan := planning.generate_plan(**kwargs):
+        return {"status": "success", "plan": plan}
     else:
         return {"status": "error", "message": "Při generování plánu došlo k chybě."}
     
@@ -47,9 +47,11 @@ def remove_machine(machine_id: int):
 def add_people(name: str):
     return dtb.add_people(name)
 @eel.expose
-def list_people(params: dict = {}):
+def list_people(include_inactive: bool = False, params: dict = {}):
     list_last_trainings = params.pop("list_last_trainings", False)
-    return dtb.list_people(list_last_trainings, **params)
+    output = dtb.list_people(include_inactive=include_inactive, list_last_trainings=list_last_trainings, **params)
+    print(output)
+    return output
 @eel.expose
 def remove_people(people_id: int):
     return dtb.remove_people(id=people_id)
@@ -66,10 +68,10 @@ def add_rev_to_machine(machine_id: int, revision_type_id: int, periodicity_month
 def remove_rev_from_machine(machine_id: int, revision_type_id: int):
     return dtb.remove_rev_from_machine(machine_id, revision_type_id)
 @eel.expose
-def add_revision_log(machine_id: int, revision_type_id: int, result: str, notes: str = "", date: str = None):
+def add_revision_log(machine_id: int, revision_type_id: int, result: str, person_id: int, notes: str = "", date: str = None):
     if date is not None:
         date = dateDTB(date)
-    return dtb.add_revision_log(machine_id, revision_type_id, result, notes, date)
+    return dtb.add_revision_log(machine_id, revision_type_id, result, person_id, notes, date)
 @eel.expose
 def remove_revision_log(log_id: int):
     return dtb.remove_revision_log(log_id)
@@ -111,14 +113,17 @@ def remove_training_log(log_id: int):
 def list_training_log(_id: int = None, person: int = None, min_date: str = None, max_date: str = None, min_e_date: str = None, max_e_date: str = None):
     # key in ["_id", "rev_type", "person", "min_date", "max_date", "min_e_date", "max_e_date"]
     output: list[any] = dtb.list_training_log(_id, person, min_date, max_date, min_e_date, max_e_date)
+    # print("Training log:", output)
     # seřazení výstupu podle data sestupně
     for i, entry in enumerate(output.copy()):
         entry = list(entry)
-        entry[2] = entry[2].__repr__()
-        output[i] = tuple(entry)
+        entry[3] = entry[3].__repr__()
+        entry[4] = entry[4].__repr__()
+        output[i] = list(entry)
+    # print("Formatted training log:", output)
     return output
 #endregion
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")
 
-eel.start('index.html', size=(800, 600), mode='edge', close_callback=close_window)
+eel.start('index.html', mode='edge', close_callback=close_window, cmdline_args=['http://localhost:4200/'], size=(1024, 768))

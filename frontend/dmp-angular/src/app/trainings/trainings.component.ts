@@ -29,7 +29,7 @@ export class TrainingsComponent {
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   revTypesList: any[] = [];
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
   // machinesList: any[] = [];
@@ -43,17 +43,21 @@ export class TrainingsComponent {
   TLogs: any[] = [];
   sorter: number = 3; // date/expiry_date = 3/4
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
-  ngOnInit() {
+  async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
     });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
     });
-    this.revTypesList = getRevTypes(this.eel_on);
+    this.modeService.eel_on$.subscribe(status => {
+      this.eel_on = status;
+    });
+    this.revTypesList = await getRevTypes(this.eel_on);
     // [this.machinesList, this.inNumList] = getMachines(this.eel_on);
     this.getTLogs();
-    this.employeesList = getEmployees(this.eel_on);
+    console.log("Employees list before fetch:", this.employeesList);
+    this.employeesList = await getEmployees(this.eel_on);
     this.filterI.filterValues = {
       revType: '',
       minDate: '',
@@ -73,8 +77,13 @@ export class TrainingsComponent {
 
   getTLogs() {
     if (this.eel_on) {
-      eel.get_training_logs()( (ret: any) => {
-        console.log('Received training logs:', ret);
+      eel.list_training_log()((ret: any) => {
+        this.TLogs = ret.map((log: any[]) => {
+          // console.log("Výsledek training:", ret);
+          log[3] = new Date(log[3]);
+          log[4] = new Date(log[4]);
+          return log;
+        });
       });
     } else {
       console.log('Eel is not initialized.');
@@ -114,7 +123,13 @@ export class TrainingsComponent {
       return this.revTypesList[log[1]-1][2] + ' měsíců';
     },
     employeeFromLog: (log: any[]): string => {
-      return this.employeesList[log[2]-1][1];
+      // console.log(this.employeesList, log);
+      try {
+        console.log("Found employee:", this.employeesList);
+        return this.employeesList[log[2]-1][1];
+      } catch (error) {
+        return 'Unknown Employee';
+      }
     },
     employee: (employee: any[]): string => {
       this.employeesList.find( emp => emp[0] === employee[0] );
@@ -123,6 +138,9 @@ export class TrainingsComponent {
   };
 
   rowFiltered(entry: any[]): boolean {
+    if (this.revTypesList.length === 0 || this.employeesList.length === 0) {
+      return true;
+    }
     const employeeName = this.logGet.employeeFromLog(entry);
     const revTypeName = this.logGet.revType(entry);
     const date = entry[3];
@@ -166,9 +184,9 @@ export class TrainingsComponent {
 
 
     if (this.eel_on) {
-      eel.add_training_log(parseInt(revTypeID), date, parseInt(employeeID))().then((result: any) => {
+      eel.add_training_log(parseInt(revTypeID), parseInt(employeeID), date)().then((result: any) => {
         console.log("Výsledek přidání revize:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'addSuccess';
           this.showDialog = true;
           this.getTLogs();
@@ -217,7 +235,7 @@ export class TrainingsComponent {
     if (this.eel_on) {
       eel.remove_training_log(logID)().then((result: any) => {
         // console.log("Výsledek odstranění periodicity:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'removeSuccess';
           this.showDialog = true;
           this.getTLogs();

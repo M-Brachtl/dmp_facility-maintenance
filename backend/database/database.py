@@ -48,7 +48,7 @@ cursor = connection.cursor()
 def list_machines(list_last_revisions=False, **params):
     # if ("_id", 0) in params.items():
     #     return [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [])]
-    if list_last_revisions:
+    if list_last_revisions: # vypíše poslední revizi (která skončila bez závady) pro každý relevantní typ revize
         params["list_last_revisions"] = True
     query = "SELECT id, in_num, name, type, location, revision_array, disposed FROM machines"
     filters = []
@@ -78,8 +78,8 @@ def list_machines(list_last_revisions=False, **params):
         # přidání revizí ve formátu (log_id, rev_type, datum)
         log_list = []
         if list_last_revisions:
-            cursor.execute("""SELECT id, type, date FROM revision_log AS og_log WHERE machine_id=? AND date=(
-                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.type=og_log.type
+            cursor.execute("""SELECT id, type, date FROM revision_log AS og_log WHERE machine_id=? AND result='bez závady' AND date=(
+                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.type=og_log.type AND log.result='bez závady'
                 )""",
                 (machine[0],)
             )
@@ -202,10 +202,15 @@ def remove_revision_type(revision_type_id: int):
     connection.commit()
     return "success"
 
-def list_people(name = "", list_last_trainings: bool = False):
+def list_people(name = "", include_inactive: bool = False, list_last_trainings: bool = False):
     query = "SELECT * FROM people"
     if name != "":
         query += f" WHERE name = '{name}'"
+    if not include_inactive:
+        if "WHERE" in query:
+            query += " AND active = 1"
+        else:
+            query += " WHERE active = 1"
     cursor.execute(query + ";")
     
     if list_last_trainings:
@@ -275,12 +280,12 @@ def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", 
 
     return output
 
-def add_revision_log(machine_id: int, rev_type: int, result: str, notes: str = "", date: dateDTB = dateDTB.today()): # validní result: bez závady/malá závada/velká závada
+def add_revision_log(machine_id: int, rev_type: int, result: str, person_id: int, notes: str = "", date: dateDTB = dateDTB.today()): # validní result: bez závady/malá závada/velká závada
     if result not in ("bez závady","malá závada","velká závada"):
         raise ValueError("Hodnota result není validní.")
     cursor.execute(
-        "INSERT INTO revision_log (machine_id, date, type, result, notes) VALUES (?, ?, ?, ?, ?)",
-        (machine_id, repr(date), rev_type, result, notes)
+        "INSERT INTO revision_log (machine_id, date, type, result, notes, person_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (machine_id, repr(date), rev_type, result, notes, person_id)
     )
     connection.commit()
     return "success"
@@ -367,7 +372,7 @@ def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
     connection.commit()
     return "success"
 
-def list_training_log(**params):
+def list_training_log(*args, **params):
     query = "SELECT id, revision_type, person, strftime('%d/%m/%Y', date), strftime('%d/%m/%Y', expiration_date) FROM training_log"
     filters = []
     # date_filter = (None, None)
@@ -488,7 +493,8 @@ if __name__ == "__main__":
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
     # print("Test porovnání dat:", dateDTB('03/06/2025') < dateDTB('02/05/2025'),sep="\n")
-    print("Databáze - machines:", list_people(list_last_trainings=True),sep="\n")
+    # print("Databáze - machines:", list_machines(list_last_revisions=True),sep="\n")
+    print("Databáze - machines:", list_training_log(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

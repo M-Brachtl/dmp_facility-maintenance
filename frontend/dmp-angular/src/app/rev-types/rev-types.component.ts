@@ -23,7 +23,7 @@ export class RevTypesComponent {
   facilityRevTypesList: any[] = [];
   // filtersShow: number = 1;
   filterI = new filterInterface();
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
   form_training_length: number = 0;
@@ -37,6 +37,10 @@ export class RevTypesComponent {
     });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
+    });
+    this.modeService.eel_on$.subscribe(eel_on => {
+      this.eel_on = eel_on;
+      this.getRevTypes();
     });
     this.getRevTypes();
     this.filterI.hiddenStyleUpdate();
@@ -162,14 +166,21 @@ export class RevTypesComponent {
   }
 }
 
-export function getRevTypes(eel_on: boolean): any[] {
+export async function getRevTypes(eel_on: boolean): Promise<any[]> {
   let revTypesList: any[] = [];
   if (eel_on) {
-      eel.list_revision_types()().then((result: any) => {
+      // eel.list_revision_types()().then((result: any) => {
+      //   console.log("Výsledek:", result);
+      //   revTypesList = result;
+      // });
+      // return revTypesList;
+      return new Promise<any[]>((resolve) => {
+        eel.list_revision_types()().then((result: any) => {
         console.log("Výsledek:", result);
         revTypesList = result;
+        resolve(revTypesList);
+        });
       });
-      return revTypesList;
     } else {
       revTypesList = [
         [1, 'Revize T1', 12, 0],

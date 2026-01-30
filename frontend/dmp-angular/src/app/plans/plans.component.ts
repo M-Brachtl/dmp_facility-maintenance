@@ -14,7 +14,7 @@ declare const eel: any;
 })
 export class PlansComponent {
   mode!: 'list' | 'add' | 'remove';
-  eel_on: boolean = false;
+  eel_on!: boolean;
   current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
   calendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
   next_month_cal: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
@@ -49,6 +49,9 @@ export class PlansComponent {
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
     });
+    this.modeService.eel_on$.subscribe(eel_status => {
+      this.eel_on = eel_status;
+    });
     await this.loadPlan('test_plan.json');
     this.parsePlan(false);
     this.parsePlan(true);
@@ -58,8 +61,8 @@ export class PlansComponent {
   async loadPlan(filename: string): Promise<void> {
     if (this.eel_on) {
       return new Promise((resolve, reject) => {
-        eel.get_plan(filename)((plan: any) => {
-          this.current_plan = plan;
+        eel.generate_plan_api(filename)((response: { "status": string, "plan": any }) => {
+          this.current_plan = response.plan;
           resolve(); // signalizuje dokončení
         });
       });

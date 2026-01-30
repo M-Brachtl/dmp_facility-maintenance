@@ -23,7 +23,7 @@ export class PeriodicitiesComponent {
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   revTypesList: any[] = [];
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
   machinesList: any[] = [];
@@ -41,6 +41,9 @@ export class PeriodicitiesComponent {
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
       this.filterI.hiddenStyleUpdate();
+    });
+    this.modeService.eel_on$.subscribe(eel_status => {
+      this.eel_on = eel_status;
     });
     this.getMachines();
     this.getRevTypes();
@@ -126,7 +129,7 @@ export class PeriodicitiesComponent {
         [5, 4, 0, 18],];
       return;
     } else {
-      eel.list_periodicities()().then((result: any) => {
+      eel.list_periodicity()().then((result: any) => {
         console.log("Výsledek:", result);
         this.periodicities = result;
       });
@@ -182,7 +185,7 @@ export class PeriodicitiesComponent {
     if (this.eel_on) {
       eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
         console.log("Výsledek přidání periodicity:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'successAddPeriodicity';
           this.showDialog = true;
           this.getPeriodicities();
@@ -213,7 +216,7 @@ export class PeriodicitiesComponent {
     if (this.eel_on) {
       eel.remove_periodicity(periodicityID)().then((result: any) => {
         console.log("Výsledek odstranění periodicity:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'removeSuccess';
           this.showDialog = true;
           this.getPeriodicities();

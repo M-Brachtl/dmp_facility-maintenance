@@ -34,7 +34,7 @@ export class RevisionsComponent {
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   revTypesList: any[] = [];
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
   machinesList: any[] = [];
@@ -45,6 +45,7 @@ export class RevisionsComponent {
   form_period_length: number = 0;
   detailedLog: any = null;
   orderingAsc: boolean = false; // true platí pro řazení od nejstarších po nejnovější
+  employeesList: any[] = [];
 
 
   showDetails(logID: number) {
@@ -54,7 +55,7 @@ export class RevisionsComponent {
   }
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
-  ngOnInit() {
+  async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
     });
@@ -62,9 +63,13 @@ export class RevisionsComponent {
       this.mode = mode;
       this.filterI.hiddenStyleUpdate();
     });
+    this.modeService.eel_on$.subscribe(status => {
+      this.eel_on = status;
+    });
     this.getMachines();
     this.getRevTypes();
     this.getLogs();
+    this.employeesList = await getEmployees(this.eel_on);
 
     this.filterI.filterValues = {
       machineName: '',
@@ -75,7 +80,11 @@ export class RevisionsComponent {
       result: ''
     }
   }
-  
+
+  get activeEmployees() {
+    return this.employeesList.filter(emp => emp[2] === 1);
+  }
+
   // cross table getters
   logGet = {
     revType: (log: any[]): string => {
@@ -88,7 +97,7 @@ export class RevisionsComponent {
       return this.machinesList[log[1]][1];
     },
     employeeFromLog: (log: any[]): string => {
-      const employees = getEmployees(this.eel_on);
+      const employees = this.employeesList;
       if (!employees) {
         return 'Chyba načtení zaměstnanců';
       }
@@ -96,7 +105,7 @@ export class RevisionsComponent {
       return emp ? emp[1] : 'Neznámý zaměstnanec';
     },
     employee: (employee: any[]): string => {
-      const employees = getEmployees(this.eel_on);
+      const employees = this.employeesList;
       if (!employees) {
         return 'Chyba načtení zaměstnanců';
       }
@@ -104,10 +113,6 @@ export class RevisionsComponent {
       return emp ? emp[1] : 'Neznámý zaměstnanec';
     }
   };
-
-  get employeesList() {
-    return getEmployees(this.eel_on);
-  }
 
   getMachines() {
     if (!this.eel_on) {
@@ -175,6 +180,14 @@ export class RevisionsComponent {
         log[2] = new Date(log[2]);
       });
       return;
+    } else {
+      eel.list_revision_log()().then((result: any) => {
+        console.log("Výsledek:", result);
+        this.logs = result.map((log: any[]) => {
+          log[2] = new Date(log[2]);
+          return log;
+        });
+      });
     }
   }
   switchOrder() {
@@ -234,9 +247,9 @@ export class RevisionsComponent {
 
 
     if (this.eel_on) {
-      eel.add_revision_log(parseInt(revTypeID), parseInt(machineID), date, parseInt(employeeID), result, notes)().then((result: any) => {
+      eel.add_revision_log(parseInt(machineID), parseInt(revTypeID), result, parseInt(employeeID), notes, date)().then((result: any) => {
         console.log("Výsledek přidání revize:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'addSuccess';
           this.showDialog = true;
           this.getLogs();
@@ -277,7 +290,7 @@ export class RevisionsComponent {
     if (this.eel_on) {
       eel.remove_revision_log(logID)().then((result: any) => {
         // console.log("Výsledek odstranění periodicity:", result);
-        if (result.success) {
+        if (result === "success") {
           this.dialogContent = 'removeSuccess';
           this.showDialog = true;
           this.getLogs();

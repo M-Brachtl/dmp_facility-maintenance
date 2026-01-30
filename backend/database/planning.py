@@ -23,18 +23,17 @@ def generate_plan_name():
         increment += 1
     return file_name
 
-def generate_plan(years: int = 10, file_name: str = "gen_default", title: str = "") -> dict:
-    if file_name == "" or file_name is None or file_name.strip() == "" or file_name.startswith("gen_") or test_exists(file_name + ".json"):
-        if file_name == "gen_default":
-            file_name = generate_plan_name()
-        else:
-            raise ValueError("Neplatný název souboru pro plán.")
-    file_name += ".json"
-    if title == "" or title is None or title.strip() == "":
+def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict: # pokud je filename prázdný, neuloží se žádný soubor
+    # if file_name == "" or file_name is None or file_name.strip() == "" or file_name.startswith("gen_") or test_exists(file_name + ".json"):
+    #     if file_name == "gen_default":
+    #         file_name = generate_plan_name()
+    #     else:
+    #         raise ValueError("Neplatný název souboru pro plán.")
+    file_name += ".json" if file_name else ""
+    if (title == "" or title is None or title.strip() == "") and file_name:
         title = file_name.replace(".json","")
     plan = {
         "title": title,
-        "active": False,
         "machines": [], # pro každá index: None | (di, in_num, name, seznam plánovaných revizí(rev_id, rev_type, datum, edited))
         "people": [] # pro každá index: None | (name, seznam plánovaných tréninků(rev_id, rev_type, datum, edited))
     }
@@ -85,8 +84,8 @@ def generate_plan(years: int = 10, file_name: str = "gen_default", title: str = 
     # while os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name)):
     #     file_name = f"plan_{today.year}_{today.month}_{today.day}_{increment}.json"
     #     increment += 1
-
-    dump(plan, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "w", encoding="utf-8"), ensure_ascii=False)
+    if file_name:
+        dump(plan, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "w", encoding="utf-8"), ensure_ascii=False, indent=4)
     return plan
 
 def get_plan(file_name: str):
@@ -104,4 +103,4 @@ def save_plan(plan: dict, file_name: str):
         print(f"Error při kontrole uloženého plánu: {e}, soubor může být poškozen.")
 
 if __name__ == "__main__":
-    generate_plan(file_name="test_plan")
+    generate_plan(file_name="gen_default")

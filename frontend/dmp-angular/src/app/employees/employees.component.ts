@@ -20,7 +20,7 @@ export class EmployeesComponent {
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   employeesList: any[] = [];
-  eel_on: boolean = false; // bez eel jsou použitá testovací data přímo v kódu
+  eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
 
@@ -32,15 +32,18 @@ export class EmployeesComponent {
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
     });
+    this.modeService.eel_on$.subscribe(eel_on => {
+      this.eel_on = eel_on;
+    });
     this.getEmployees();
     this.filterI.hiddenStyleUpdate();
     this.filterI.filterValues['nameFilter'] = '';
-    this.filterI.filterValues['activeFilter'] = 'all'; // all/active/inactive
+    this.filterI.filterValues['activeFilter'] = 'active'; // all/active/inactive
   }
 
   getEmployees() {
     if (this.eel_on) {
-      eel.list_employees()().then((result: any) => {
+      eel.list_people(true)().then((result: any) => {
         console.log("Výsledek:", result);
         this.employeesList = result;
       });
@@ -56,6 +59,7 @@ export class EmployeesComponent {
       ];
     }
   }
+
   removeEmployee() {
     if (!this.employeeRem.nativeElement.value) {
       this.showDialog = true;
@@ -68,7 +72,7 @@ export class EmployeesComponent {
     }
     if (this.eel_on) {
       const empID = this.employeeRem.nativeElement.value;
-      eel.remove_employee(empID)().then((result: any) => {
+      eel.remove_people(empID)().then((result: any) => {
         if (result.error) {
           this.showDialog = true;
           this.dialogContent = 'serverError';
@@ -92,7 +96,7 @@ export class EmployeesComponent {
   }
   rowFiltered(employee: any): boolean {
     if (this.filterI.filterValues['activeFilter'] === '') {
-      this.filterI.filterValues['activeFilter'] = 'all';
+      this.filterI.filterValues['activeFilter'] = 'active';
     }
     if (this.filterI.filterValues['nameFilter'] && !employee[1].toLowerCase().includes(this.filterI.filterValues['nameFilter'].toLowerCase())) {
       return false;
@@ -114,7 +118,7 @@ export class EmployeesComponent {
       return;
     }
     if (this.eel_on) {
-      eel.add_employee(empName)().then((result: any) => {
+      eel.add_people(empName)().then((result: any) => {
         console.log("Výsledek přidání zaměstnance:", result);
         this.showDialog = true;
         this.dialogContent = 'addSuccess';
@@ -122,7 +126,7 @@ export class EmployeesComponent {
       });
     } else {
       const newEmpID = this.employeesList.length ? Math.max(...this.employeesList.map(emp => emp[0])) + 1 : 1;
-      this.employeesList.push([newEmpID, empName]);
+      this.employeesList.push([newEmpID, empName, 1]);
       this.showDialog = true;
       this.dialogContent = 'addSuccess';
     }
@@ -135,12 +139,20 @@ export class EmployeesComponent {
   }
 }
 
-export function getEmployees(eel_on: boolean): any[] {
+export async function getEmployees(eel_on: boolean = true, include_inactive: boolean = true): Promise<any[]> {
   let employeesList: any[] = [];
   if (eel_on) {
-    eel.list_employees()().then((result: any) => {
-      console.log("Výsledek:", result);
+    // eel.list_people()().then((result: any) => {
+    //   employeesList = result;
+    //   console.log("Výsledek empl2:", employeesList);
+    //   return employeesList;
+    // });
+    return new Promise<any[]>((resolve) => {
+      eel.list_people(include_inactive)().then((result: any) => {
       employeesList = result;
+      console.log("Výsledek empl2:", employeesList);
+      resolve(employeesList);
+      });
     });
   } else {
     employeesList = [
@@ -151,6 +163,6 @@ export function getEmployees(eel_on: boolean): any[] {
       [5, 'Eva Demoová', 1],
       [6, 'Jára Cimrman', 0],
     ];
+    return employeesList;
   }
-  return employeesList;
 }

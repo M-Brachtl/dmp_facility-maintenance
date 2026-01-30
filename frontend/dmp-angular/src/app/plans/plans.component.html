@@ -1,22 +1,6 @@
 <app-header-btns [altText]="['Školení', 'REV - Měsíční výhled', 'REV - Celý plán']" />
 <main class="p-7 bg-gray-100 my-5 rounded-lg shadow-lg shadow-gray-300 h-90vh">
     @if (mode === "add") {
-        <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center justify-left gap-1">
-                <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
-                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
-                <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
-            </div>
-            <!-- <div class="flex">
-                <label for="limit" class="mr-2 font-semibold">Týdenní limit:</label>
-                <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
-                    class="w-8 bg-white rounded spin-btn"
-                    (change)="markOverflowWeeks()"
-                />
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
-            </div> -->
-        </div>
         <div class="overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300 max-h-table">
             <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
                 <thead>
@@ -48,11 +32,6 @@
     }
     @else if (mode === "remove") {
         <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center justify-left gap-1">
-                <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
-                <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
-                <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
-            </div>
             <div class="flex">
                 <label for="limit" class="mr-2 font-semibold">Týdenní limit:</label>
                 <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
@@ -126,23 +105,19 @@
             </div>
         } -->
         <div class="flex items-center justify-between mb-2">
+            <div class="flex">
+                <label for="limit" class="mr-2 font-semibold">Týdenní limit:</label>
+                <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
+                class="w-8 bg-white rounded spin-btn"
+                (change)="markOverflowWeeks()"
+                />
+                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
+                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
+            </div>
             <div class="flex items-center justify-left gap-1">
                 <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
                 <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
                 <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
-            </div>
-            <!-- <div>
-                <button class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Aplikovat změny</button>
-            </div> -->
-            
-            <div class="flex">
-                <label for="limit" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
-                <input [(ngModel)]="limitGlobal" type="number" min="1" id="limit"
-                    class="w-8 bg-white rounded spin-btn"
-                    (change)="markOverflowWeeks()"
-                />
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
             </div>
         </div>
         <div class="overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300 max-h-table">
