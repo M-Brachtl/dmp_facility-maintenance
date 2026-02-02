@@ -73,7 +73,7 @@
                                     <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                         hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
                                         aria-disabled:hover:bg-indigo-500">
-                                        <button class="cursor-pointer">Školení</button>
+                                        <button class="cursor-pointer" (click)="openEmployeeTrainings(employee[0])">Školení</button>
                                     </td>
                                 <!-- <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                     hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
@@ -120,6 +120,13 @@
         @case ('removeSuccess') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
             <p>Zaměstnanec úspěšně vyřazen.</p>
+        }
+        @case ('employeeTrainings') {
+            <h2 class="text-xl font-bold mb-4">Školení zaměstnance</h2>
+            <h3 class="text-lg font-semibold mb-2">{{ employeeTrainings[0] }}</h3>
+            @for (revType of employeeTrainings[1]; track $index) {
+                <p>{{ revType }}</p>
+            }
         }
     }
 </app-dialog-container>

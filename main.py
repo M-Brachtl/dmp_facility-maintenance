@@ -28,8 +28,8 @@ def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše 
 #region Database functions exposed to Eel
 # dir(dtb) = ['add_machine', 'add_people', 'add_rev_to_machine', 'add_revision_log', 'add_revision_type', 'add_training_log', 'get_machine_name', 'get_periodicity', 'list_facility_activities', 'list_machines', 'list_people', 'list_revision_log', 'list_revision_types', 'list_training_log', 'remove_machine', 'remove_people', 'remove_rev_from_machine', 'remove_revision_log', 'remove_revision_type', 'remove_training_log']
 @eel.expose
-def list_machines(params: dict = {}):
-    list_last_revisions = params.pop("list_last_revisions", False)
+def list_machines(list_last_revisions = False, params: dict = {}):
+    # list_last_revisions = params.pop("list_last_revisions", False)
     return dtb.list_machines(list_last_revisions, **params)
 @eel.expose
 def add_machine(in_num: str, name: str, type: str, location: str):

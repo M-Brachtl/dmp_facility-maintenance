@@ -100,7 +100,7 @@ export class MachinesComponent {
         [17, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
       ];
     } else {
-      eel.list_machines()().then((result: any) => {
+      eel.list_machines(true)().then((result: any) => {
         console.log("Výsledek:", result);
         this.machinesList = result;
       });
@@ -276,13 +276,13 @@ export class MachinesComponent {
   }
 }
 
-export function getMachines(eel_on: boolean): [any[], string[]] {
+export async function getMachines(eel_on: boolean): Promise<[any[], string[]]> {
   let machinesList: any[] = [];
   let inNumList: string[] = [];
   if (!eel_on) {
-      machinesList = [ // ID, Inventory Number, Name, Type, Location, Location IDs, ...
+      machinesList = [ // ID, Inventory Number, Name, Type, Location, Revisions, Deposed, Last Revisions
         [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
-        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2], 0, []],
+        [1, "T_001", "Stroj A", "Test", "Lokace T", [1, 2, 3], 0, []],
         [2, "NM-001","New Test Machine vz.1", "Test", "New Testing Facility", [5, 3], 0, []],
         [3, "NM-002","New Test Machine vz.2", "Test - A2", "Location - A2", [6], 0, []],
         [4, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
@@ -300,10 +300,19 @@ export function getMachines(eel_on: boolean): [any[], string[]] {
         [16, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
         [17, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
       ];
+      inNumList = machinesList.map(machine => machine[1]);
     } else {
-      eel.list_machines()().then((result: any) => {
-        console.log("Výsledek:", result);
-        machinesList = result;
+      // eel.list_machines()().then((result: any) => {
+      //   console.log("Výsledek:", result);
+      //   machinesList = result;
+      // });
+      return new Promise<[any[], string[]]>((resolve) => {
+        eel.list_machines()().then((result: any) => {
+          console.log("Výsledek:", result);
+          machinesList = result;
+          inNumList = machinesList.map(machine => machine[1]);
+          resolve([machinesList, inNumList]);
+        });
       });
     }
     return [machinesList, inNumList];

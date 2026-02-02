@@ -255,3 +255,44 @@ export class TrainingsComponent {
     this.logRemRef.nativeElement.value = '';
   }
 }
+
+export async function getTLogs(eel_on: boolean): Promise<any[]> {
+  let TLogs: any[] = [];
+  if (eel_on) {
+    // eel.list_training_log()((ret: any) => {
+    //   TLogs = ret.map((log: any[]) => {
+    //     // console.log("Výsledek training:", ret);
+    //     log[3] = new Date(log[3]);
+    //     log[4] = new Date(log[4]);
+    //     return log;
+    //   });
+    // });
+    return new Promise<any[]>((resolve) => {
+      eel.list_training_log()().then((ret: any) => {
+        TLogs = ret.map((log: any[]) => {
+          log[3] = new Date(log[3]);
+          log[4] = new Date(log[4]);
+          return log;
+        });
+        resolve(TLogs);
+      });
+    });
+  } else {
+    console.log('Eel is not initialized.');
+    TLogs = [ // id, rev_type_id, employee_id, date, expiry_date
+      [1, 1, 1, "2025-11-07", "2026-11-07"],
+      [2, 1, 2, "2024-06-15", "2025-06-15"],
+      [3, 2, 2, "2026-01-21", "2028-01-21"],
+      [4, 5, 3, "2024-07-20", "2029-07-20"],
+      [5, 3, 1, "2023-05-10", "2028-05-10"]
+    ];
+  }
+  TLogs.map( log => {
+    log[3] = new Date(log[3]);
+    log[4] = new Date(log[4]);
+  } );
+  TLogs.sort( (a, b) => {
+    return a[4] - b[4]; // řazení podle expiry_date
+  } );
+  return TLogs;
+}

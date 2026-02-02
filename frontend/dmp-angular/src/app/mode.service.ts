@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root'
 })
 export class ModeService {
-    private modeSubject = new BehaviorSubject<'list' | 'add' | 'remove'>('remove');
+    private modeSubject = new BehaviorSubject<'list' | 'add' | 'remove'>('list');
     mode$ = this.modeSubject.asObservable();
     setMode(mode: 'list' | 'add' | 'remove') {
         this.modeSubject.next(mode);
@@ -14,6 +14,6 @@ export class ModeService {
         return this.modeSubject.getValue();
     }
 
-    private eel_on: boolean = true;
+    private eel_on: boolean = false;
     eel_on$ = new BehaviorSubject<boolean>(this.eel_on).asObservable();
 }

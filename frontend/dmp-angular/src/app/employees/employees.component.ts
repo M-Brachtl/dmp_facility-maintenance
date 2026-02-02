@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 
 import { filterInterface } from '../filterInterface';
+import { getTLogs } from '../trainings/trainings.component';
+import { getRevTypes } from '../rev-types/rev-types.component';
 
 declare const eel: any;
 
@@ -23,9 +25,12 @@ export class EmployeesComponent {
   eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   showDialog: boolean = false;
   dialogContent: string = '';
+  TLogs: any[] = [];
+  revTypes: any[] = [];
+  employeeTrainings: [string, string[]] = ["", []];
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
-  ngOnInit() {
+  async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
     });
@@ -35,6 +40,8 @@ export class EmployeesComponent {
     this.modeService.eel_on$.subscribe(eel_on => {
       this.eel_on = eel_on;
     });
+    this.TLogs = await getTLogs(this.eel_on);
+    this.revTypes = await getRevTypes(this.eel_on);
     this.getEmployees();
     this.filterI.hiddenStyleUpdate();
     this.filterI.filterValues['nameFilter'] = '';
@@ -137,6 +144,26 @@ export class EmployeesComponent {
   get activeEmployees() {
     return this.employeesList.filter(emp => emp[2] === 1);
   }
+
+  listValidTrainings(employeeID: number): string[] {
+    if (!this.TLogs || this.TLogs.length === 0) {
+      return [];
+    }
+    const emplLogs = this.TLogs.filter(log => log[2] === employeeID);
+    let validTrainings: Set<string> = new Set();
+    emplLogs.forEach(log => {
+      if (log[4] >= new Date()){
+        validTrainings.add(this.revTypes.find(rt => rt[0] === log[1])[1]);
+      }
+    })
+    return Array.from(validTrainings);
+  }
+
+  openEmployeeTrainings(employeeID: number) {
+    this.employeeTrainings = [this.employeesList.find(emp => emp[0] === employeeID)[1], this.listValidTrainings(employeeID)];
+    this.dialogContent = 'employeeTrainings';
+    this.showDialog = true;
+  }
 }
 
 export async function getEmployees(eel_on: boolean = true, include_inactive: boolean = true): Promise<any[]> {
@@ -149,9 +176,9 @@ export async function getEmployees(eel_on: boolean = true, include_inactive: boo
     // });
     return new Promise<any[]>((resolve) => {
       eel.list_people(include_inactive)().then((result: any) => {
-      employeesList = result;
-      console.log("Výsledek empl2:", employeesList);
-      resolve(employeesList);
+        employeesList = result;
+        console.log("Výsledek empl2:", employeesList);
+        resolve(employeesList);
       });
     });
   } else {

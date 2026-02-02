@@ -4,6 +4,9 @@ import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
+import { getEmployees } from '../employees/employees.component';
+import { getTLogs } from '../trainings/trainings.component';
+import { getMachines } from '../machines/machines.component';
 
 import { filterInterface } from '../filterInterface';
 
@@ -27,11 +30,16 @@ export class RevTypesComponent {
   showDialog: boolean = false;
   dialogContent: string = '';
   form_training_length: number = 0;
+  trainedEmployees: [string, string[]] = ["" , []];
+  TLogs: any[] = [];
+  employeesList: any[] = [];
+  dependentMachines: [string, string[][]] = ["", []];
+  machineList: any[][] = [];
 
   detailedBtnsShow: number = 1;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
-  ngOnInit() {
+  async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
     });
@@ -46,6 +54,9 @@ export class RevTypesComponent {
     this.filterI.hiddenStyleUpdate();
     this.filterI.filterValues['typeFilter'] = 'all';
     this.filterI.filterValues['nameFilter'] = '';
+    this.employeesList = await getEmployees(this.eel_on);
+    this.TLogs = await getTLogs(this.eel_on);
+    this.machineList = await getMachines(this.eel_on);
   }
   getRevTypes() {
     if (this.eel_on) {
@@ -120,7 +131,7 @@ export class RevTypesComponent {
     // alert('Stroj úspěšně přidán.');
     this.showDialog = true;
     this.dialogContent = "addSuccess";
-    
+    this.getRevTypes();
     // promažeme formulář
     console.log(target.children);
     Array.from(target.children).forEach(element => {
@@ -163,6 +174,37 @@ export class RevTypesComponent {
     } else {
       this.revTypesList = this.revTypesList.filter(revType => revType[0] != revTypeId);
     }
+  }
+  listValidTrainings(employeeID: number): string[] {
+    if (!this.TLogs || this.TLogs.length === 0) {
+      return [];
+    }
+    const emplLogs = this.TLogs.filter(log => log[2] === employeeID);
+    let validTrainings: Set<string> = new Set();
+    emplLogs.forEach(log => {
+      if (log[4] >= new Date()){
+        validTrainings.add(this.employeesList.find(emp => emp[0] === log[2])[1]);
+      }
+    })
+    return Array.from(validTrainings);
+  }
+  openTrainedEmployees(revTypeID: number) {
+    this.trainedEmployees = [this.revTypesList.find(rt => rt[0] === revTypeID)[1], this.listValidTrainings(revTypeID)];
+    this.dialogContent = 'trainedEmployees';
+    this.showDialog = true;
+  }
+  listDependentMachines(revTypeID: number): string[][] {
+    if (!this.machineList || this.machineList.length === 0) {
+      return [];
+    }
+    console.log("Stroje:", this.machineList);
+    const dependentMachines = this.machineList[0].filter(machine => machine[5].includes(revTypeID)).map(machine => [machine[2], this.machineList[1][machine[0]]]);
+    return dependentMachines;
+  }
+  openDependentMachines(revTypeID: number) {
+    this.dependentMachines = [this.revTypesList.find(rt => rt[0] === revTypeID)[1], this.listDependentMachines(revTypeID)];
+    this.dialogContent = 'dependentMachines';
+    this.showDialog = true;
   }
 }
 

@@ -77,8 +77,9 @@
                                     <td [attr.aria-disabled]="isFacility(revType) != ''" class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                         hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
                                         aria-disabled:hover:bg-indigo-500 aria-disabled:active:bg-indigo-500 aria-disabled:cursor-not-allowed
-                                        "><button class="cursor-pointer
-                                            disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="isFacility(revType) != ''">
+                                        "(click)="openDependentMachines(revType[0])">
+                                            <button class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            [disabled]="isFacility(revType) != ''">
                                             @if (!detailedBtnsShow) {
                                                 <img src="assets/machine.svg" alt="Závislé stroje" class="w-5 inline mx-auto" />
                                             } @else {
@@ -88,8 +89,7 @@
                                 <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                     hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
                                     aria-disabled:hover:bg-indigo-500 aria-disabled:active:bg-indigo-500 aria-disabled:cursor-not-allowed
-                                    "><button class="cursor-pointer
-                                        disabled:opacity-50 disabled:cursor-not-allowed">
+                                    " (click)="openTrainedEmployees(revType[0])"><button class="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                                         @if (!detailedBtnsShow) {
                                             <img src="assets/trainee.svg" alt="Vyškolení zaměstnanci" class="w-5 inline mx-auto" />
                                         } @else {
@@ -134,6 +134,20 @@
         @case ('errorNoSelection') {
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
             <p>Prosím vyberte typ revize k odebrání.</p>
+        }
+        @case ('trainedEmployees') {
+            <h2 class="text-xl font-bold mb-4">Vyškolení zaměstnanci</h2>
+            <h3 class="text-lg font-semibold mb-2">{{ trainedEmployees[0] }}</h3>
+            @for (employee of trainedEmployees[1]; track $index) {
+                <p>{{ employee }}</p>
+            }
+        }
+        @case ('dependentMachines') {
+            <h2 class="text-xl font-bold mb-4">Závislé stroje</h2>
+            <h3 class="text-lg font-semibold mb-2">{{ dependentMachines[0] }}</h3>
+            @for (machine of dependentMachines[1]; track $index) {
+                <p>{{ machine[0] }} &ndash; {{ machine[1] }}</p>
+            }
         }
     }
 </app-dialog-container>
