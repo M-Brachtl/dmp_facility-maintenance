@@ -1,5 +1,6 @@
 import sqlite3 as sql
 import os
+import sys
 import datetime as dt
 from calendar import monthrange
 try:
@@ -40,7 +41,16 @@ class dateDTB(dt.date):
     def convert_to_date(self):
         return dt.date(self.year, self.month, self.day)
 
-connection = sql.connect(os.path.dirname(os.path.abspath(__file__)) + "\\database.db")
+# PyInstaller-compatible path handling
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    base_path = sys._MEIPASS
+else:
+    # Running as script
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+db_path = os.path.join(base_path, "backend", "database", "database.db")
+connection = sql.connect(db_path)
 cursor = connection.cursor()
 
 # region functions

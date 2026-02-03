@@ -29,6 +29,7 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
     #         file_name = generate_plan_name()
     #     else:
     #         raise ValueError("Neplatný název souboru pro plán.")
+    file_name = "" # disable saving for now
     file_name += ".json" if file_name else ""
     if (title == "" or title is None or title.strip() == "") and file_name:
         title = file_name.replace(".json","")

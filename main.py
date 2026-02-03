@@ -1,3 +1,4 @@
+import sys
 import backend.database.database as dtb
 from backend.database.database import dateDTB
 import backend.database.planning as planning
@@ -15,7 +16,7 @@ def get_test():
 
 @eel.expose
 def close_window(*args, **kwargs):
-    exit(0)
+    sys.exit(0)
 
 @eel.expose
 def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše nebo defaultuje nula, nezapíše se nic do argumentů funkce -> použije se výchozích 10 let

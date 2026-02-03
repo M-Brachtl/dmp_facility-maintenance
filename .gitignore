@@ -10,3 +10,5 @@ test/
 backend/database/plans/*.json
 node_modules/
 dmp-angular-legacy/
+dist/
+build/
