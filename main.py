@@ -3,7 +3,7 @@ from backend.database.database import dateDTB
 import backend.database.planning as planning
 import eel
 
-testing_no_angular = True
+testing_no_angular = False
 if testing_no_angular:
     eel.init('frontend/test', js_result_timeout=5000)
 else:
@@ -126,4 +126,4 @@ def list_training_log(_id: int = None, person: int = None, min_date: str = None,
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")
 
-eel.start('index.html', mode='edge', close_callback=close_window, cmdline_args=['http://localhost:4200/'], size=(1024, 768))
+eel.start('index.html', mode='edge', close_callback=close_window, size=(1540, 864))
