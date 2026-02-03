@@ -5,6 +5,8 @@ import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 import { SafeHtml } from '@angular/platform-browser';
+import { getRevTypes } from '../rev-types/rev-types.component';
+import { nextMonthCalendarMachines } from '../plans/plans.component';
 
 import { filterInterface } from '../filterInterface';
 
@@ -27,7 +29,10 @@ export class MachinesComponent {
   inNumList: string[] = [];
   showDialog: boolean = false;
   dialogContent: SafeHtml = '';
-
+  nextMonthCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
+  revTypesList: any[] = [];
+  machineDetails: [string, string, string, string, boolean, [string, string][], string[]] = ["", "", "", "", false, [], []];
+  // machineDetails: [title, inNum, type, location, disposed, nextMonthRevs, allRevisions]
   // debug: nahrazení původních metod a proměnných pro filtraci
   filterI = new filterInterface();
 
@@ -51,7 +56,7 @@ export class MachinesComponent {
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   
-  ngOnInit() {
+  async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
     });
@@ -75,6 +80,9 @@ export class MachinesComponent {
       locationFilter: '',
       statusFilter: ''
     };
+    this.nextMonthCalendar = await nextMonthCalendarMachines(this.eel_on);
+    console.log("Next Month Calendar Machines:", this.nextMonthCalendar);
+    this.revTypesList = await getRevTypes(this.eel_on);
   }
   
   getMachines() {
@@ -156,13 +164,6 @@ export class MachinesComponent {
       return true;
     }
   }
-
-  // deleteFilters() {////
-  //   this.nameFilter = '';
-  //   this.inNumFilter = '';
-  //   this.typeFilter = '';
-  //   this.locationFilter = '';
-  // }
 
   isDisposed(machine: any[]): string {
     return machine[6] ? 'line-through text-gray-500' : '';
@@ -274,6 +275,51 @@ export class MachinesComponent {
   get notDisposedMachines(): any[] {
     return this.machinesList.filter(machine => !machine[6]).slice(1);
   }
+  openMachineDetails(machineId: number) {
+    const machine = this.machinesList.find(machine => machine[0] === machineId);
+    if (machine) {
+      const title = machine[2];
+      const inNum = machine[1];
+      const type = machine[3];
+      const location = machine[4];
+      const disposed = machine[6] ? true : false;
+      const allRevisions = machine[5].map((revId: number) => {
+        const revType = this.revTypesList.find(rt => rt[0] === revId);
+        return revType ? revType[1] : 'Unknown Revision Type';
+      });
+      console.log("Next Month Calendar:", this.nextMonthCalendar);
+      // Get next month revisions for this machine
+      let nextMonthRevs: [string, string][] = [];
+      Object.values(this.nextMonthCalendar).forEach(entry => {
+        entry.machines.forEach(rev => {
+          if (rev[2] === inNum) {
+            // const revTypeName = 
+            nextMonthRevs.push([rev[1] as string, rev[0] as string]);
+          }
+        });
+      });
+      this.machineDetails = [title, inNum, type, location, disposed, nextMonthRevs, allRevisions];
+      this.dialogContent = 'machineDetails';
+      this.showDialog = true;
+    }
+  }
+  strDate(dateObj: Date | string): string {
+    if (typeof dateObj === 'string') {
+      dateObj = new Date(dateObj);
+    }
+    return new Intl.DateTimeFormat('cs-CZ', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(dateObj);
+  }
+  beforeToday(dateObj: Date | string): string {
+    let date: Date;
+    if (typeof dateObj === 'string') {
+      date = new Date(dateObj);
+    } else {
+      date = dateObj;
+    }
+    const today = new Date();
+    return date < today ? 'text-red-600 font-bold' : '';
+  }
+
 }
 
 export async function getMachines(eel_on: boolean): Promise<[any[], string[]]> {

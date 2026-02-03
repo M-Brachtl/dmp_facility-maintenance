@@ -233,3 +233,16 @@ export class PeriodicitiesComponent {
     }
   }
 }
+
+// export async function getPeriodicities(eel_on: boolean): any[] {
+//   if (!eel_on) {
+//     return [
+//       [1, 1, 1, 12],
+//       [2, 2, 1, 24],
+//       [3, 5, 2, 6],
+//       [4, 3, 2, 60],
+//       [5, 4, 0, 18],];
+//   } else {
+//     const result = await eel.list_periodicity()();
+//     return result;
+//   }

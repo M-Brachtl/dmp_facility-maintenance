@@ -19,3 +19,7 @@
     -webkit-appearance: none;
     margin: 0;
 }
+
+.late {
+    @apply text-red-600 font-semibold;
+}

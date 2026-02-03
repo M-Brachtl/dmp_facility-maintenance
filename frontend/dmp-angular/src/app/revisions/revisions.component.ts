@@ -18,7 +18,7 @@ declare const eel: any;
 })
 export class RevisionsComponent {
   @ViewChild('revTypeAdd') revTypeAddRef!: ElementRef;
-  @ViewChild('machineAdd') machineAddRef!: ElementRef;
+  @ViewChild('machineAddE') machineAddRef!: ElementRef;
   @ViewChild('employeeAdd') employeeAddRef!: ElementRef;
   // @ViewChild('employeeRem') employeeRemRef!: ElementRef;
   @ViewChild('dateAdd') dateAddRef!: ElementRef;
@@ -30,6 +30,7 @@ export class RevisionsComponent {
   // @ViewChild('machineRem') machineRemRef!: ElementRef;
   revTypeRem = '';
   machineRem = '';
+  machineAdd = '';
 
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
@@ -321,6 +322,13 @@ export class RevisionsComponent {
     } else {
       return true;
     }
+  }
+
+  get revTypesListNoFac() {
+    return this.revTypesList.filter(rt => rt[3] == 0);
+  }
+  get revTypesListFac() {
+    return this.revTypesList.filter(rt => rt[3] == 1);
   }
 }
 

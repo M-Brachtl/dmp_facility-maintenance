@@ -4,7 +4,7 @@
         <form (ngSubmit)="onSubmit($event)" class="max-w-md mx-auto">
             <div class="flex gap-2 mb-4">
                 <label for="machine" class="block mb-2 font-semibold w-2/5">Stroj:</label>
-                <select #machineAdd id="machine_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <select [(ngModel)]="machineAdd" #machineAddE name="machineAdd" id="machine_add" class="border border-gray-300 rounded px-2 py-1 w-full">
                     <option value="" selected disabled></option>
                     @for (machine of machinesList; track $index) {
                         <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
@@ -14,9 +14,16 @@
             <div class="flex gap-2 mb-4">
                 <label for="name" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
                 <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
-                    <option value="" selected disabled></option>
-                    @for (revType of revTypesList; track $index) {
-                        <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                    <option value="" selected disabled>{{ machineAdd === "" ? "Vyberte stroj" : "" }}</option>
+                    @if (machineAdd === "0") {
+                        @for (revType of revTypesListFac; track $index) {
+                            <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                        }
+                    }
+                    @else if (machineAdd !== "") {
+                        @for (revType of revTypesListNoFac; track $index) {
+                            <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                        }
                     }
                 </select>
             </div>

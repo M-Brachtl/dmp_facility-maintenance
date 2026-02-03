@@ -112,7 +112,7 @@
                                 <td class="w-2/10">{{ machine[3] }}</td> <!-- Typ -->
                                 <td class="w-2/10">{{ machine[4] }}</td> <!-- Lokace -->
                                 <!-- <td>{{ machine[6] }}</td> Stav - disposed? -->
-                                <td class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 cursor-pointer active:bg-indigo-800 transition-colors duration-200"><button class="cursor-pointer">Detaily</button></td>
+                                <td (click)="openMachineDetails(machine[0])" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 cursor-pointer active:bg-indigo-800 transition-colors duration-200"><button class="cursor-pointer">Detaily</button></td>
                             </tr>
                             }
                         }
@@ -151,6 +151,38 @@
             @case ('DependentRevisions') {
                 <h2 class="text-xl font-bold mb-4">Chyba</h2>
                 <p>Stroj nelze odebrat, protože má závislé revize.</p>
+            }
+            @case ('machineDetails') {
+                <h2 class="text-xl font-bold mb-4">Detaily stroje</h2>
+                <p><span class="font-semibold">Název: </span>{{ machineDetails[0] }}</p>
+                <p><span class="font-semibold">Inventární číslo: </span>{{ machineDetails[1] }}</p>
+                <p><span class="font-semibold">Typ: </span>{{ machineDetails[2] }}</p>
+                <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p>
+                <p><span class="font-semibold">Likvidován: </span>{{ machineDetails[4] ? 'Ano' : 'Ne' }}</p>
+                <p><span class="font-semibold">Nadcházející revize: </span>
+                    @if (machineDetails[5].length == 0) {
+                        Žádné nadcházející revize
+                    }
+                    @else {
+                        <ul class="list-disc list-inside">
+                            @for (rev of machineDetails[5]; track $index) {
+                                <li [class]="beforeToday(rev[1])">{{ (rev[0]) }} - {{ strDate(rev[1]) }}</li>
+                            }
+                        </ul>
+                    }
+                </p>
+                <p><span class="font-semibold">Všechny revize: </span>
+                    @if (machineDetails[6].length == 0) {
+                        Žádné revize
+                    }
+                    @else {
+                        <ul class="list-disc list-inside">
+                            @for (rev of machineDetails[6]; track $index) {
+                                <li>{{ rev }}</li>
+                            }
+                        </ul>
+                    }
+                </p>
             }
         }
     </app-dialog-container>

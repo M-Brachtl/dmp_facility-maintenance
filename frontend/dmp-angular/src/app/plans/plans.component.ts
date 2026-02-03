@@ -2,13 +2,15 @@ import { Component } from '@angular/core';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
-// import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
+import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
+import { getTLogs } from '../trainings/trainings.component';
+import { getEmployees } from '../employees/employees.component';
 
 declare const eel: any;
 
 @Component({
   selector: 'app-plans',
-  imports: [HeaderBtnsComponent, FormsModule],
+  imports: [HeaderBtnsComponent, FormsModule, DialogContainerComponent],
   templateUrl: './plans.component.html',
   styleUrl: './plans.component.scss',
 })
@@ -16,13 +18,17 @@ export class PlansComponent {
   mode!: 'list' | 'add' | 'remove';
   eel_on!: boolean;
   current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
-  calendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
-  next_month_cal: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
+  calendar: { [key: string]: { machines: (Date | string | boolean | number)[][]; people: (Date | string)[][] } } = {};
+  next_month_cal: { [key: string]: { machines: (Date | string | boolean | number)[][]; people: (Date | string)[][] } } = {};
   fill_used = false;
   filter_showing = false;
   min_date?: string;
   max_date?: string;
-  
+  dialogShow = false;
+  dialogContent = '';
+  dialogEmployeeList: [[string, Date][], Date] = [[], new Date()];
+  TLogs: any[] = [];
+  Employees: any[] = [];
   keyIsToday(key: string){
     const [year, month] = key.split('-').map(Number);
     const today = new Date();
@@ -55,6 +61,8 @@ export class PlansComponent {
     await this.loadPlan('test_plan.json');
     this.parsePlan(false);
     this.parsePlan(true);
+    this.TLogs = await getTLogs(this.eel_on);
+    this.Employees = await getEmployees(this.eel_on);
     console.log('Calendar:', this.calendar);
   }
 
@@ -105,7 +113,7 @@ export class PlansComponent {
   }
 
   isBeforeToday(date: any){
-    console.log(date, date < new Date())
+    // console.log(date, date < new Date())
     return date <new  Date() ? 'bg-red-500' : '';
   }
 
@@ -134,7 +142,7 @@ export class PlansComponent {
         if (!calendar[month_key]) {
           calendar[month_key] = { machines: [], people: [] };
         }
-        calendar[month_key].machines.push([rev_date, rev[1],...machine_info]); // rev type, in_num, name
+        calendar[month_key].machines.push([rev_date, rev[1],...machine_info, rev[0]]); // rev_name, in_num, name, rev_id
         if (rev_date < min_date) min_date = rev_date; // update min_date
         if (rev_date > max_date) max_date = rev_date; // update max_date
       });
@@ -165,7 +173,7 @@ export class PlansComponent {
     }
     if (nextMonth){
       max_date = new Date()
-      max_date.setMonth(max_date.getMonth() + 2);
+      max_date.setMonth(max_date.getMonth() + 1);
       console.log("Next month cal:", max_date)
       // delete all months after custom_max_date
       for (const key in calendar) {
@@ -301,4 +309,96 @@ export class PlansComponent {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
+
+  openAvailableEmployees(plannedRevID: any, planned_date: any /* Date */): void {
+    if (typeof plannedRevID !== 'number') {
+      console.error('Planned Revision ID is not a number.');
+      return;
+    }
+    if (!(planned_date instanceof Date)) {
+      console.error('Planned date is not a Date object.');
+      return;
+    }
+    // gather unique employee names from current_plan.people
+    const employeeSet: Set<[string, Date]> = new Set();
+    this.TLogs.forEach(log => {
+      if (log[4] > new Date() && log[1] === plannedRevID && this.Employees.find(emp => emp[0] === log[2])[2] === 1) { // only include non-expired trainings
+        employeeSet.add([log[2], log[4]]);
+      }
+    });
+    console.log('Available Employees for Rev ID', plannedRevID, ':', employeeSet);
+    this.dialogEmployeeList = [Array.from(employeeSet).sort().map(id => {
+      const employee = this.Employees.find(emp => emp[0] === id[0]);
+      return employee ? [employee[1], id[1]] : [`ID ${id}`, id[1]];
+    }), planned_date];
+    this.dialogContent = 'availableEmployees';
+    this.dialogShow = true;
+  }
+
+  tooLateTrainingStyle(trainingDate: Date, planned_date: Date): string {
+    return trainingDate < planned_date ? 'late' : '';
+  }
+}
+
+export async function nextMonthCalendarMachines(eel_on: boolean): Promise<{ [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } }> {
+  let current_plan: { title: string; active: boolean; machines: any[]; people: any[] } = { title: '', active: false, machines: [], people: [] };
+  if (eel_on) {
+    await new Promise<void>(resolve => {
+      eel.generate_plan_api()((response: { "status": string, "plan": any }) => {
+        current_plan = response.plan;
+        resolve();
+      });
+    });
+  } else {
+    fetch(`http://localhost:4200/test_plan.json`)
+      .then(response => response.json())
+      .then(plan => {
+        current_plan = plan;
+        console.log('Received plan:', plan);
+      })
+      .catch(error => {
+        console.error('Error fetching plan:', error);
+      });
+  }
+  // parsing logic similar to parsePlan method, but only for next month
+  // dates are updated so unused months are filled after parsing
+  let min_date = new Date(); // set to current date initially
+  let max_date = min_date; // set to current date initially
+  // key example: "2025-11" means: November 2025
+  let calendar: { [key: string]: { machines: string[][]; people: string[][] } } = {};
+  current_plan.machines.forEach(machine => {
+    const machine_info = [machine[1], machine[2]]; // in_num, name
+    machine[3].forEach((rev: any) => {
+      const rev_date = new Date(rev[2]);
+      const month_key = `${rev_date.getFullYear()}-${rev_date.getMonth() + 1}`;
+      if (!calendar[month_key]) {
+        calendar[month_key] = { machines: [], people: [] };
+      }
+      calendar[month_key].machines.push([rev_date, rev[1],...machine_info]); // rev type, in_num, name
+      if (rev_date < min_date) min_date = rev_date; // update min_date
+      if (rev_date > max_date) max_date = rev_date; // update max_date
+    });
+  });
+
+  // ingoring people for next month calendar
+
+  max_date = new Date()
+  max_date.setMonth(max_date.getMonth() + 1);
+  console.log("Next month cal:", max_date)
+  // delete all months after custom_max_date
+  for (const key in calendar) {
+    const [year, month] = key.split('-').map(Number);
+    const key_date = new Date(year, month - 1, 1);
+    if (key_date > max_date) {
+      delete calendar[key];
+    }
+  }
+  // sort revs in each month
+  for (const key in calendar) {
+    calendar[key].machines.sort((a, b) => {
+      return new Date(a[0]).getTime() - new Date(b[0]).getTime();
+    });
+  }
+
+  return calendar;
 }
