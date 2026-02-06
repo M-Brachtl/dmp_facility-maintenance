@@ -33,6 +33,9 @@ class dateDTB(dt.date):
         year = self.year + months_since_og_year // 12
         month = months_since_og_year % 12
 
+        while month <= 0:
+            month += 12
+            year -= 1
         # Upravit na poslední den nového měsíce
         day = min(self.day, monthrange(year, month)[1])
 
@@ -45,11 +48,12 @@ class dateDTB(dt.date):
 if getattr(sys, 'frozen', False):
     # Running as compiled executable
     base_path = sys._MEIPASS
+    db_path = os.path.join(base_path, "backend", "database", "database.db")
 else:
     # Running as script
     base_path = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_path, "database.db")
 
-db_path = os.path.join(base_path, "backend", "database", "database.db")
 connection = sql.connect(db_path)
 cursor = connection.cursor()
 
@@ -76,7 +80,8 @@ def list_machines(list_last_revisions=False, **params):
     cursor.execute(query + ";")
     output_raw = cursor.fetchall()
     # if ("_id", 0) in params.items():
-    output_raw = [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", str(list_facility_activities()), 0)] + output_raw
+    if params.get("_id", None) == None or params.get("_id", None) == 0:
+        output_raw = [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", str(list_facility_activities()), 0)] + output_raw
     output = []
     for machine in output_raw:
         # revisions = machine[5]
@@ -141,6 +146,11 @@ def remove_machine(machine_id: int):
 
     # cursor.execute("DELETE FROM machines WHERE id = ?;", (machine_id,))
     cursor.execute("UPDATE machines SET disposed = 1 WHERE id = ?;", (machine_id,))
+    connection.commit()
+    return "success"
+
+def edit_machine_name(machine_id: int, new_name: str):
+    cursor.execute("UPDATE machines SET name = ? WHERE id = ?;", (new_name, machine_id))
     connection.commit()
     return "success"
 
@@ -259,6 +269,11 @@ def remove_people(id: int):
     connection.commit()
     return "success"
 
+def edit_people_name(id: int, new_name: str):
+    cursor.execute("UPDATE people SET name = ? WHERE id = ?;", (new_name, id))
+    connection.commit()
+    return "success"
+
 def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", min_date: dateDTB = None, max_date: dateDTB = None): # validní result: bez závady/malá závada/velká závada
     if isinstance(min_date, str) or isinstance(max_date, str):
         raise TypeError("min_date a max_date musí být typu dateDTB nebo None.")
@@ -373,7 +388,7 @@ def list_periodicity(machine_id: int = None, revision_type_id: int = None):
 
 def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
     cursor.execute("SELECT validity_period FROM revision_types WHERE id = ?", (rev_type,))
-    rule = cursor.fetchone()[0]
+    rule = cursor.fetchone()[0] # [0] -- fetchone vrací jednu položku, která je tuple o jedné hodnotě - validity_period
     expiration_date = date.add_months(rule)
     cursor.execute(
         "INSERT INTO training_log (revision_type, person, date, expiration_date) VALUES (?,?,?,?)",
@@ -445,7 +460,14 @@ def remove_training_log(_id: int):
 
 def get_periodicity(machine_id: int, rev_id: int) -> int:
     cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine=?;",(rev_id,machine_id))
-    return cursor.fetchone()[0]
+    output = cursor.fetchone()
+    try:
+        output = output[0]
+    except Exception:
+        print("Exception occurred while fetching periodicity")
+        print(f"machine_id: {machine_id}, rev_id: {rev_id}, output: {output}")
+        return None
+    return output
 
 def list_facility_activities() -> list[int]:
     cursor.execute("SELECT revision_type FROM periodicity WHERE machine=0;")
@@ -503,8 +525,8 @@ if __name__ == "__main__":
     # print("Databáze:", list_machines(list_last_revisions=True),sep="\n")
     # print("Databáze:", get_periodicity(1,2),sep="\n")
     # print("Test porovnání dat:", dateDTB('03/06/2025') < dateDTB('02/05/2025'),sep="\n")
-    print("Databáze - machines:", list_machines(list_last_revisions=True),sep="\n")
-    # print("Databáze - machines:", list_training_log(),sep="\n")
+    # print("Databáze - machines:", list_machines(list_last_revisions=True),sep="\n")
+    print("Databáze - machines:", list_training_log(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

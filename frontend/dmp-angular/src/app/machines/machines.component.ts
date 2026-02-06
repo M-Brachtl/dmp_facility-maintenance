@@ -21,6 +21,7 @@ declare const eel: any;
 export class MachinesComponent {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
   @ViewChild('machineRem') machineRem!: ElementRef;
+  @ViewChild('nameChanger') nameChanger!: ElementRef;
   eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   mode!: 'list' | 'add' | 'remove';
   machinesList: any[] = [];
@@ -31,7 +32,7 @@ export class MachinesComponent {
   dialogContent: SafeHtml = '';
   nextMonthCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
   revTypesList: any[] = [];
-  machineDetails: [string, string, string, string, boolean, [string, string][], string[]] = ["", "", "", "", false, [], []];
+  machineDetails: [string, string, string, string, boolean, [string, string][], string[], number] = ["", "", "", "", false, [], [], 0];
   // machineDetails: [title, inNum, type, location, disposed, nextMonthRevs, allRevisions]
   // debug: nahrazení původních metod a proměnných pro filtraci
   filterI = new filterInterface();
@@ -298,7 +299,7 @@ export class MachinesComponent {
           }
         });
       });
-      this.machineDetails = [title, inNum, type, location, disposed, nextMonthRevs, allRevisions];
+      this.machineDetails = [title, inNum, type, location, disposed, nextMonthRevs, allRevisions, machineId];
       this.dialogContent = 'machineDetails';
       this.showDialog = true;
     }
@@ -319,7 +320,33 @@ export class MachinesComponent {
     const today = new Date();
     return date < today ? 'text-red-600 font-bold' : '';
   }
-
+  saveNameChange() {
+    const newName = this.nameChanger.nativeElement.value;
+    const machineId = this.machineDetails[7];
+    if (newName.trim() === '') {
+      this.showDialog = true;
+      this.dialogContent = "errorMissingFields";
+      return;
+    }
+    if (this.eel_on) {
+      eel.edit_machine_name(machineId, newName)().then((result: any) => {
+        if (result.status === "error") {
+          this.showDialog = true;
+          this.dialogContent = "unknownError";
+          return;
+        }
+        console.log("Název stroje aktualizován:", result);
+        this.getMachines();
+        this.machineDetails[0] = newName; // aktualizujeme název v detailech
+      });
+    } else {
+      const machine = this.machinesList.find(machine => machine[0] === machineId);
+      if (machine) {
+        machine[2] = newName; // aktualizujeme název v seznamu
+        this.machineDetails[0] = newName; // aktualizujeme název v detailech
+      }
+    }
+  }
 }
 
 export async function getMachines(eel_on: boolean): Promise<[any[], string[]]> {

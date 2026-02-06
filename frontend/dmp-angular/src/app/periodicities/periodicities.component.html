@@ -117,8 +117,9 @@
     @switch (dialogContent) {
         @default {
             <p>Tohle by se zobrazit nemělo.</p>
+            <p>Error: {{ dialogContent }}</p>
         }
-        @case ('addSuccess') {
+        @case ('successAddPeriodicity') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
             <p>Revize úspěšně přidána.</p>
         }
@@ -137,6 +138,10 @@
         @case ('removeSuccess') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
             <p>Revize úspěšně odebrána.</p>
+        }
+        @case ('errorPeriodicityExists') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Pro tento stroj a typ revize již existuje nastavená periodicita.</p>
         }
     }
 </app-dialog-container>

@@ -127,6 +127,7 @@
         @switch (dialogContent) {
             @default {
                 <p>Tohle by se zobrazit nemělo.</p>
+                <p>Error: {{ dialogContent }}</p>
             }
             @case ('addSuccess'){
                 <h2 class="text-xl font-bold mb-4">Stroj úspěšně přidán.</h2>
@@ -154,7 +155,11 @@
             }
             @case ('machineDetails') {
                 <h2 class="text-xl font-bold mb-4">Detaily stroje</h2>
-                <p><span class="font-semibold">Název: </span>{{ machineDetails[0] }}</p>
+                <p>
+                    <span class="font-semibold">Název: </span>
+                    <input class="border border-gray-300 rounded" #nameChanger type="text" [value]="machineDetails[0]">
+                    <button (click)="saveNameChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
+                </p>
                 <p><span class="font-semibold">Inventární číslo: </span>{{ machineDetails[1] }}</p>
                 <p><span class="font-semibold">Typ: </span>{{ machineDetails[2] }}</p>
                 <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p>

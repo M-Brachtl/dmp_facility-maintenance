@@ -45,6 +45,9 @@ def remove_machine(machine_id: int):
         else:
             raise e
 @eel.expose
+def edit_machine_name(machine_id: int, new_name: str):
+    return dtb.edit_machine_name(machine_id, new_name)
+@eel.expose
 def add_people(name: str):
     return dtb.add_people(name)
 @eel.expose
@@ -57,16 +60,19 @@ def list_people(include_inactive: bool = False, params: dict = {}):
 def remove_people(people_id: int):
     return dtb.remove_people(id=people_id)
 @eel.expose
+def edit_people_name(people_id: int, new_name: str):
+    return dtb.edit_people_name(people_id, new_name)
+@eel.expose
 def get_periodicity(machine_id: int, revision_type_id: int):
     return dtb.get_periodicity(machine_id, revision_type_id)
 @eel.expose
 def list_periodicity(machine_id: int = None, revision_type_id: int = None):
     return dtb.list_periodicity(machine_id, revision_type_id)
 @eel.expose
-def add_rev_to_machine(machine_id: int, revision_type_id: int, periodicity_months: int):
+def add_periodicity(machine_id: int, revision_type_id: int, periodicity_months: int):
     return dtb.add_rev_to_machine(machine_id, revision_type_id, periodicity_months)
 @eel.expose
-def remove_rev_from_machine(machine_id: int, revision_type_id: int):
+def remove_periodicity(machine_id: int, revision_type_id: int):
     return dtb.remove_rev_from_machine(machine_id, revision_type_id)
 @eel.expose
 def add_revision_log(machine_id: int, revision_type_id: int, result: str, person_id: int, notes: str = "", date: str = None):
@@ -127,4 +133,4 @@ def list_training_log(_id: int = None, person: int = None, min_date: str = None,
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")
 
-eel.start('index.html', mode='edge', close_callback=close_window, size=(1540, 864))
+eel.start('index.html', mode='edge', close_callback=close_window, size=(1540, 864), cmdline_args=["--disable-http-cache", "--profile-directory='Default'"])

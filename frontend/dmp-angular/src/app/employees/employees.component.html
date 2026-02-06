@@ -62,18 +62,28 @@
                                     (click)="toggleDetailedButtons()"
                                 />
                             </th> -->
-                            <th></th>
+                            <th colspan="2"></th>
                         </tr>
                     </thead>
                     <tbody #tbody class="order-separate border-spacing-0 w-full">
                         @for (employee of employeesList; track $index) {
                             @if (rowFiltered(employee)) {
                                 <tr class="even:bg-indigo-200 h-7" [class]="isActive(employee)">
-                                    <td class="w-5/6">{{ employee[1] }}</td> <!-- Název -->
+                                    <td class="w-5/6">
+                                        <span #editableSpan [contentEditable]="isBeingEdited(employee[0])" [class]="isBeingEdited(employee[0]) ? 'editable' : ''">{{ employee[1] }}</span>
+                                        @if (isBeingEdited(employee[0])) {
+                                            <button (click)="editEmployee(employee[0])" class="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-semibold px-1 mx-1 rounded active:bg-green-900 transition-colors duration-200">Potvrdit</button>
+                                        }
+                                    </td> <!-- Název -->
                                     <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                         hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
                                         aria-disabled:hover:bg-indigo-500">
                                         <button class="cursor-pointer" (click)="openEmployeeTrainings(employee[0])">Školení</button>
+                                    </td>
+                                    <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
+                                        hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
+                                        aria-disabled:hover:bg-indigo-500">
+                                        <button class="cursor-pointer" (click)="openEdits(employee[0])">Editovat</button>
                                     </td>
                                 <!-- <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
                                     hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
@@ -127,6 +137,10 @@
             @for (revType of employeeTrainings[1]; track $index) {
                 <p>{{ revType }}</p>
             }
+        }
+        @case ('editSuccess') {
+            <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+            <p>Zaměstnanec úspěšně upraven.</p>
         }
     }
 </app-dialog-container>

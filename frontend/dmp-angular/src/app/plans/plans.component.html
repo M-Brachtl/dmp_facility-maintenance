@@ -163,6 +163,7 @@
     @switch (dialogContent) {
         @default {
             <p>Tohle by se zobrazit nemělo.</p>
+            <p>Error: {{ dialogContent }}</p>
         }
         @case ('availableEmployees') {
             <h2 class="text-xl font-bold mb-4">Dostupní zaměstnanci</h2>

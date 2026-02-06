@@ -167,7 +167,7 @@ export class PeriodicitiesComponent {
     return '';
   }
 
-  onSubmit(event: any) {
+  async onSubmit(event: any) {
     event.preventDefault();
     const revTypeID = this.revTypeAddRef.nativeElement.value;
     const machineID = this.machineAddRef.nativeElement.value;
@@ -181,20 +181,30 @@ export class PeriodicitiesComponent {
       this.showDialog = true;
       return;
     }
-
+    let existingPeriodicity = null;
     if (this.eel_on) {
-      eel.add_periodicity(parseInt(revTypeID), parseInt(machineID), this.form_period_length)().then((result: any) => {
-        console.log("Výsledek přidání periodicity:", result);
-        if (result === "success") {
-          this.dialogContent = 'successAddPeriodicity';
-          this.showDialog = true;
-          this.getPeriodicities();
-        } else {
-          this.dialogContent = 'errorAddPeriodicity';
-          this.showDialog = true;
-          return;
-        }
-      });
+      const existing = await eel.get_periodicity(parseInt(machineID), parseInt(revTypeID))();
+      if (existing != null) {
+        this.dialogContent = 'errorPeriodicityExists';
+        this.showDialog = true;
+        existingPeriodicity = true;
+      }
+      if (existingPeriodicity) {
+        return;
+      } else {
+        eel.add_periodicity(parseInt(machineID), parseInt(revTypeID), this.form_period_length)().then((result: any) => {
+          console.log("Výsledek přidání periodicity:", result);
+          if (result === "success") {
+            this.dialogContent = 'successAddPeriodicity';
+            this.showDialog = true;
+            this.getPeriodicities();
+          } else {
+            this.dialogContent = 'errorAddPeriodicity';
+            this.showDialog = true;
+            return;
+          }
+        });
+      }
     } else {
       const newID = this.periodicities.length + 1;
       this.periodicities.push([newID, parseInt(revTypeID), parseInt(machineID), this.form_period_length]);
@@ -208,13 +218,15 @@ export class PeriodicitiesComponent {
   }
   removePeriodicity() {
     const periodicityID = parseInt(this.periodRemRef.nativeElement.value);
+    const machineID = this.periodicities.find(p => p[0] === periodicityID)?.[2];
+    const revTypeID = this.periodicities.find(p => p[0] === periodicityID)?.[1];
     if (!periodicityID) {
       this.dialogContent = 'errorMissingFields';
       this.showDialog = true;
       return;
     }
     if (this.eel_on) {
-      eel.remove_periodicity(periodicityID)().then((result: any) => {
+      eel.remove_periodicity(machineID, revTypeID)().then((result: any) => { // machineID, revTypeID
         console.log("Výsledek odstranění periodicity:", result);
         if (result === "success") {
           this.dialogContent = 'removeSuccess';

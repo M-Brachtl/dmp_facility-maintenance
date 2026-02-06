@@ -19,6 +19,7 @@ declare const eel: any;
 })
 export class EmployeesComponent {
   @ViewChild('employeeRem') employeeRem!: ElementRef;
+  @ViewChild('editableSpan') editableSpan!: ElementRef;
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   employeesList: any[] = [];
@@ -28,6 +29,7 @@ export class EmployeesComponent {
   TLogs: any[] = [];
   revTypes: any[] = [];
   employeeTrainings: [string, string[]] = ["", []];
+  openedEditsID: number | null = null;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   async ngOnInit() {
@@ -163,6 +165,44 @@ export class EmployeesComponent {
     this.employeeTrainings = [this.employeesList.find(emp => emp[0] === employeeID)[1], this.listValidTrainings(employeeID)];
     this.dialogContent = 'employeeTrainings';
     this.showDialog = true;
+  }
+
+  openEdits(employeeID: number) {
+    this.openedEditsID = employeeID;
+    this.editableSpan.nativeElement
+  }
+
+  isBeingEdited(employeeID: number): boolean {
+    return this.openedEditsID === employeeID;
+  }
+
+  editEmployee(employeeID: number) {
+    const employee = this.employeesList.find(emp => emp[0] === employeeID);
+    const spanElement = this.editableSpan.nativeElement as HTMLSpanElement;
+    const newName = spanElement.innerText.trim();
+    if (!newName) {
+      this.showDialog = true;
+      this.dialogContent = 'errorMissingFields';
+      return;
+    }
+    if (this.eel_on) {
+      eel.edit_people_name(employeeID, newName)().then((result: any) => {
+        if (result.error) {
+          this.showDialog = true;
+          this.dialogContent = 'serverError';
+          return;
+        }
+        this.showDialog = true;
+        this.dialogContent = 'editSuccess';
+        this.openedEditsID = null;
+        this.getEmployees();
+      });
+    } else {
+      employee[1] = newName;
+      this.showDialog = true;
+      this.dialogContent = 'editSuccess';
+      this.openedEditsID = null;
+    }
   }
 }
 
