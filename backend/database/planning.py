@@ -73,9 +73,17 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
             except UnboundLocalError:
                 work_date = today.add_months(-periodicity)
             work_date = work_date.add_months(periodicity)
+            i = 0
             while work_date <= end_date:
                 planned_trainings.append((training_type, dtb.list_revision_types(_id=training_type)[0][1], repr(work_date), False))
                 work_date = work_date.add_months(periodicity)
+                if i < 1000:
+                    # print(work_date, end_date, periodicity)
+                    pass
+                elif i == 1000:
+                    # print("...")
+                    raise RuntimeError(f"Nekonečná smyčka, periodicita = {periodicity}")
+                i += 1
             del work_date
         plan["people"].append([*person[:2], planned_trainings])
 

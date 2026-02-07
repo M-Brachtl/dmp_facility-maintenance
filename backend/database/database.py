@@ -197,10 +197,12 @@ def remove_revision_type(revision_type_id: int):
     machines_check: list[tuple] = cursor.fetchall()
     dependencies = []
     for machine in machines_check:
-        if revision_type_id in tuple(int(n) for n in machine[2].strip("[]").split(", ")):
+        if machine[2] == "[]":
+            continue
+        if int(revision_type_id) in tuple(int(n) for n in machine[2].strip("[]").split(", ")):
             dependencies.append(machine[:2])
     if dependencies != []:
-        raise RuntimeError("Tento typ revize využívají některé stroje.",dependencies)
+        raise RuntimeError("Na tomto typu revize jsou závislé některé stroje.",dependencies)
 
     cursor.execute("DELETE FROM revision_types WHERE id = ?;", (revision_type_id,))
 

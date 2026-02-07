@@ -91,7 +91,7 @@ def list_revision_log(machine_id: int = None, revision_type_id: int = None, resu
     for i, entry in enumerate(raw_output.copy()):
         entry = list(entry)
         entry[2] = entry[2].__repr__()
-        raw_output[i] = tuple(entry)        
+        raw_output[i] = tuple(entry)
     return raw_output
 @eel.expose
 def add_revision_type(name: str, validity_period: int, facility_activity: bool = False):
@@ -101,7 +101,8 @@ def remove_revision_type(revision_type_id: int):
     try:
         return dtb.remove_revision_type(revision_type_id)
     except RuntimeError as e:
-        if str(e).startswith("Tento typ revize využívají některé stroje."):
+        print("Error while removing revision type:", e)
+        if e.args[0] == "Na tomto typu revize jsou závislé některé stroje.":
             return {"status": "error", "message": "DependentMachines", "details": e.args[1]}
         else:
             raise e

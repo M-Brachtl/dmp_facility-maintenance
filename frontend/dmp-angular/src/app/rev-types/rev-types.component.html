@@ -18,7 +18,7 @@
     }
     @else if (mode == 'remove') {
         <div>
-            <h2 class="text-xl font-bold mb-4">Vyber stroj k odebrání</h2>
+            <h2 class="text-xl font-bold mb-4">Vyber typ revize k odebrání</h2>
             <select #revTypeRem id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
                 @for (revType of revTypesList; track $index) {
@@ -124,7 +124,7 @@
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
             <p>Frekvence školení musí být kladné celé číslo.</p>
         }
-        @case ('DependentMachines') {
+        @case ('errorDependentMachines') {
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
             <p>Nelze odebrat typ revize, protože jsou na něm závislé některé stroje.</p>
         }

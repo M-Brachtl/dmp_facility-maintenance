@@ -120,7 +120,7 @@ export class RevTypesComponent {
       return;
     }
     if (this.eel_on) {
-      eel.add_revision_type(name, facility, this.form_training_length)().then((result: any) => {
+      eel.add_revision_type(name, this.form_training_length, facility)().then((result: any) => {
         console.log("Revize přidána:", result);
         this.getRevTypes();
       });
@@ -166,7 +166,7 @@ export class RevTypesComponent {
       eel.remove_revision_type(revTypeId)().then((result: any) => {
         if (result.status === "error" && result.message === "DependentMachines") {
           this.showDialog = true;
-          this.dialogContent = "DependentMachines";
+          this.dialogContent = "errorDependentMachines";
           return;
         }
         this.getRevTypes();
