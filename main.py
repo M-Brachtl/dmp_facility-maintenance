@@ -16,7 +16,10 @@ def get_test():
 
 @eel.expose
 def close_window(*args, **kwargs):
-    sys.exit(0)
+    if testing_no_angular:
+        print("Closing application (testing mode)...")
+    else:
+        sys.exit(0)
 
 @eel.expose
 def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše nebo defaultuje nula, nezapíše se nic do argumentů funkce -> použije se výchozích 10 let
@@ -34,7 +37,13 @@ def list_machines(list_last_revisions = False, params: dict = {}):
     return dtb.list_machines(list_last_revisions, **params)
 @eel.expose
 def add_machine(in_num: str, name: str, type: str, location: str):
-    return dtb.add_machine(in_num, name, type, location)
+    try:
+        return dtb.add_machine(in_num, name, type, location)
+    except RuntimeError as e:
+        if str(e) == "Stroj s tímto inventárním číslem už existuje.":
+            return {"status": "error", "message": "DuplicateINNumber"}
+        else:
+            raise e
 @eel.expose
 def remove_machine(machine_id: int):
     try:

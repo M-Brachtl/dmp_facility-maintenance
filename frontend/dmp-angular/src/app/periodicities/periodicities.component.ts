@@ -244,6 +244,9 @@ export class PeriodicitiesComponent {
       this.showDialog = true;
     }
   }
+  get activeMachinesList() {
+    return this.machinesList.filter(machine => !machine[6]);
+  }
 }
 
 // export async function getPeriodicities(eel_on: boolean): any[] {

@@ -13,7 +13,7 @@
             </div>
             <div class="flex gap-2 mb-4">
                 <label for="name" class="block mb-2 font-semibold w-2/5">Typ revize:</label>
-                <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
+                <select [(ngModel)]="revTypeAdd" #revTypeAddE name="revTypeAdd" id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
                     <option value="" selected disabled>{{ machineAdd === "" ? "Vyberte stroj" : "" }}</option>
                     @if (machineAdd === "0") {
                         @for (revType of revTypesListFac; track $index) {
@@ -29,9 +29,11 @@
             </div>
             <div class="flex gap-2 mb-4">
                 <label for="name" class="block mb-2 font-semibold w-2/5">Zaměstnanec:</label>
+                <!-- <p class="bg-red-600">revTypeAdd: {{ revTypeAdd }}</p>
+                <p class="bg-red-600">machineAdd: {{ machineAdd }}</p> -->
                 <select #employeeAdd id="employee_add" class="border border-gray-300 rounded px-2 py-1 w-full">
                     <option value="" selected disabled></option>
-                    @for (employee of activeEmployees; track $index) {
+                    @for (employee of filterAvailableEmployees; track $index) {
                         <option value="{{ employee[0] }}">{{ logGet.employee(employee) }}</option>
                     }
                 </select>

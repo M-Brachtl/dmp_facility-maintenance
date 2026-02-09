@@ -12,7 +12,7 @@
             <label for="machine" class="block mb-2 font-semibold">Stroj:</label>
             <select #machineAdd id="machine_add" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
-                @for (machine of machinesList; track $index) {
+                @for (machine of activeMachinesList; track $index) {
                     <option value="{{ machine[0] }}">{{ machine[2] }} ({{ machine[1] }})</option>
                 }
             </select>

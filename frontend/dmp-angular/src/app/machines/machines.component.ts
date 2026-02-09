@@ -69,9 +69,12 @@ export class MachinesComponent {
     this.modeService.eel_on$.subscribe(eel_on => {
       this.eel_on = eel_on;
     });
-    this.getMachines();
+    await this.getMachines();
     this.getTypes();
     this.getLocations();
+    console.log("Machines List:", this.machinesList);
+    console.log("Types List:", this.typesList);
+    console.log("Locations List:", this.locationsList);
 
     // initialize filter style
     this.filterI.filterValues = {
@@ -86,7 +89,7 @@ export class MachinesComponent {
     this.revTypesList = await getRevTypes(this.eel_on);
   }
   
-  getMachines() {
+  async getMachines(): Promise<void> {
     if (!this.eel_on) {
       this.machinesList = [ // ID, Inventory Number, Name, Type, Location, Location IDs, ...
         [0, "FACILITY", "Facility", "Fictive - Facility", "No Location", [4], 0, []],
@@ -108,13 +111,17 @@ export class MachinesComponent {
         [16, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
         [17, "OLD-01","Old Machine", "Test", "No Location", [4], 1, [0,1,2,3]],
       ];
+      this.inNumList = this.machinesList.map(machine => machine[1]);
     } else {
-      eel.list_machines(true)().then((result: any) => {
-        console.log("Výsledek:", result);
-        this.machinesList = result;
+      return new Promise<void>((resolve) => {
+        eel.list_machines(true)().then((result: any) => {
+          console.log("Výsledek:", result);
+          this.machinesList = result;
+          this.inNumList = this.machinesList.map(machine => machine[1]);
+          resolve();
+        });
       });
     }
-    this.inNumList = this.machinesList.map(machine => machine[1]);
   }
 
   getTypes(machinesList: any[] = this.machinesList) {

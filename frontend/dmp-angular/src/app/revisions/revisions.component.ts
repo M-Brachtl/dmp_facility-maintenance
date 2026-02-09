@@ -7,6 +7,7 @@ import { DialogContainerComponent } from '../dialog-container/dialog-container.c
 
 import { filterInterface } from '../filterInterface';
 import { getEmployees } from '../employees/employees.component';
+import { getTLogs } from '../trainings/trainings.component';
 
 declare const eel: any;
 // Periodicita
@@ -17,7 +18,7 @@ declare const eel: any;
   styleUrl: './revisions.component.scss'
 })
 export class RevisionsComponent {
-  @ViewChild('revTypeAdd') revTypeAddRef!: ElementRef;
+  @ViewChild('revTypeAddE') revTypeAddRef!: ElementRef;
   @ViewChild('machineAddE') machineAddRef!: ElementRef;
   @ViewChild('employeeAdd') employeeAddRef!: ElementRef;
   // @ViewChild('employeeRem') employeeRemRef!: ElementRef;
@@ -28,9 +29,10 @@ export class RevisionsComponent {
   
   // @ViewChild('revTypeRem') revTypeRemRef!: ElementRef;
   // @ViewChild('machineRem') machineRemRef!: ElementRef;
-  revTypeRem = '';
-  machineRem = '';
-  machineAdd = '';
+  revTypeRem: string = '';
+  machineRem: string = '';
+  machineAdd: string = '';
+  revTypeAdd: string = '';
 
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
@@ -47,6 +49,7 @@ export class RevisionsComponent {
   detailedLog: any = null;
   orderingAsc: boolean = false; // true platí pro řazení od nejstarších po nejnovější
   employeesList: any[] = [];
+  TLogs: any[] = [];
 
 
   showDetails(logID: number) {
@@ -71,6 +74,7 @@ export class RevisionsComponent {
     this.getRevTypes();
     this.getLogs();
     this.employeesList = await getEmployees(this.eel_on);
+    this.TLogs = await getTLogs(this.eel_on);
 
     this.filterI.filterValues = {
       machineName: '',
@@ -329,6 +333,28 @@ export class RevisionsComponent {
   }
   get revTypesListFac() {
     return this.revTypesList.filter(rt => rt[3] == 1);
+  }
+
+  availableEmployees(RevID: number): Set<number> { // vrací ID zaměstnanců, kteří mají platné školení pro daný typ revize
+    const employeeSet: Set<number> = new Set();
+    this.TLogs.forEach(log => {
+      if (log[4] > new Date() && log[1] === RevID && this.employeesList.find(emp => emp[0] === log[2])[2] === 1) { // only include non-expired trainings
+        employeeSet.add(log[2]);
+      }
+    });
+    // console.log(employeeSet);
+    return employeeSet;
+  }
+
+  get filterAvailableEmployees(): any[] {
+    // console.log("Obsah 'Stroj' a 'Typ revize' filtru:", this.machineAdd, this.revTypeAdd);
+    const RevID = this.revTypeAdd;
+    if (!RevID) {
+      // console.log("Žádný typ revize není vybrán, zobrazují se všichni aktivní zaměstnanci.");
+      return this.activeEmployees;
+    }
+    const employeeSet = this.availableEmployees(parseInt(RevID));
+    return this.employeesList.filter(emp => employeeSet.has(emp[0]));
   }
 }
 
