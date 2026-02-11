@@ -42,6 +42,8 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
     end_date = today.add_months(years*12)
     
     for machine in machines_data:
+        if machine[6] != "": # pokud je zklikvidovaný, neplánuj žádné revize
+            continue
         planned_revs = []
         for rev_type in machine[5]: # projeď každou revizi daného stroje
             periodicity = dtb.get_periodicity(machine[0],rev_type)

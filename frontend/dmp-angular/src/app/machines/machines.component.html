@@ -172,7 +172,7 @@
                     <button (click)="saveLocChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
                 </p>
                 <!-- <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p> -->
-                <p><span class="font-semibold">Likvidován: </span>{{ machineDetails[4] ? 'Ano' : 'Ne' }}</p>
+                <p><span class="font-semibold">Likvidován: </span>{{ machineDetails[4] === "" ? 'Ne' : strDate(machineDetails[4]) }}</p>
                 <!-- <p><span class="font-semibold">Nadcházející revize: </span>
                     @if (machineDetails[5].length == 0) {
                         Žádné nadcházející revize
@@ -186,7 +186,7 @@
                     }
                 </p> -->
                 <p><span class="font-semibold">Příští revize: </span>
-                    @if (machineDetails[6].length == 0) {
+                    @if (machineDetails[6].length == 0 || machineDetails[4] !== "") {
                         Žádné revize
                     }
                     @else {

@@ -35,7 +35,7 @@ export class MachinesComponent {
   nextMonthCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
   allCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
   revTypesList: any[] = [];
-  machineDetails: [string, string, string, string, boolean, [string, string][], [string, Date][], number] = ["", "", "", "", false, [], [], 0];
+  machineDetails: [string, string, string, string, string | Date, [string, string][], [string, Date][], number] = ["", "", "", "", "", [], [], 0];
   // machineDetails: [title, inNum, type, location, disposed, nextMonthRevs, allRevisions]
   // debug: nahrazení původních metod a proměnných pro filtraci
   filterI = new filterInterface();
@@ -178,7 +178,7 @@ export class MachinesComponent {
   }
 
   isDisposed(machine: any[]): string {
-    return machine[6] ? 'line-through text-gray-500' : '';
+    return machine[6] === "" ? '' : 'line-through text-gray-500';
   }
 
   onSubmit(event: Event) {
@@ -208,7 +208,7 @@ export class MachinesComponent {
         this.getMachines();
       });
     } else {
-      const newMachine = [this.machinesList.length, inNum, name, type, location, [], 0, []];
+      const newMachine = [this.machinesList.length, inNum, name, type, location, [], "", []];
       this.machinesList.push(newMachine);
       this.inNumList.push(inNum);
     }
@@ -294,7 +294,7 @@ export class MachinesComponent {
       const inNum = machine[1];
       const type = machine[3];
       const location = machine[4];
-      const disposed = machine[6] ? true : false;
+      const disposed = machine[6] ? new Date(machine[6]) : "";
       const allRevisions = machine[5].map((revId: number) => {
         const revType = this.revTypesList.find(rt => rt[0] === revId);
         const revText = revType ? revType[1] : 'Unknown Revision Type';

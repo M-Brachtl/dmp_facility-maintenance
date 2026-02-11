@@ -81,7 +81,7 @@ def list_machines(list_last_revisions=False, **params):
     output_raw = cursor.fetchall()
     # if ("_id", 0) in params.items():
     if params.get("_id", None) == None or params.get("_id", None) == 0:
-        output_raw = [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", str(list_facility_activities()), 0)] + output_raw
+        output_raw = [(0, "FACILITY", "Facility", "Fictive - Facility", "No Location", str(list_facility_activities()), "")] + output_raw
     output = []
     for machine in output_raw:
         # revisions = machine[5]
@@ -145,7 +145,7 @@ def remove_machine(machine_id: int):
     #     raise RuntimeError("Tento stroj má na sebe vázané revize. Nejprve odstraň periodicitu revize-stroje.")
 
     # cursor.execute("DELETE FROM machines WHERE id = ?;", (machine_id,))
-    cursor.execute("UPDATE machines SET disposed = 1 WHERE id = ?;", (machine_id,))
+    cursor.execute("UPDATE machines SET disposed = ? WHERE id = ?;", (dt.date.today(), machine_id))
     connection.commit()
     return "success"
 
