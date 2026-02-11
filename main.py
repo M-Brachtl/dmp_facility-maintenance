@@ -57,6 +57,12 @@ def remove_machine(machine_id: int):
 def edit_machine_name(machine_id: int, new_name: str):
     return dtb.edit_machine_name(machine_id, new_name)
 @eel.expose
+def edit_machine_type(machine_id: int, new_type: str):
+    return dtb.edit_machine_type(machine_id, new_type)
+@eel.expose
+def edit_machine_location(machine_id: int, new_location: str):
+    return dtb.edit_machine_location(machine_id, new_location)
+@eel.expose
 def add_people(name: str):
     return dtb.add_people(name)
 @eel.expose

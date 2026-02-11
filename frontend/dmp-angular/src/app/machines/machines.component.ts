@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogContainerComponent } from '../dialog-container/dialog-container.component';
 import { SafeHtml } from '@angular/platform-browser';
 import { getRevTypes } from '../rev-types/rev-types.component';
-import { nextMonthCalendarMachines } from '../plans/plans.component';
+import { nextMonthCalendarMachines, allCalendarMachines } from '../plans/plans.component';
 
 import { filterInterface } from '../filterInterface';
 
@@ -22,6 +22,8 @@ export class MachinesComponent {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
   @ViewChild('machineRem') machineRem!: ElementRef;
   @ViewChild('nameChanger') nameChanger!: ElementRef;
+  @ViewChild('typeChanger') typeChanger!: ElementRef;
+  @ViewChild('locChanger') locChanger!: ElementRef;
   eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
   mode!: 'list' | 'add' | 'remove';
   machinesList: any[] = [];
@@ -31,8 +33,9 @@ export class MachinesComponent {
   showDialog: boolean = false;
   dialogContent: SafeHtml = '';
   nextMonthCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
+  allCalendar: { [key: string]: { machines: (Date | string | boolean)[][]; people: (Date | string)[][] } } = {};
   revTypesList: any[] = [];
-  machineDetails: [string, string, string, string, boolean, [string, string][], string[], number] = ["", "", "", "", false, [], [], 0];
+  machineDetails: [string, string, string, string, boolean, [string, string][], [string, Date][], number] = ["", "", "", "", false, [], [], 0];
   // machineDetails: [title, inNum, type, location, disposed, nextMonthRevs, allRevisions]
   // debug: nahrazení původních metod a proměnných pro filtraci
   filterI = new filterInterface();
@@ -87,6 +90,7 @@ export class MachinesComponent {
     this.nextMonthCalendar = await nextMonthCalendarMachines(this.eel_on);
     console.log("Next Month Calendar Machines:", this.nextMonthCalendar);
     this.revTypesList = await getRevTypes(this.eel_on);
+    this.allCalendar = await allCalendarMachines(this.eel_on);
   }
   
   async getMachines(): Promise<void> {
@@ -293,7 +297,19 @@ export class MachinesComponent {
       const disposed = machine[6] ? true : false;
       const allRevisions = machine[5].map((revId: number) => {
         const revType = this.revTypesList.find(rt => rt[0] === revId);
-        return revType ? revType[1] : 'Unknown Revision Type';
+        const revText = revType ? revType[1] : 'Unknown Revision Type';
+        let date: Date = new Date();
+        Object.values(this.allCalendar).forEach(entry => {
+          entry.machines.forEach(rev => {
+            if (rev[2] === inNum && rev[1] === revText) {
+              // const revTypeName = 
+              if (rev[0] < date){
+                date = rev[0] as Date;
+              }
+            }
+          });
+        })
+        return [revText, date];
       });
       console.log("Next Month Calendar:", this.nextMonthCalendar);
       // Get next month revisions for this machine
@@ -351,6 +367,60 @@ export class MachinesComponent {
       if (machine) {
         machine[2] = newName; // aktualizujeme název v seznamu
         this.machineDetails[0] = newName; // aktualizujeme název v detailech
+      }
+    }
+  }
+  saveTypeChange() {
+    const newType = this.typeChanger.nativeElement.value;
+    const machineId = this.machineDetails[7];
+    if (newType.trim() === '') {
+      this.showDialog = true;
+      this.dialogContent = "errorMissingFields";
+      return;
+    }
+    if (this.eel_on) {
+      eel.edit_machine_type(machineId, newType)().then((result: any) => {
+        if (result.status === "error") {
+          this.showDialog = true;
+          this.dialogContent = "unknownError";
+          return;
+        }
+        console.log("Typ stroje aktualizován:", result);
+        this.getMachines();
+        this.machineDetails[2] = newType; // aktualizujeme název v detailech
+      });
+    } else {
+      const machine = this.machinesList.find(machine => machine[0] === machineId);
+      if (machine) {
+        machine[3] = newType; // aktualizujeme název v seznamu
+        this.machineDetails[2] = newType; // aktualizujeme název v detailech
+      }
+    }
+  }
+  saveLocChange() {
+    const newLoc = this.locChanger.nativeElement.value;
+    const machineId = this.machineDetails[7];
+    if (newLoc.trim() === '') {
+      this.showDialog = true;
+      this.dialogContent = "errorMissingFields";
+      return;
+    }
+    if (this.eel_on) {
+      eel.edit_machine_location(machineId, newLoc)().then((result: any) => {
+        if (result.status === "error") {
+          this.showDialog = true;
+          this.dialogContent = "unknownError";
+          return;
+        }
+        console.log("Lokace stroje aktualizována:", result);
+        this.getMachines();
+        this.machineDetails[3] = newLoc; // aktualizujeme název v detailech
+      });
+    } else {
+      const machine = this.machinesList.find(machine => machine[0] === machineId);
+      if (machine) {
+        machine[4] = newLoc; // aktualizujeme název v seznamu
+        this.machineDetails[3] = newLoc; // aktualizujeme název v detailech
       }
     }
   }

@@ -154,6 +154,16 @@ def edit_machine_name(machine_id: int, new_name: str):
     connection.commit()
     return "success"
 
+def edit_machine_type(machine_id: int, new_type: str):
+    cursor.execute("UPDATE machines SET type = ? WHERE id = ?;", (new_type, machine_id))
+    connection.commit()
+    return "success"
+
+def edit_machine_location(machine_id: int, new_location: str):
+    cursor.execute("UPDATE machines SET location = ? WHERE id = ?;", (new_location, machine_id))
+    connection.commit()
+    return "success"
+
 ## revision types
 def list_revision_types(_id: int = 0, name: str = "", validity_period: int = 0, facility_activity: bool = False): # pravidlo se aplikuje pro přesné shody
     query = "SELECT id, name, validity_period, facility_activity FROM revision_types"
@@ -502,7 +512,7 @@ def recover_database(backup_path: str):
 
 def clear_backups():
     backup.clear_backups()
-
+#endregion
 
 if __name__ == "__main__":
     # backup.backup_database()
