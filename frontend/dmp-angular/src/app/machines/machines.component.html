@@ -108,9 +108,9 @@
                             @if (rowFiltered(machine)) {
                             <tr class="even:bg-indigo-200 h-7" [class]="isDisposed(machine)">
                                 <td class="w-2.5/10">{{ machine[1] }}</td> <!-- Inventární číslo -->
-                                <td class="w-3/10">{{ machine[2] }}</td> <!-- Název -->
-                                <td class="w-2/10">{{ machine[3] }}</td> <!-- Typ -->
-                                <td class="w-2/10">{{ machine[4] }}</td> <!-- Lokace -->
+                                <td class="w-3/10 px-1">{{ machine[2] }}</td> <!-- Název -->
+                                <td class="w-2/10 px-1">{{ machine[3] }}</td> <!-- Typ -->
+                                <td class="w-2/10 px-1">{{ machine[4] }}</td> <!-- Lokace -->
                                 <!-- <td>{{ machine[6] }}</td> Stav - disposed? -->
                                 <td (click)="openMachineDetails(machine[0])" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 cursor-pointer active:bg-indigo-800 transition-colors duration-200"><button class="cursor-pointer">Detaily</button></td>
                             </tr>
@@ -161,10 +161,19 @@
                     <button (click)="saveNameChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
                 </p>
                 <p><span class="font-semibold">Inventární číslo: </span>{{ machineDetails[1] }}</p>
-                <p><span class="font-semibold">Typ: </span>{{ machineDetails[2] }}</p>
-                <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p>
+                <p>
+                    <span class="font-semibold">Typ: </span>
+                    <input class="border border-gray-300 rounded" #typeChanger type="text" [value]="machineDetails[2]">
+                    <button (click)="saveTypeChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
+                </p>
+                <p>
+                    <span class="font-semibold">Lokace: </span>
+                    <input class="border border-gray-300 rounded" #locChanger type="text" [value]="machineDetails[3]">
+                    <button (click)="saveLocChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
+                </p>
+                <!-- <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p> -->
                 <p><span class="font-semibold">Likvidován: </span>{{ machineDetails[4] ? 'Ano' : 'Ne' }}</p>
-                <p><span class="font-semibold">Nadcházející revize: </span>
+                <!-- <p><span class="font-semibold">Nadcházející revize: </span>
                     @if (machineDetails[5].length == 0) {
                         Žádné nadcházející revize
                     }
@@ -175,15 +184,15 @@
                             }
                         </ul>
                     }
-                </p>
-                <p><span class="font-semibold">Všechny revize: </span>
+                </p> -->
+                <p><span class="font-semibold">Příští revize: </span>
                     @if (machineDetails[6].length == 0) {
                         Žádné revize
                     }
                     @else {
                         <ul class="list-disc list-inside">
                             @for (rev of machineDetails[6]; track $index) {
-                                <li>{{ rev }}</li>
+                                <li>{{ rev[0] }} &ndash; {{ strDate(rev[1]) }}</li>
                             }
                         </ul>
                     }
