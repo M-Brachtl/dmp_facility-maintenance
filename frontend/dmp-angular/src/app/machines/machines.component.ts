@@ -298,7 +298,8 @@ export class MachinesComponent {
       const allRevisions = machine[5].map((revId: number) => {
         const revType = this.revTypesList.find(rt => rt[0] === revId);
         const revText = revType ? revType[1] : 'Unknown Revision Type';
-        let date: Date = new Date();
+        let date: Date = new Date(275760,8,13); // highest possible date
+        console.log(this.allCalendar)
         Object.values(this.allCalendar).forEach(entry => {
           entry.machines.forEach(rev => {
             if (rev[2] === inNum && rev[1] === revText) {
