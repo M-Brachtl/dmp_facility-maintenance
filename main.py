@@ -76,6 +76,7 @@ def remove_people(people_id: int):
     return dtb.remove_people(id=people_id)
 @eel.expose
 def edit_people_name(people_id: int, new_name: str):
+    print(f"Editing name of person with ID {people_id} to '{new_name}'")
     return dtb.edit_people_name(people_id, new_name)
 @eel.expose
 def get_periodicity(machine_id: int, revision_type_id: int):

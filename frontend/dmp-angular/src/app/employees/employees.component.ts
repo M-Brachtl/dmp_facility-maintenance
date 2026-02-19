@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
@@ -19,7 +19,7 @@ declare const eel: any;
 })
 export class EmployeesComponent {
   @ViewChild('employeeRem') employeeRem!: ElementRef;
-  @ViewChild('editableSpan') editableSpan!: ElementRef;
+  @ViewChildren('editableSpan') editableSpans!: ElementRef[];
   mode!: 'list' | 'add' | 'remove';
   filterI = new filterInterface();
   employeesList: any[] = [];
@@ -169,7 +169,10 @@ export class EmployeesComponent {
 
   openEdits(employeeID: number) {
     this.openedEditsID = employeeID;
-    this.editableSpan.nativeElement
+    const spanElement = this.editableSpans.find((span: ElementRef) => (span.nativeElement as HTMLSpanElement).isContentEditable);
+    if (spanElement) {
+      (spanElement.nativeElement as HTMLSpanElement).focus();
+    }
   }
 
   isBeingEdited(employeeID: number): boolean {
@@ -178,8 +181,9 @@ export class EmployeesComponent {
 
   editEmployee(employeeID: number) {
     const employee = this.employeesList.find(emp => emp[0] === employeeID);
-    const spanElement = this.editableSpan.nativeElement as HTMLSpanElement;
-    const newName = spanElement.innerText.trim();
+    
+    const spanElement = this.editableSpans.find((span: ElementRef) => (span.nativeElement as HTMLSpanElement).isContentEditable);
+    const newName = spanElement ? (spanElement.nativeElement as HTMLSpanElement).innerText.trim() : null;
     if (!newName) {
       this.showDialog = true;
       this.dialogContent = 'errorMissingFields';
