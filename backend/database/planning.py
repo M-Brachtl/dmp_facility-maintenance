@@ -64,7 +64,10 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
     people_data = dtb.list_people(list_last_trainings=True)
     for person in people_data:
         planned_trainings = []
-        list_of_revs = [rev[0] for rev in dtb.list_revision_types()] # získej všechny tréninky, protože lidé musí dělat všechny
+        ## Zastaralé:
+        ## list_of_revs = [rev[0] for rev in dtb.list_revision_types()] # získej všechny tréninky, protože lidé musí dělat všechny
+        ## Nové:
+        list_of_revs = dtb.get_assignment(person[0])[1] # získej všechny tréninky, které jsou přiřazené dané osobě
         for training_type in list_of_revs: # projeď každý trénink dané osoby
             periodicity = dtb.list_revision_types(_id=training_type)[0][2]
             for last_log in person[3]: # hledání data posledního tréninku

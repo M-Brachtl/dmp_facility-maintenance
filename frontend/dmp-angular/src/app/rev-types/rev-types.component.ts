@@ -86,6 +86,8 @@ export class RevTypesComponent {
       return false;
     } else if (typeFilter === 'is not' && revType[3] != 0) {
       return false;
+    } else if (revType[4] == 0) { // pokud je revize neaktivní, skryjeme ji
+      return false;
     }
     return true;
   }

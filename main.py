@@ -146,6 +146,15 @@ def list_training_log(_id: int = None, person: int = None, min_date: str = None,
         output[i] = list(entry)
     # print("Formatted training log:", output)
     return output
+@eel.expose
+def list_assignments():
+    return dtb.list_assignments()
+@eel.expose
+def add_assignment(rev_type_id: int, people_id: int):
+    return dtb.add_assignment(rev_type_id, people_id)
+@eel.expose
+def remove_assignment(rev_type_id: int, people_id: int):
+    return dtb.remove_assignment(rev_type_id, people_id)
 #endregion
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")

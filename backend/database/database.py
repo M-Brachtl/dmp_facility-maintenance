@@ -93,8 +93,8 @@ def list_machines(list_last_revisions=False, **params):
         # přidání revizí ve formátu (log_id, rev_type, datum)
         log_list = []
         if list_last_revisions:
-            cursor.execute("""SELECT id, type, date FROM revision_log AS og_log WHERE machine_id=? AND result='bez závady' AND date=(
-                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.type=og_log.type AND log.result='bez závady'
+            cursor.execute("""SELECT id, rev_type, date FROM revision_log AS og_log WHERE machine_id=? AND result='bez závady' AND date=(
+                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.rev_type=og_log.rev_type AND log.result='bez závady'
                 )""",
                 (machine[0],)
             )
@@ -214,7 +214,7 @@ def remove_revision_type(revision_type_id: int):
     if dependencies != []:
         raise RuntimeError("Na tomto typu revize jsou závislé některé stroje.",dependencies)
 
-    cursor.execute("DELETE FROM revision_types WHERE id = ?;", (revision_type_id,))
+    cursor.execute("UPDATE revision_types SET active = 0 WHERE id = ?;", (revision_type_id,))
 
     # cursor.execute("SELECT id, trained_rev, untrained_rev FROM people")
     # raw_output: str = cursor.fetchall()
@@ -296,7 +296,7 @@ def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", 
     if machine_id:
         additional_query += f"machine_id = {machine_id} AND "
     if rev_type:
-        additional_query += f"type = {rev_type} AND "
+        additional_query += f"rev_type = {rev_type} AND "
     if min_date:
         additional_query += f"date >= '{repr(min_date)}' AND "
     if max_date:
@@ -312,6 +312,7 @@ def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", 
     output = []
     for log in output_raw:
         log_list = list(log)
+        log_list[1] = 0 if log[1] is None else log[1]
         log_list[2] = dateDTB(log[2])
         output.append(tuple(log_list))
 
@@ -321,7 +322,7 @@ def add_revision_log(machine_id: int, rev_type: int, result: str, person_id: int
     if result not in ("bez závady","malá závada","velká závada"):
         raise ValueError("Hodnota result není validní.")
     cursor.execute(
-        "INSERT INTO revision_log (machine_id, date, type, result, notes, person_id) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO revision_log (machine_id, date, rev_type, result, notes, person_id) VALUES (?, ?, ?, ?, ?, ?)",
         (machine_id, repr(date), rev_type, result, notes, person_id)
     )
     connection.commit()
@@ -377,25 +378,32 @@ def list_periodicity(machine_id: int = None, revision_type_id: int = None):
             (machine_id, revision_type_id)
         )
         output = cursor.fetchall()
-        return output
+        # return output
     elif machine_id:
         cursor.execute(
             "SELECT * FROM periodicity WHERE machine = ?;",
             (machine_id,)
         )
         output = cursor.fetchall()
-        return output
+        # return output
     elif revision_type_id:
         cursor.execute(
             "SELECT * FROM periodicity WHERE revision_type = ?;",
             (revision_type_id,)
         )
         output = cursor.fetchall()
-        return output
-    cursor.execute(
-        "SELECT * FROM periodicity"
-    )
+        # return output
+    else:
+        cursor.execute(
+            "SELECT * FROM periodicity"
+        )
     output = cursor.fetchall()
+    for i, entry in enumerate(output.copy()):
+        # zkontroluj, jestli není null, nahraď 0
+        entry = list(entry)
+        if entry[2] is None:
+            entry[2] = 0
+        output[i] = tuple(entry)
     return output
 
 def add_training_log(rev_type, person, date: dateDTB = dateDTB.today()):
@@ -471,7 +479,10 @@ def remove_training_log(_id: int):
     return "success"
 
 def get_periodicity(machine_id: int, rev_id: int) -> int:
-    cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine=?;",(rev_id,machine_id))
+    if machine_id == 0:
+        cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine IS NULL;",(rev_id,))
+    else:
+        cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine=?;",(rev_id,machine_id))
     output = cursor.fetchone()
     try:
         output = output[0]
@@ -482,10 +493,70 @@ def get_periodicity(machine_id: int, rev_id: int) -> int:
     return output
 
 def list_facility_activities() -> list[int]:
-    cursor.execute("SELECT revision_type FROM periodicity WHERE machine=0;")
+    cursor.execute("SELECT revision_type FROM periodicity WHERE machine IS NULL;")
     raw_output = cursor.fetchall()
     return [rev[0] for rev in raw_output]
 
+def list_assignments():
+    cursor.execute("""
+    SELECT
+        p.id AS person_id,
+        json_group_array(r.id) AS revision_ids
+    FROM people p
+    LEFT JOIN assignments a ON p.id = a.person_id
+    LEFT JOIN revision_types r ON a.rev_type_id = r.id
+    GROUP BY p.id;
+    """)
+    return_data = []
+    for person_id, revision_ids in cursor.fetchall():
+        if revision_ids is not None and revision_ids != "[null]":
+            try:
+                revision_ids = [int(rid) for rid in revision_ids.strip("[]").split(",")]
+            except ValueError as e:
+                print(f"Warning: Failed to parse revision_ids for person_id {person_id}. Raw value: {revision_ids}")
+                raise e
+        else:
+            revision_ids = []
+        return_data.append((person_id, revision_ids))
+    return return_data
+
+def add_assignment(rev_type: int, person: int):
+    cursor.execute(
+        "INSERT INTO assignments (person_id, rev_type_id) VALUES (?,?);",
+        (person, rev_type)
+    )
+    connection.commit()
+    return "success"
+
+def remove_assignment(rev_type: int, person: int):
+    cursor.execute("DELETE FROM assignments WHERE person_id=? AND rev_type_id=?;", (person, rev_type))
+    connection.commit()
+    return "success"
+
+def get_assignment(person: int):
+    cursor.execute("""
+    SELECT
+        p.id AS person_id,
+        json_group_array(r.id) AS revision_ids
+    FROM people p
+    LEFT JOIN assignments a ON p.id = a.person_id
+    LEFT JOIN revision_types r ON a.rev_type_id = r.id
+    WHERE p.id = ?
+    GROUP BY p.id;
+    """, (person,))
+    output = cursor.fetchone()
+    if output is not None:
+        person_id, revision_ids = output
+        if revision_ids is not None and revision_ids != "[null]":
+            try:
+                revision_ids = [int(rid) for rid in revision_ids.strip("[]").split(",")]
+            except ValueError:
+                print(f"Warning: Failed to parse revision_ids for person_id {person_id}. Raw value: {revision_ids}")
+                revision_ids = []
+        else:
+            revision_ids = []
+        return (person_id, revision_ids)
+    return None
 # endregion
 
 # region speciální funkce
