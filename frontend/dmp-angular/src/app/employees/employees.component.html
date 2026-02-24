@@ -124,6 +124,10 @@
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
             <p>Vybraný zaměstnanec neexistuje.</p>
         }
+        @case ('errorEmployeeAlreadyExists') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Zaměstnanec s tímto jménem již existuje.</p>
+        }
         @case ('errorNoSelection') {
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
             <p>Prosím vyberte zaměstnance k vyřazení.</p>

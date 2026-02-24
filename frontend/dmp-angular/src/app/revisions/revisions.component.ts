@@ -329,10 +329,10 @@ export class RevisionsComponent {
   }
 
   get revTypesListNoFac() {
-    return this.revTypesList.filter(rt => rt[3] == 0);
+    return this.activeRevTypeList.filter(rt => rt[3] == 0);
   }
   get revTypesListFac() {
-    return this.revTypesList.filter(rt => rt[3] == 1);
+    return this.activeRevTypeList.filter(rt => rt[3] == 1);
   }
 
   availableEmployees(RevID: number): Set<number> { // vrací ID zaměstnanců, kteří mají platné školení pro daný typ revize
@@ -355,6 +355,10 @@ export class RevisionsComponent {
     }
     const employeeSet = this.availableEmployees(parseInt(RevID));
     return this.employeesList.filter(emp => employeeSet.has(emp[0]));
+  }
+  
+  get activeRevTypeList(): any[] {
+    return this.revTypesList.filter(revType => revType[4] == 1);
   }
 }
 

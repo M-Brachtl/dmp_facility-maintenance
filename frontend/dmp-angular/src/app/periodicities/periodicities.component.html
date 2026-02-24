@@ -5,7 +5,7 @@
             <label for="name" class="block mb-2 font-semibold">Typ revize:</label>
             <select #revTypeAdd id="rev_type_add" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
-                @for (revType of revTypesList; track $index) {
+                @for (revType of activeRevTypeList; track $index) {
                     <option value="{{ revType[0] }}">{{ revType[1] }}</option>
                 }
             </select>
@@ -25,7 +25,7 @@
     }
     @else if (mode == 'remove') {
         <div>
-            <h2 class="text-xl font-bold mb-4">Vyber stroj k odebrání</h2>
+            <h2 class="text-xl font-bold mb-4">Vyber periodicitu k odebrání</h2>
             <select #periodRem id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
                 @for (entry of periodicities; track $index) {
@@ -121,7 +121,7 @@
         }
         @case ('successAddPeriodicity') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
-            <p>Revize úspěšně přidána.</p>
+            <p>Periodicita úspěšně přidána.</p>
         }
         @case ('errorMissingFields') {
             <h2 class="text-xl font-bold mb-4">Chyba</h2>
@@ -137,7 +137,7 @@
         }
         @case ('removeSuccess') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
-            <p>Revize úspěšně odebrána.</p>
+            <p>Periodicita úspěšně odebrána.</p>
         }
         @case ('errorPeriodicityExists') {
             <h2 class="text-xl font-bold mb-4">Chyba</h2>

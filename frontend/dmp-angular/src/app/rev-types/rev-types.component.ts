@@ -57,6 +57,7 @@ export class RevTypesComponent {
     this.employeesList = await getEmployees(this.eel_on);
     this.TLogs = await getTLogs(this.eel_on);
     this.machineList = await getMachines(this.eel_on);
+    console.log("MachineList(revstyps):", this.machineList);
   }
   getRevTypes() {
     if (this.eel_on) {
@@ -89,6 +90,7 @@ export class RevTypesComponent {
     } else if (revType[4] == 0) { // pokud je revize neaktivní, skryjeme ji
       return false;
     }
+    // console.log("RevType:", revType);
     return true;
   }
 
@@ -171,6 +173,10 @@ export class RevTypesComponent {
           this.dialogContent = "errorDependentMachines";
           return;
         }
+        if (result === "success") {
+          this.showDialog = true;
+          this.dialogContent = "revTypeDeactivated";
+        }
         this.getRevTypes();
       });
     } else {
@@ -207,6 +213,10 @@ export class RevTypesComponent {
     this.dependentMachines = [this.revTypesList.find(rt => rt[0] === revTypeID)[1], this.listDependentMachines(revTypeID)];
     this.dialogContent = 'dependentMachines';
     this.showDialog = true;
+  }
+
+  get activeRevTypeList(): any[] {
+    return this.revTypesList.filter(revType => revType[4] == 1);
   }
 }
 

@@ -126,6 +126,11 @@ export class EmployeesComponent {
       // console.log("Neplatné jméno zaměstnance:", empName);
       return;
     }
+    else if (this.employeesList.find(emp => emp[1].toLowerCase() === empName.toLowerCase())) {
+      this.showDialog = true;
+      this.dialogContent = 'errorEmployeeAlreadyExists';
+      return;
+    }
     if (this.eel_on) {
       eel.add_people(empName)().then((result: any) => {
         console.log("Výsledek přidání zaměstnance:", result);

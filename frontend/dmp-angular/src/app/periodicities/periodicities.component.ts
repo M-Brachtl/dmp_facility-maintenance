@@ -247,6 +247,9 @@ export class PeriodicitiesComponent {
   get activeMachinesList() {
     return this.machinesList.filter(machine => !machine[6]);
   }
+  get activeRevTypeList(): any[] {
+    return this.revTypesList.filter(revType => revType[4] == 1);
+  }
 }
 
 // export async function getPeriodicities(eel_on: boolean): any[] {

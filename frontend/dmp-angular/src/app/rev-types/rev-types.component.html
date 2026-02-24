@@ -21,7 +21,7 @@
             <h2 class="text-xl font-bold mb-4">Vyber typ revize k odebrání</h2>
             <select #revTypeRem id="rev_type_rem" class="border border-gray-300 rounded px-2 py-1 w-full">
                 <option value="" selected disabled></option>
-                @for (revType of revTypesList; track $index) {
+                @for (revType of activeRevTypeList; track $index) {
                     <option value="{{ revType[0] }}">{{ revType[1] }}</option>
                 }
             </select>
@@ -149,6 +149,10 @@
             @for (machine of dependentMachines[1]; track $index) {
                 <p>{{ machine[0] }} &ndash; {{ machine[1] }}</p>
             }
+        }
+        @case ('revTypeDeactivated') {
+            <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+            <p>Typ revize úspěšně deaktivován.</p>
         }
     }
 </app-dialog-container>

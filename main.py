@@ -4,7 +4,7 @@ from backend.database.database import dateDTB
 import backend.database.planning as planning
 import eel
 
-testing_no_angular = False
+testing_no_angular = True
 if testing_no_angular:
     eel.init('frontend/test', js_result_timeout=5000)
 else:

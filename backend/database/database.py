@@ -55,6 +55,7 @@ else:
     db_path = os.path.join(base_path, "database.db")
 
 connection = sql.connect(db_path)
+connection.execute("PRAGMA foreign_keys = ON") # zapnutí podpory cizích klíčů
 cursor = connection.cursor()
 
 # region functions
@@ -166,7 +167,7 @@ def edit_machine_location(machine_id: int, new_location: str):
 
 ## revision types
 def list_revision_types(_id: int = 0, name: str = "", validity_period: int = 0, facility_activity: bool = False): # pravidlo se aplikuje pro přesné shody
-    query = "SELECT id, name, validity_period, facility_activity FROM revision_types"
+    query = "SELECT * FROM revision_types"
     filters = []
     if _id:
         filters.append(f"id = {_id}")
@@ -203,13 +204,15 @@ def add_revision_type(name: str, validity_period: int, facility_activity: bool =
     return "success"
 
 def remove_revision_type(revision_type_id: int):
-    cursor.execute("SELECT id, in_num, revision_array FROM machines")
-    machines_check: list[tuple] = cursor.fetchall()
+    # machines_check: list[tuple] = cursor.fetchall()
+    machines_check = list_machines(list_last_revisions=False)
+    print(machines_check)
     dependencies = []
     for machine in machines_check:
-        if machine[2] == "[]":
+        if machine[5] == []:
             continue
-        if int(revision_type_id) in tuple(int(n) for n in machine[2].strip("[]").split(", ")):
+        # print(machine[5])
+        if int(revision_type_id) in tuple(n for n in machine[5]):
             dependencies.append(machine[:2])
     if dependencies != []:
         raise RuntimeError("Na tomto typu revize jsou závislé některé stroje.",dependencies)
@@ -321,6 +324,8 @@ def list_revision_log(machine_id: int = 0, rev_type: int = 0, result: str = "", 
 def add_revision_log(machine_id: int, rev_type: int, result: str, person_id: int, notes: str = "", date: dateDTB = dateDTB.today()): # validní result: bez závady/malá závada/velká závada
     if result not in ("bez závady","malá závada","velká závada"):
         raise ValueError("Hodnota result není validní.")
+    if machine_id == 0:
+        machine_id = None
     cursor.execute(
         "INSERT INTO revision_log (machine_id, date, rev_type, result, notes, person_id) VALUES (?, ?, ?, ?, ?, ?)",
         (machine_id, repr(date), rev_type, result, notes, person_id)
@@ -347,6 +352,8 @@ def add_rev_to_machine(machine_id: int, rev_id: int, rule: int): # rule je v mě
             "UPDATE machines SET revision_array = ? WHERE id = ?;",
             (str(revision_array), machine_id)
         )
+    else: # machine_id = 0 (facility = null)
+        machine_id = None
     cursor.execute(
         "INSERT INTO periodicity (revision_type, machine, rule) VALUES (?,?,?);",
         (rev_id, machine_id, rule)
@@ -362,11 +369,16 @@ def remove_rev_from_machine(machine_id: int, rev_id: int):
             "UPDATE machines SET revision_array = ? WHERE id = ?;",
             (str(revision_array), machine_id)
         )
-
-    cursor.execute(
-        "DELETE FROM periodicity WHERE revision_type = ? AND machine = ?;",
-        (rev_id, machine_id)
-    )
+        cursor.execute(
+            "DELETE FROM periodicity WHERE revision_type = ? AND machine = ?;",
+            (rev_id, machine_id)
+        )
+    else: # machine_id = 0 (facility = null)
+        machine_id = None
+        cursor.execute(
+            "DELETE FROM periodicity WHERE revision_type = ? AND machine IS NULL;",
+            (rev_id,)
+        )
 
     connection.commit()
     return "success"
@@ -479,7 +491,7 @@ def remove_training_log(_id: int):
     return "success"
 
 def get_periodicity(machine_id: int, rev_id: int) -> int:
-    if machine_id == 0:
+    if machine_id == 0: # facility = null
         cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine IS NULL;",(rev_id,))
     else:
         cursor.execute("SELECT rule FROM periodicity WHERE revision_type=? AND machine=?;",(rev_id,machine_id))
