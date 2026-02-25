@@ -28,8 +28,9 @@ export class EmployeesComponent {
   dialogContent: string = '';
   TLogs: any[] = [];
   revTypes: any[] = [];
-  employeeTrainings: [string, string[]] = ["", []];
+  employeeTrainings: [string, string[], Number[] | []] = ["", [], []];
   openedEditsID: number | null = null;
+  assignments: [Number, Number[]][] | null = null;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   async ngOnInit() {
@@ -48,6 +49,16 @@ export class EmployeesComponent {
     this.filterI.hiddenStyleUpdate();
     this.filterI.filterValues['nameFilter'] = '';
     this.filterI.filterValues['activeFilter'] = 'active'; // all/active/inactive
+    this.getAssignments();
+  }
+
+  getAssignments() {
+    if (this.eel_on) {
+      eel.list_assignments()().then((result: [Number, Number[]][]) => {
+        this.assignments = result;
+      })
+      return;
+    }
   }
 
   getEmployees() {
@@ -167,9 +178,12 @@ export class EmployeesComponent {
   }
 
   openEmployeeTrainings(employeeID: number) {
-    this.employeeTrainings = [this.employeesList.find(emp => emp[0] === employeeID)[1], this.listValidTrainings(employeeID)];
-    this.dialogContent = 'employeeTrainings';
-    this.showDialog = true;
+    console.log(this.assignments);
+    if (this.assignments){
+      this.employeeTrainings = [this.employeesList.find(emp => emp[0] === employeeID)[1], this.listValidTrainings(employeeID), this.assignments.find(emp => emp[0] === employeeID)![1].map(revTypeID => this.revTypes.find(revType => revType[0] == revTypeID)[1])];
+      this.dialogContent = 'employeeTrainings';
+      this.showDialog = true;
+    }
   }
 
   openEdits(employeeID: number) {
@@ -212,6 +226,12 @@ export class EmployeesComponent {
       this.dialogContent = 'editSuccess';
       this.openedEditsID = null;
     }
+  }
+
+  removeAssignment(employeeName: string, revTypeName: Number){
+    const employeeID = this.employeesList.find(emp => emp[1] === employeeName)[0];
+    const revTypeID = this.revTypes.find(rev => rev[1] === revTypeName)[0];
+    console.log("Removing revType " + revTypeID + " from assignment with employee " + employeeID);
   }
 }
 

@@ -139,9 +139,20 @@
         @case ('employeeTrainings') {
             <h2 class="text-xl font-bold mb-4">Školení zaměstnance</h2>
             <h3 class="text-lg font-semibold mb-2">{{ employeeTrainings[0] }}</h3>
-            @for (revType of employeeTrainings[1]; track $index) {
-                <p>{{ revType }}</p>
-            }
+            <div class="flex flex-row justify-around">
+                <div>
+                    <h4 class="text-lg mb-2">Aktivní školení</h4>
+                    @for (revType of employeeTrainings[1]; track $index) {
+                        <p>{{ revType }}</p>
+                    }
+                </div>
+                <div>
+                    <h4 class="text-lg mb-2">Přiřazená školení</h4>
+                    @for (assingment of employeeTrainings[2]; track $index) {
+                        <p>{{ assingment }} <button (click)="removeAssignment(employeeTrainings[0], assingment)" class="bg-red-500 rounded-sm hover:bg-red-700 active:bg-red-900 text-white transition-colors duration-200 cursor-pointer px-2 text-sm">X</button></p>
+                    }
+                </div>
+            </div>
         }
         @case ('editSuccess') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
