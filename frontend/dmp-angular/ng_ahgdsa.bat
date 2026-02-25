@@ -1,1 +1,0 @@
-call C:\Users\bra42176\Downloads\node-v25.3.0\node-v25.3.0-win-x64\node.exe H:\4L\dmp\dmp_facility-maintenance\frontend\dmp-angular\node_modules\@angular\cli\bin\ng.js $1
