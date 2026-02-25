@@ -600,7 +600,7 @@ def clear_backups():
 if __name__ == "__main__":
     # backup.backup_database()
     # print(add_machine("T_002-D", "Stroj B", "Test", "Lokace TD"))
-    # add_revision_type("Revize New_test 1", 60)
+    # add_revision_type("Revize T2", 60)
     # add_people("Adam Testovač", [1])
     # add_people("Jára Cimrman")
     # remove_people(1)
@@ -621,7 +621,7 @@ if __name__ == "__main__":
     # print("Databáze:", get_periodicity(1,2),sep="\n")
     # print("Test porovnání dat:", dateDTB('03/06/2025') < dateDTB('02/05/2025'),sep="\n")
     # print("Databáze - machines:", list_machines(list_last_revisions=True),sep="\n")
-    print("Databáze - machines:", list_training_log(),sep="\n")
+    print("Databáze - machines:", list_revision_types(),sep="\n")
     # clean_database()
     # recover_database(3)
     # clear_backups()

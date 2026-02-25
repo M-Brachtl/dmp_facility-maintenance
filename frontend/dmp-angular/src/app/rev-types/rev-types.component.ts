@@ -123,6 +123,11 @@ export class RevTypesComponent {
       console.log("Type of training length:", typeof this.form_training_length);
       return;
     }
+    if (this.revTypesList.find(revType => revType[1].toLowerCase() === name.toLowerCase())){
+      this.showDialog = true;
+      this.dialogContent = "errorRevTypeDuplicate";
+      return;
+    }
     if (this.eel_on) {
       eel.add_revision_type(name, this.form_training_length, facility)().then((result: any) => {
         console.log("Revize přidána:", result);
