@@ -178,6 +178,7 @@ export class RevTypesComponent {
           this.dialogContent = "errorDependentMachines";
           return;
         }
+        console.log("Výsledek odebrání:", result);
         if (result === "success") {
           this.showDialog = true;
           this.dialogContent = "revTypeDeactivated";

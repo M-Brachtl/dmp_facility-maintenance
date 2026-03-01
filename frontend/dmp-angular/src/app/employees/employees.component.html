@@ -140,23 +140,43 @@
             <h2 class="text-xl font-bold mb-4">Školení zaměstnance</h2>
             <h3 class="text-lg font-semibold mb-2">{{ employeeTrainings[0] }}</h3>
             <div class="flex flex-row justify-around">
-                <div>
+                <div class="w-1/2">
                     <h4 class="text-lg mb-2">Aktivní školení</h4>
                     @for (revType of employeeTrainings[1]; track $index) {
                         <p>{{ revType }}</p>
                     }
                 </div>
-                <div>
+                <div class="w-1/2">
                     <h4 class="text-lg mb-2">Přiřazená školení</h4>
                     @for (assingment of employeeTrainings[2]; track $index) {
-                        <p>{{ assingment }} <button (click)="removeAssignment(employeeTrainings[0], assingment)" class="bg-red-500 rounded-sm hover:bg-red-700 active:bg-red-900 text-white transition-colors duration-200 cursor-pointer px-2 text-sm">X</button></p>
+                        <p class="inline-flex items-center gap-5">
+                            <span>{{ assingment }}</span>
+                            <button 
+                                (click)="removeAssignment(employeeTrainings[0], assingment)"
+                                class="bg-red-500 rounded-sm hover:bg-red-700 active:bg-red-900
+                                transition-colors duration-200 cursor-pointer text-sm">
+                                <img src="assets/close.svg" alt="X" class="w-4">
+                            </button>
+                        </p>
                     }
+                    <select class="w-full border border-gray-300 py-1 mt-2 cursor-pointer" [(ngModel)]="newAssignmentID">
+                        <option value="0" disabled selected hidden>Nové přiřazení</option>
+                        @for (revType of unassignedRevTypes(employeeTrainings[0]); track $index) {
+                            <option value="{{ revType[0] }}">{{ revType[1] }}</option>
+                        }
+                    </select>
+                    <button (click)="addAssignment(employeeTrainings[0])" class="w-full bg-blue-500 hover:bg-blue-700 text-white text-sm py-1 px-4 cursor-pointer active:bg-blue-900 transition-colors duration-200">Přiřadit</button>
                 </div>
             </div>
         }
         @case ('editSuccess') {
             <h2 class="text-xl font-bold mb-4">Úspěch</h2>
             <p>Zaměstnanec úspěšně upraven.</p>
+        }
+        @case ('assignmentError') {
+            <h2 class="text-xl font-bold mb-4">Chyba</h2>
+            <p>Nepodařilo se odebrat nebo přidat přiřazení školení.</p>
+            <p class="text-lg font-bold text-red-600">Tohle je chyba v programu.</p>
         }
     }
 </app-dialog-container>

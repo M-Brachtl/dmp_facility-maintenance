@@ -28,9 +28,10 @@ export class EmployeesComponent {
   dialogContent: string = '';
   TLogs: any[] = [];
   revTypes: any[] = [];
-  employeeTrainings: [string, string[], Number[] | []] = ["", [], []];
+  employeeTrainings: [string, string[], string[]] = ["", [], []];
   openedEditsID: number | null = null;
   assignments: [Number, Number[]][] | null = null;
+  newAssignmentID: Number = 0;
 
   constructor(private route: ActivatedRoute, private modeService: ModeService) {}
   async ngOnInit() {
@@ -178,11 +179,12 @@ export class EmployeesComponent {
   }
 
   openEmployeeTrainings(employeeID: number) {
-    console.log(this.assignments);
+    // console.log(this.assignments);
     if (this.assignments){
       this.employeeTrainings = [this.employeesList.find(emp => emp[0] === employeeID)[1], this.listValidTrainings(employeeID), this.assignments.find(emp => emp[0] === employeeID)![1].map(revTypeID => this.revTypes.find(revType => revType[0] == revTypeID)[1])];
       this.dialogContent = 'employeeTrainings';
       this.showDialog = true;
+      // console.log(this.employeeTrainings);
     }
   }
 
@@ -228,10 +230,46 @@ export class EmployeesComponent {
     }
   }
 
-  removeAssignment(employeeName: string, revTypeName: Number){
+  removeAssignment(employeeName: string, revTypeName: string) {
     const employeeID = this.employeesList.find(emp => emp[1] === employeeName)[0];
     const revTypeID = this.revTypes.find(rev => rev[1] === revTypeName)[0];
-    console.log("Removing revType " + revTypeID + " from assignment with employee " + employeeID);
+    if (this.eel_on) {
+      eel.remove_assignment(revTypeID, employeeID)().then((result: any) => {
+        if (result.error) {
+          this.showDialog = true;
+          this.dialogContent = 'assignmentError';
+          return;
+        }
+        // this.showDialog = true;
+        // this.dialogContent = 'assignmentError';
+        this.getAssignments();
+        this.employeeTrainings[2] = this.employeeTrainings[2].filter((revType: string) => revType !== revTypeName);
+      });
+    }
+  }
+
+  unassignedRevTypes(employeeName: string): string[] {
+    const employeeID = this.employeesList.find(emp => emp[1] === employeeName)[0];
+    const assignedRevTypesIDs = this.assignments?.find(emp => emp[0] === employeeID)?.[1] || [];
+    const unassignedRevTypes = this.revTypes.filter(revType => !assignedRevTypesIDs.includes(revType[0]) && revType[4] == 1);
+    return unassignedRevTypes;
+  }
+
+  addAssignment(employeeName: string) {
+    const employeeID = this.employeesList.find(emp => emp[1] === employeeName)[0];
+    const revTypeID = this.newAssignmentID;
+    if (this.eel_on) {
+      eel.add_assignment(revTypeID, employeeID)().then((result: any) => {
+        if (result.error) {
+          this.showDialog = true;
+          this.dialogContent = 'assignmentError';
+          return;
+        }
+        this.getAssignments();
+        this.employeeTrainings[2].push(this.revTypes.find(revType => revType[0] == revTypeID)[1]);
+        this.newAssignmentID = 0;
+      });
+    }
   }
 }
 
