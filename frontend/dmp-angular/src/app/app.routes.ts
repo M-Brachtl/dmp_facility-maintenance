@@ -18,7 +18,7 @@ export const routes: Routes = [
         component: MachinesComponent
     },
     {
-        path: 'revisions',
+        path: 'revisions/:mode',
         component: RevisionsComponent
     },
     {

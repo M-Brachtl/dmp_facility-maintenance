@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModeService } from '../mode.service';
 import { HeaderBtnsComponent } from '../header-btns/header-btns.component';
 import { FormsModule } from '@angular/forms';
@@ -35,6 +35,7 @@ export class RevisionsComponent {
   revTypeAdd: string = '';
 
   mode!: 'list' | 'add' | 'remove';
+  // listMode: 'list' | 'defects' | null = null;
   filterI = new filterInterface();
   revTypesList: any[] = [];
   eel_on!: boolean; // bez eel jsou použitá testovací data přímo v kódu
@@ -58,7 +59,7 @@ export class RevisionsComponent {
     this.showDialog = true;
   }
 
-  constructor(private route: ActivatedRoute, private modeService: ModeService) {}
+  constructor(private route: ActivatedRoute, private modeService: ModeService, private router: Router) {}
   async ngOnInit() {
     this.route.url.subscribe(url => {
       console.log('Current route:', url);
@@ -88,6 +89,18 @@ export class RevisionsComponent {
 
   get activeEmployees() {
     return this.employeesList.filter(emp => emp[2] === 1);
+  }
+  
+  get listMode() {
+    return this.route.snapshot.paramMap.get('mode') as 'list' | 'defects';
+  }
+
+  showDefects() {
+    this.router.navigate(['/revisions', 'defects']);
+    this.filterI.deleteFilters();
+  }
+  hideDefects() {
+    this.router.navigate(['/revisions', 'list']);
   }
 
   // cross table getters
@@ -213,6 +226,11 @@ export class RevisionsComponent {
     const date = entry[2];
     const result = entry[4];
 
+    if (this.listMode === "defects") {
+      // console.log("Kontrola závad pro záznam ID:", entry[0]);
+      return this.lastDefects.some(defLog => defLog[0] === entry[0]);
+    }
+
     if (
       (revTypeName && !revTypeName.toLowerCase().includes(this.filterI.filterValues['revType'].toLowerCase())) ||
       (machineName && !machineName.toLowerCase().includes(this.filterI.filterValues['machineName'].toLowerCase())) ||
@@ -227,9 +245,20 @@ export class RevisionsComponent {
     }
   }
 
-  // isFacility(revTypeID: number){
-  //   return '';
-  // }
+  get lastDefects() {
+    let lastLogs: any[] = [];
+    this.logs.forEach(log => {
+      const found = lastLogs.find(knownLog => knownLog[1] == log[1] && knownLog[3] == log[3]);
+      if (!found) {
+        lastLogs.push(log);
+      } else if (found[4] < log[4]){
+        lastLogs = lastLogs.filter(knownLog => knownLog[1] != log[1] || knownLog[3] != log[3]);
+        lastLogs.push(log);
+      }
+    })
+    lastLogs = lastLogs.filter(knownLog => knownLog[4] !== "bez závady");
+    return lastLogs;
+  }
 
   onSubmit(event: any) {
     event.preventDefault();

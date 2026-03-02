@@ -100,52 +100,58 @@
         </div>
     }
     @else if (mode == 'list') {
-        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
-            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
-                    <img [src]="filterI.iconGet" alt="Schovat filtry"
-                        class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
-                        (click)="filterI.toggleInterface()"
-                    />
-                <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
-                <span></span>
+        @if(listMode == 'list'){
+            <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
+                <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+                        <img [src]="filterI.iconGet" alt="Schovat filtry"
+                            class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
+                            (click)="filterI.toggleInterface()"
+                        />
+                    <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
+                    <span></span>
+                </div>
+                @if (filterI.showing) {
+                    <div>
+                        <label for="machineName" class="mr-2 font-semibold">Název stroje:</label>
+                        <input autocomplete="off" [(ngModel)]="filterI.filterValues['machineName']" type="text" id="machineName" class="border border-gray-300 rounded px-2 py-1" placeholder="Název stroje" />
+                    </div>
+                    <div>
+                        <label for="machineInNum" class="mr-2 font-semibold">Inv. číslo stroje:</label>
+                        <input autocomplete="off" [(ngModel)]="filterI.filterValues['machineInNum']" type="text" id="machineInNum" class="border border-gray-300 rounded px-2 py-1" placeholder="Inv. č. stroje" />
+                    </div>
+                    <div>
+                        <label for="revType" class="mr-2 font-semibold">Název revize:</label>
+                        <input autocomplete="off" [(ngModel)]="filterI.filterValues['revType']" type="text" id="revType" class="border border-gray-300 rounded px-2 py-1" placeholder="Název revize" />
+                    </div>
+                    <div>
+                        <label for="result" class="mr-2 font-semibold">Výsledek:</label>
+                        <select name="result" id="result" [(ngModel)]="filterI.filterValues['result']" class="border border-gray-300 rounded px-2 py-1">
+                            <option value="" selected>Vše</option>
+                            <option value="bez závady">Bez závady</option>
+                            <option value="malá závada">Malá závada</option>
+                            <option value="velká závada">Velká závada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="minDate" class="mr-2 font-semibold">Minimální datum:</label>
+                        <input autocomplete="off" [(ngModel)]="filterI.filterValues['minDate']" type="date" min="0" id="minDate" class="border border-gray-300 rounded px-2 py-1" placeholder="min. datum" />
+                    </div>
+                    <div>
+                        <label for="maxDate" class="mr-2 font-semibold">Maximální datum:</label>
+                        <input autocomplete="off" [(ngModel)]="filterI.filterValues['maxDate']" type="date" min="0" id="maxDate" class="border border-gray-300 rounded px-2 py-1" placeholder="max. datum" />
+                    </div>
+                }
             </div>
-            @if (filterI.showing) {
-                <div>
-                    <label for="machineName" class="mr-2 font-semibold">Název stroje:</label>
-                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['machineName']" type="text" id="machineName" class="border border-gray-300 rounded px-2 py-1" placeholder="Název stroje" />
-                </div>
-                <div>
-                    <label for="machineInNum" class="mr-2 font-semibold">Inv. číslo stroje:</label>
-                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['machineInNum']" type="text" id="machineInNum" class="border border-gray-300 rounded px-2 py-1" placeholder="Inv. č. stroje" />
-                </div>
-                <div>
-                    <label for="revType" class="mr-2 font-semibold">Název revize:</label>
-                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['revType']" type="text" id="revType" class="border border-gray-300 rounded px-2 py-1" placeholder="Název revize" />
-                </div>
-                <div>
-                    <label for="result" class="mr-2 font-semibold">Výsledek:</label>
-                    <select name="result" id="result" [(ngModel)]="filterI.filterValues['result']" class="border border-gray-300 rounded px-2 py-1">
-                        <option value="" selected>Vše</option>
-                        <option value="bez závady">Bez závady</option>
-                        <option value="malá závada">Malá závada</option>
-                        <option value="velká závada">Velká závada</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="minDate" class="mr-2 font-semibold">Minimální datum:</label>
-                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['minDate']" type="date" min="0" id="minDate" class="border border-gray-300 rounded px-2 py-1" placeholder="min. datum" />
-                </div>
-                <div>
-                    <label for="maxDate" class="mr-2 font-semibold">Maximální datum:</label>
-                    <input autocomplete="off" [(ngModel)]="filterI.filterValues['maxDate']" type="date" min="0" id="maxDate" class="border border-gray-300 rounded px-2 py-1" placeholder="max. datum" />
-                </div>
-            }
-        </div>
-        <div class="text-center mb-5">
-            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
-        </div>
+            <div class="mb-5 gap-1 inline-flex justify-center w-full">
+                <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+                <button (click)="showDefects()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Zobrazit závady</button>
+            </div>
+        }
+        @else {
+            <button (click)="hideDefects()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Zpět</button>
+        }
         <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
-            <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
+            <div [class]="listMode === 'defects' ? 'max-table-h-filter-defects' : filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
                 <table class="table-auto border-collapse border border-gray-400 w-3xl text-center">
                     <thead class="bg-indigo-500 text-white h-7 w-full sticky top-0 z-10">
                         <tr>

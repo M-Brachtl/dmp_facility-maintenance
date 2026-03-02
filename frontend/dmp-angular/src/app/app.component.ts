@@ -37,6 +37,10 @@ export class AppComponent {
         return 'Správa strojů';
       case '/revisions':
         return 'Záznamy revizí';
+      case '/revisions/list':
+        return 'Záznamy revizí';
+      case '/revisions/defects':
+        return 'Záznamy revizí se závadami';
       case '/rev-types':
         return 'Typy revizí';
       case '/trainings':
