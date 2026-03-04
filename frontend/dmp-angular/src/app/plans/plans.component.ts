@@ -68,7 +68,7 @@ export class PlansComponent {
   async loadPlan(filename: string): Promise<void> {
     if (this.eel_on) {
       return new Promise((resolve, reject) => {
-        eel.generate_plan_api(filename)((response: { "status": string, "plan": any }) => {
+        eel.generate_plan_api()((response: { "status": string, "plan": any }) => {
           this.current_plan = response.plan;
           resolve(); // signalizuje dokončení
         });

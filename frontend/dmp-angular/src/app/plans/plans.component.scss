@@ -3,8 +3,11 @@
 // .max-table-h-filter-shown {
 //     max-height: 40vh;
 // }
-.max-h-table {
+.max-table-h-filter-shown {
     max-height: 52vh;
+}
+.max-table-h-filter-hidden {
+    max-height: 62vh;
 }
 .today-cell {
     @apply bg-yellow-200;

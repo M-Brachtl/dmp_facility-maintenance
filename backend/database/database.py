@@ -94,11 +94,17 @@ def list_machines(list_last_revisions=False, **params):
         # přidání revizí ve formátu (log_id, rev_type, datum)
         log_list = []
         if list_last_revisions:
-            cursor.execute("""SELECT id, rev_type, date FROM revision_log AS og_log WHERE machine_id=? AND result='bez závady' AND date=(
-                    SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.rev_type=og_log.rev_type AND log.result='bez závady'
-                )""",
-                (machine[0],)
-            )
+            if machine[0] != 0:
+                cursor.execute("""SELECT id, rev_type, date FROM revision_log AS og_log WHERE machine_id=? AND result='bez závady' AND date=(
+                        SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id=og_log.machine_id AND log.rev_type=og_log.rev_type AND log.result='bez závady'
+                    )""",
+                    (machine[0],)
+                )
+            else:
+                cursor.execute("""SELECT id, rev_type, date FROM revision_log AS og_log WHERE machine_id IS NULL AND result='bez závady' AND date=(
+                        SELECT MAX(log.date) FROM revision_log AS log WHERE log.machine_id IS NULL AND log.rev_type=og_log.rev_type AND log.result='bez závady'
+                    )"""
+                )
             log_list = cursor.fetchall()
             for lID, log in enumerate(log_list):
                 log_list[lID] = list(log_list[lID])
