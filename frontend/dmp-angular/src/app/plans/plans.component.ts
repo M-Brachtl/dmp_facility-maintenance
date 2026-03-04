@@ -21,7 +21,7 @@ export class PlansComponent {
   calendar: { [key: string]: { machines: (Date | string | boolean | number)[][]; people: (Date | string)[][] } } = {};
   next_month_cal: { [key: string]: { machines: (Date | string | boolean | number)[][]; people: (Date | string)[][] } } = {};
   fill_used = false;
-  filter_showing = false;
+  filter_showing = true;
   min_date?: string;
   max_date?: string;
   dialogShow = false;
@@ -35,19 +35,18 @@ export class PlansComponent {
     return year === today.getFullYear() && month === (today.getMonth() + 1);
   }
 
-  // get iconPath(): string {
-  //   return this.filter_showing ? 'assets/hide.svg' : 'assets/show.svg';
-  // }
+  get iconPath(): string {
+    return this.filter_showing ? 'assets/hide.svg' : 'assets/show.svg';
+  }
 
   // get tableMaxHeightClass(): string {
   //   return this.filter_showing ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden';
   // }
 
   deleteFilters(): void {
-    this.fill_used = true;
-    this.min_date = undefined;
-    this.max_date = undefined;
-    this.parsePlan();
+    this.machineNameFilter = "";
+    this.machineInvFilter = "";
+    this.revTypeFilter = "";
   }
 
   constructor(private modeService: ModeService) {}
@@ -337,6 +336,21 @@ export class PlansComponent {
 
   tooLateTrainingStyle(trainingDate: Date, planned_date: Date): string {
     return trainingDate < planned_date ? 'late' : '';
+  }
+
+  machineNameFilter: string = ""
+  machineInvFilter: string = ""
+  revTypeFilter: string = ""
+
+  rowFiltered(entry: any[]): boolean {
+    if (!(entry[3] as string).includes(this.machineNameFilter.trim()) && this.machineNameFilter != "") return false;
+    else if (!(entry[2] as string).includes(this.machineInvFilter.trim()) && this.machineInvFilter != "") return false;
+    else if (!(entry[1] as string).includes(this.revTypeFilter.trim()) && this.revTypeFilter != "") return false;
+    else return true;
+  }
+
+  filteredMonth(month: any[][]): any[] {
+    return month.filter(entry => this.rowFiltered(entry));
   }
 }
 
