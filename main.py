@@ -22,9 +22,8 @@ def close_window(*args, **kwargs):
         sys.exit(0)
 
 @eel.expose
-def generate_plan_api(file_name: str = "", years: int = 0): # pokud se napíše nebo defaultuje nula, nezapíše se nic do argumentů funkce -> použije se výchozích 10 let
-    kwargs = {key: value for key, value in zip(("years", "file_name"), (years,file_name)) if value}
-    if plan := planning.generate_plan(**kwargs):
+def generate_plan_api():
+    if plan := planning.generate_plan():
         return {"status": "success", "plan": plan}
     else:
         return {"status": "error", "message": "Při generování plánu došlo k chybě."}

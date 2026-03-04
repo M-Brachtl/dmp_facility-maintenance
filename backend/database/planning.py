@@ -1,5 +1,3 @@
-from datetime import date
-import os
 try:
     from . import database as dtb
     from .database import dateDTB
@@ -7,34 +5,10 @@ except ImportError:
     import database as dtb
     from database import dateDTB
 
-from json import dump, load
-
 today = dateDTB.today()
 
-def test_exists(file_name: str) -> bool:
-    return os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name))
-
-def generate_plan_name():
-    file_name = f"gen_plan_{today.year}_{today.month}_{today.day}"
-    # zkontroluj jestli file_name neexistuje
-    increment = 1
-    while test_exists(file_name + ".json"):
-        file_name = f"gen_plan_{today.year}_{today.month}_{today.day}_{increment}"
-        increment += 1
-    return file_name
-
-def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict: # pokud je filename prázdný, neuloží se žádný soubor
-    # if file_name == "" or file_name is None or file_name.strip() == "" or file_name.startswith("gen_") or test_exists(file_name + ".json"):
-    #     if file_name == "gen_default":
-    #         file_name = generate_plan_name()
-    #     else:
-    #         raise ValueError("Neplatný název souboru pro plán.")
-    file_name = "" # disable saving for now
-    file_name += ".json" if file_name else ""
-    if (title == "" or title is None or title.strip() == "") and file_name:
-        title = file_name.replace(".json","")
+def generate_plan(years: int = 10):
     plan = {
-        "title": title,
         "machines": [], # pro každá index: None | (di, in_num, name, seznam plánovaných revizí(rev_id, rev_type, datum, edited))
         "people": [] # pro každá index: None | (name, seznam plánovaných tréninků(rev_id, rev_type, datum, edited))
     }
@@ -64,9 +38,6 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
     people_data = dtb.list_people(list_last_trainings=True)
     for person in people_data:
         planned_trainings = []
-        ## Zastaralé:
-        ## list_of_revs = [rev[0] for rev in dtb.list_revision_types()] # získej všechny tréninky, protože lidé musí dělat všechny
-        ## Nové:
         list_of_revs = dtb.get_assignment(person[0])[1] # získej všechny tréninky, které jsou přiřazené dané osobě
         for training_type in list_of_revs: # projeď každý trénink dané osoby
             periodicity = dtb.list_revision_types(_id=training_type)[0][2]
@@ -91,30 +62,8 @@ def generate_plan(years: int = 10, title: str = "", file_name: str = "") -> dict
                 i += 1
             del work_date
         plan["people"].append([*person[:2], planned_trainings])
-
-    # f"plan_{today.year}_{today.month}_{today.day}.json"
-    # # zkontroluj jestli file_name neexistuje
-    # increment = 1
-    # while os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name)):
-    #     file_name = f"plan_{today.year}_{today.month}_{today.day}_{increment}.json"
-    #     increment += 1
-    if file_name:
-        dump(plan, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "w", encoding="utf-8"), ensure_ascii=False, indent=4)
     return plan
 
-def get_plan(file_name: str):
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "r", encoding="utf-8") as f:
-        return load(f)
-    
-def save_plan(plan: dict, file_name: str):
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "w", encoding="utf-8") as f:
-        dump(plan, f, ensure_ascii=False)
-    # test if able to parse back
-    try:
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plans", file_name), "r", encoding="utf-8") as f:
-            _ = load(f)
-    except Exception as e:
-        print(f"Error při kontrole uloženého plánu: {e}, soubor může být poškozen.")
-
 if __name__ == "__main__":
-    generate_plan(file_name="gen_default")
+    # generate_plan()
+    print(dtb.list_machines(list_last_revisions=True))
