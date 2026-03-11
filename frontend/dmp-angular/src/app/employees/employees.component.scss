@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../commonStyles.scss";
 
 .max-table-h-filter-shown {
     max-height: 42vh;
@@ -13,4 +14,12 @@
 
 .editable {
     @apply border border-blue-500 bg-blue-100 px-1 rounded;
+}
+
+// .detailBtns {
+//     @apply bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
+//     hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200;
+// }
+.emplDetailBtns {
+    @apply aria-disabled:hover:bg-indigo-500;
 }

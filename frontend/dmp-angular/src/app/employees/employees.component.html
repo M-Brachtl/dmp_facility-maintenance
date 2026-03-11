@@ -23,13 +23,13 @@
         </div>
     }
     @else if (mode == 'list') {
-        <div class="grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
-            <div class="col-span-2 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
+        <div class="filtersContainer">
+            <div class="filtersHeaderDiv"> <!-- Nadpis filtrů, schování filtrů -->
                     <img [src]="filterI.iconGet" alt="Schovat filtry"
-                        class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
+                        class="filtersHideBtn"
                         (click)="filterI.toggleInterface()"
                     />
-                <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
+                <span class="filtersHeaderText">Filtry</span>
                 <span></span>
             </div>
             @if (filterI.showing) {
@@ -48,7 +48,7 @@
             }
         </div>
         <div class="text-center mb-5">
-            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+            <button (click)="filterI.deleteFilters()" type="button" class="basicBtn rounded">Smazat filtry</button>
         </div>
         <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
             <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
@@ -76,14 +76,10 @@
                                             <button (click)="editEmployee(employee[0])" class="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-semibold px-1 mx-1 rounded active:bg-green-900 transition-colors duration-200">Potvrdit</button>
                                         }
                                     </td> <!-- Název -->
-                                    <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
-                                        hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
-                                        aria-disabled:hover:bg-indigo-500">
+                                    <td class="basicBtn emplDetailBtns">
                                         <button class="cursor-pointer" (click)="openEmployeeTrainings(employee[0])">Školení</button>
                                     </td>
-                                    <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer
-                                        hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200
-                                        aria-disabled:hover:bg-indigo-500">
+                                    <td class="basicBtn emplDetailBtns">
                                         <button class="cursor-pointer" (click)="openEdits(employee[0])">Editovat</button>
                                     </td>
                                 <!-- <td class="bg-indigo-500 text-white font-bold py-1 px-4 cursor-pointer

@@ -43,11 +43,11 @@
             <div class="col-span-6 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
                 <!-- <button class=" h-3" title="Schovat filtry"> -->
                     <img [src]="filterI.iconGet" alt="Schovat filtry"
-                        class="w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200"
+                        class="filtersHideBtn"
                         (click)="filterI.toggleInterface()"
                     />
                 <!-- </button> -->
-                <span class="text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white">Filtry</span>
+                <span class="filtersHeaderText">Filtry</span>
                 <span></span>
             </div>
             @if (filterI.showing) {
@@ -88,7 +88,7 @@
             }
         </div>
         <div class="text-center mb-5">
-            <button (click)="filterI.deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
+            <button (click)="filterI.deleteFilters()" type="button" class="basicBtn rounded">Smazat filtry</button>
             <!-- <button (click)="deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button> -->
         </div>
         <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
@@ -112,7 +112,7 @@
                                 <td class="w-2/10 px-1">{{ machine[3] }}</td> <!-- Typ -->
                                 <td class="w-2/10 px-1">{{ machine[4] }}</td> <!-- Lokace -->
                                 <!-- <td>{{ machine[6] }}</td> Stav - disposed? -->
-                                <td (click)="openMachineDetails(machine[0])" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 cursor-pointer active:bg-indigo-800 transition-colors duration-200"><button class="cursor-pointer">Detaily</button></td>
+                                <td (click)="openMachineDetails(machine[0])" class="basicBtn"><button class="cursor-pointer">Detaily</button></td>
                             </tr>
                             }
                         }

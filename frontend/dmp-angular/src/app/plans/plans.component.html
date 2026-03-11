@@ -38,8 +38,8 @@
                     class="w-8 bg-white rounded spin-btn"
                     (change)="markOverflowWeeks()"
                 />
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
+                <button class="arrowBtn" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
+                <button class="arrowBtn" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
             </div>
         </div>
         <div class="overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300 max-h-table">
@@ -73,7 +73,6 @@
         </div>
     }
     @else if (mode == 'list') {
-        <!-- <h3 class="text-lg font-bold text-center mb-4">{{ current_plan.title }}</h3> -->
         <div class="grid grid-cols-3 gap-4 mb-2 pb-4 place-items-center bg-gray-200">
             <div class="col-span-3 flex items-center justify-between bg-gray-500 w-full">
                     <img [src]="iconPath" alt="Schovat filtry"
@@ -100,9 +99,6 @@
         </div>
         @if (filter_showing && false) {
             <div class="flex gap-2 justify-center" [@slideInOut]>
-                <!-- <div class="text-center mb-5">
-                    <button (click)="applyFilters(min_date, max_date)" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Aplikovat filtry</button>
-                </div> -->
                 <div class="text-center mb-5">
                     <button (click)="deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button>
                 </div>
@@ -115,16 +111,16 @@
                 class="w-8 bg-white rounded spin-btn"
                 (change)="markOverflowWeeks()"
                 />
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
-                <button class="bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
+                <button class="arrowBtn" (click)="limitGlobal = limitGlobal + 1; markOverflowWeeks()"><img src="assets/arrow_up.svg" alt="" class="w-4 h-5" /></button>
+                <button class="arrowBtn" (click)="limitGlobal = limitGlobal - 1; markOverflowWeeks()"><img src="assets/arrow_down.svg" alt="" class="w-4 h-5" /></button>
             </div>
             <div class="text-center">
-                <button (click)="deleteFilters()" type="button" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Smazat filtry</button>
+                <button (click)="deleteFilters()" type="button" class="planBtn">Smazat filtry</button>
             </div>
             <div class="flex items-center justify-left gap-1">
                 <!-- <label for="fill-used-filter" class="mr-2 font-semibold">Zobrazit prázdné měsíce:</label>
                 <input autocomplete="off" [(ngModel)]="fill_used" type="checkbox" id="fill-used-filter" class="w-4 h-4 accent-indigo-500 cursor-pointer" /> -->
-                <button (click)="showCurrentMonth()" class="bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2">Zobrazit aktuální měsíc</button>
+                <button (click)="showCurrentMonth()" class="planBtn">Zobrazit aktuální měsíc</button>
             </div>
         </div>
         <div class="overflow-y-auto overflow-x-hidden shadow-inner shadow-gray-300" [class]="filter_showing ? 'max-table-h-filter-shown' : 'max-table-h-filter-hidden'">

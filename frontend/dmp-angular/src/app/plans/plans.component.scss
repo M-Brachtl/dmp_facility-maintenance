@@ -3,11 +3,20 @@
 // .max-table-h-filter-shown {
 //     max-height: 40vh;
 // }
+.max-h-table {
+    max-height: 62vh;
+}
 .max-table-h-filter-shown {
     max-height: 52vh;
 }
 .max-table-h-filter-hidden {
     max-height: 62vh;
+}
+.arrowBtn {
+    @apply bg-indigo-500 cursor-pointer hover:bg-indigo-400 active:bg-indigo-700;
+}
+.planBtn {
+    @apply bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-colors duration-150 border border-black text-white rounded cursor-pointer px-1 mx-2;
 }
 .today-cell {
     @apply bg-yellow-200;

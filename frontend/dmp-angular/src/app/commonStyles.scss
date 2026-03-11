@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.basicBtn {
+    @apply bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 cursor-pointer active:bg-indigo-800 transition-colors duration-200;
+}
+.filtersContainer {
+    @apply grid grid-cols-2 gap-4 mb-2 pb-4 place-items-center bg-gray-200;
+}
+.filtersHeaderDiv {
+    @apply col-span-2 flex items-center justify-between bg-gray-500 w-full;
+}
+.filtersHideBtn {
+    @apply w-3.5 inline absolute left-1/13 bg-gray-300 p-0.5 rounded cursor-pointer hover:bg-gray-400 transition-colors duration-200;
+}
+.filtersHeaderText {
+    @apply text-xs mx-auto left-3 relative transform -translate-x-1/2 text-white;
+}
