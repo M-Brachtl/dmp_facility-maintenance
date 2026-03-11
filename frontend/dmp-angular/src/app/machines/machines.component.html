@@ -38,15 +38,12 @@
         </div>
     }
     @else if (mode == 'list') {
-        <!-- <div class="flex justify-center mb-2 space-x-5 flex-wrap"> Filtry -->
         <div class="grid grid-cols-6 gap-1.5 mb-2 pb-4 place-items-center bg-gray-200">
             <div class="col-span-6 flex items-center justify-between bg-gray-500 w-full"> <!-- Nadpis filtrů, schování filtrů -->
-                <!-- <button class=" h-3" title="Schovat filtry"> -->
                     <img [src]="filterI.iconGet" alt="Schovat filtry"
                         class="filtersHideBtn"
                         (click)="filterI.toggleInterface()"
                     />
-                <!-- </button> -->
                 <span class="filtersHeaderText">Filtry</span>
                 <span></span>
             </div>
@@ -89,7 +86,6 @@
         </div>
         <div class="text-center mb-5">
             <button (click)="filterI.deleteFilters()" type="button" class="basicBtn rounded">Smazat filtry</button>
-            <!-- <button (click)="deleteFilters()" type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-4 rounded cursor-pointer active:bg-indigo-800 transition-colors duration-200">Smazat filtry</button> -->
         </div>
         <div #tableContainer class="flex justify-center flex-col"> <!-- Tabulka -->
             <div [class]="filterI.hiddenStyleValue" class="overflow-y-auto overflow-x-hidden"> <!-- Pro scrollování tabulky -->
@@ -171,20 +167,7 @@
                     <input class="border border-gray-300 rounded" #locChanger type="text" [value]="machineDetails[3]">
                     <button (click)="saveLocChange()" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold px-1 rounded cursor-pointer active:bg-blue-900">Uložit</button>
                 </p>
-                <!-- <p><span class="font-semibold">Lokace: </span>{{ machineDetails[3] }}</p> -->
                 <p><span class="font-semibold">Likvidován: </span>{{ machineDetails[4] === "" ? 'Ne' : strDate(machineDetails[4]) }}</p>
-                <!-- <p><span class="font-semibold">Nadcházející revize: </span>
-                    @if (machineDetails[5].length == 0) {
-                        Žádné nadcházející revize
-                    }
-                    @else {
-                        <ul class="list-disc list-inside">
-                            @for (rev of machineDetails[5]; track $index) {
-                                <li [class]="beforeToday(rev[1])">{{ (rev[0]) }} - {{ strDate(rev[1]) }}</li>
-                            }
-                        </ul>
-                    }
-                </p> -->
                 <p><span class="font-semibold">Příští revize: </span>
                     @if (machineDetails[6].length == 0 || machineDetails[4] !== "") {
                         Žádné revize
