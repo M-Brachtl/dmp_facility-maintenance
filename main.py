@@ -1,7 +1,7 @@
 import sys
 import backend.database.database as dtb
 from backend.database.database import dateDTB
-import backend.database.planning as planning
+import backend.planning as planning
 import eel
 
 testing_no_angular = False
@@ -154,6 +154,10 @@ def add_assignment(rev_type_id: int, people_id: int):
 @eel.expose
 def remove_assignment(rev_type_id: int, people_id: int):
     return dtb.remove_assignment(rev_type_id, people_id)
+
+@eel.expose
+def export_csv():
+    return dtb.export_csv()
 #endregion
 # eel.start('./index.html', size=(800, 600), mode='edge')
 print("Starting Eel application...")

@@ -1,9 +1,9 @@
 try:
-    from . import database as dtb
-    from .database import dateDTB
+    from .database import database as dtb
+    from .database.database import dateDTB
 except ImportError:
-    import database as dtb
-    from database import dateDTB
+    import database.database as dtb
+    from database.database import dateDTB
 
 today = dateDTB.today()
 
@@ -65,5 +65,5 @@ def generate_plan(years: int = 10):
     return plan
 
 if __name__ == "__main__":
-    # generate_plan()
-    print(dtb.list_machines(list_last_revisions=True))
+    print(generate_plan())
+    # print(dtb.list_machines(list_last_revisions=True))

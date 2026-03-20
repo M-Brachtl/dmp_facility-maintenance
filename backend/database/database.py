@@ -3,10 +3,10 @@ import os
 import sys
 import datetime as dt
 from calendar import monthrange
-try:
-    from . import backup
-except ImportError:
-    import backup
+# try:
+#     from . import backup
+# except ImportError:
+#     import backup
 
 ## useful later: output = [int(n) for n in test_str.strip("[]").split(", ")]
 class dateDTB(dt.date):
@@ -577,30 +577,69 @@ def get_assignment(person: int):
     return None
 # endregion
 
-# region speciální funkce
-def clean_database(): # odstraní všechen obsah databáze (krom tabulek a jejich struktur)
-    # if input("Napiš 'ANO', pokud sis zazálohoval databázi a máš 100% jistotu, že chceš pokračovat: ") != "ANO":
-    #     raise ValueError("!! Smazání databáze zrušeno. !!")
-    backup.backup_database()
-    # if input("Zkontroluj, jestli se databáze zazálohovala ('JO'): ") != "JO":
-    #     raise ValueError("!! Smazání databáze zrušeno. !!")
-
-    cursor.execute("DELETE FROM machines;")
-    cursor.execute("DELETE FROM people;")
-    cursor.execute("DELETE FROM periodicity;")
-    cursor.execute("DELETE FROM revision_log;")
-    cursor.execute("DELETE FROM revision_types;")
-    cursor.execute("DELETE FROM training_log;")
-
-    connection.commit()
+import csv
+import os
+def export_csv():
+    cursor.execute("SELECT * FROM machines;")
+    machines = cursor.fetchall()
+    os.makedirs('./export', exist_ok=True)
+    with open('./export/machines.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['id', 'in_num', 'name', 'type', 'location', 'revision_array', 'disposed'])
+        writer.writerows(machines)
+    
+    cursor.execute("SELECT * FROM revision_types;")
+    revision_types = cursor.fetchall()
+    with open('./export/revision_types.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['id', 'name', 'validity_period', 'facility_activity', 'active'])
+        writer.writerows(revision_types)
+    
+    cursor.execute("SELECT * FROM people;")
+    people = cursor.fetchall()
+    with open('./export/people.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['id', 'name', 'active'])
+        writer.writerows(people)
+    
+    cursor.execute("SELECT * FROM revision_log;")
+    revision_log = cursor.fetchall()
+    with open('./export/revision_log.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['id', 'machine_id', 'date', 'rev_type', 'result', 'notes', 'person_id'])
+        writer.writerows(revision_log)
+    
+    cursor.execute("SELECT * FROM training_log;")
+    training_log = cursor.fetchall()
+    with open('./export/training_log.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['id', 'revision_type', 'person', 'date', 'expiration_date'])
+        writer.writerows(training_log)
     return "success"
+# # region speciální funkce
+# def clean_database(): # odstraní všechen obsah databáze (krom tabulek a jejich struktur)
+#     # if input("Napiš 'ANO', pokud sis zazálohoval databázi a máš 100% jistotu, že chceš pokračovat: ") != "ANO":
+#     #     raise ValueError("!! Smazání databáze zrušeno. !!")
+#     backup.backup_database()
+#     # if input("Zkontroluj, jestli se databáze zazálohovala ('JO'): ") != "JO":
+#     #     raise ValueError("!! Smazání databáze zrušeno. !!")
 
-def recover_database(backup_path: str):
-    backup.backup_database()
-    backup.restore_database(2)
+#     cursor.execute("DELETE FROM machines;")
+#     cursor.execute("DELETE FROM people;")
+#     cursor.execute("DELETE FROM periodicity;")
+#     cursor.execute("DELETE FROM revision_log;")
+#     cursor.execute("DELETE FROM revision_types;")
+#     cursor.execute("DELETE FROM training_log;")
 
-def clear_backups():
-    backup.clear_backups()
+#     connection.commit()
+#     return "success"
+
+# def recover_database(backup_path: str):
+#     backup.backup_database()
+#     backup.restore_database(2)
+
+# def clear_backups():
+#     backup.clear_backups()
 #endregion
 
 if __name__ == "__main__":

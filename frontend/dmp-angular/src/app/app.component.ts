@@ -55,6 +55,17 @@ export class AppComponent {
         return 'Hlavní menu';
     }
   }
+
+  export() {
+    eel.export_csv()((result: any) => {
+      console.log('Export result:', result);
+      if (result === 'success') {
+        alert('Data byla úspěšně exportována!');
+      } else {
+        alert('Export selhal: ' + result);
+      }
+    });
+  }
 }
 
 // eel
