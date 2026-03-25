@@ -21,15 +21,10 @@ export class HeaderBtnsComponent {
   switchMode(mode: 'list' | 'add' | 'remove') {
     // emit event modeChanged with mode value
     this.modeService.setMode(mode);
-    this.route.url.subscribe(url => {
-      if (url.toString().includes('revisions')) {
-        console.log('Current route:', url);
-        if (mode === 'list') {
-          this.router.navigate(['/revisions', 'list']);
-        } else {
-          this.router.navigate(['/revisions']);
-        }
-      }
-    });
+    // this.route.url.subscribe(url => {
+    //   if (url.toString().includes('revisions')) {
+        
+    //   }
+    // });
   }
 }
