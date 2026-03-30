@@ -26,6 +26,7 @@ export class AppComponent {
       .subscribe((event: NavigationEnd) => {
         console.log('Route changed:', event.url);
         this.title = this.getTitle(event.url);
+        this.btnsShown = false; // schová tlačítka při každé změně stránky, aby se nepletla s případným dialogem s výsledkem exportu nebo jiným dialogem, který by mohl být otevřený na nové stránce
       });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
@@ -64,7 +65,13 @@ export class AppComponent {
       } else {
         alert('Export selhal: ' + result);
       }
+      this.toggleBtns(); // schová tlačítka po exportu, aby se nepletla s případným dialogem s výsledkem exportu
     });
+  }
+
+  btnsShown = false;
+  toggleBtns() {
+    this.btnsShown = !this.btnsShown;
   }
 }
 

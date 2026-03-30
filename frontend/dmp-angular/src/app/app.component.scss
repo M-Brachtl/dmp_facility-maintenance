@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.btn-shown {
+    @apply top-1;
+}
+
+.btn-hidden {
+    @apply -top-20;
+}
