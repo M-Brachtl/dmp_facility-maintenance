@@ -97,6 +97,7 @@ export class RevisionsComponent {
 
   showDefects() {
     this.router.navigate(['/revisions', 'defects']);
+    console.log(this.router);
     this.filterI.deleteFilters();
   }
   hideDefects() {

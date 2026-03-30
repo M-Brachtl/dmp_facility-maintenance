@@ -57,8 +57,8 @@
         <h2 class="karta-nadpis">Záznamy revizí</h2>
         <!-- <p class="text-sm text-gray-600">Popis karty 1</p> -->
         <ul class="list-disc list-inside">
-            <a draggable="false" [routerLink]="['/revisions']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
-            <a draggable="false" [routerLink]="['/revisions']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
+            <a draggable="false" [routerLink]="['/revisions', 'list']" (click)="switchMode('add')"><li class="karta-item">přidat</li></a>
+            <a draggable="false" [routerLink]="['/revisions', 'list']" (click)="switchMode('remove')"><li class="karta-item">odebrat</li></a>
             <a draggable="false" [routerLink]="['/revisions', 'list']" (click)="switchMode('list')"><li class="karta-item">vypsat</li></a>
             <a draggable="false" [routerLink]="['/revisions', 'defects']" (click)="switchMode('list')"><li class="karta-item">závadové</li></a>
         </ul>
