@@ -117,10 +117,13 @@ export class TrainingsComponent {
   
   logGet = {
     revType: (log: any[]): string => {
-      return this.revTypesList[log[1]-1][1];
+      // return this.revTypesList[log[1]-1][1];
+      return this.revTypesList.find(rt => rt[0] === log[1]) ? this.revTypesList.find(rt => rt[0] === log[1])[1] : 'Unknown Rev Type';
     },
     periodicity: (log: any[]): string => {
-      return this.revTypesList[log[1]-1][2] + ' měsíců';
+      // return this.revTypesList[log[1]-1][2] + ' měsíců';
+      const revType = this.revTypesList.find(rt => rt[0] === log[1]);
+      return revType ? revType[2] + ' měsíců' : 'Unknown Periodicity';
     },
     employeeFromLog: (log: any[]): string => {
       // console.log(this.employeesList, log);

@@ -106,13 +106,16 @@ export class RevisionsComponent {
   // cross table getters
   logGet = {
     revType: (log: any[]): string => {
-      return this.revTypesList[log[3]-1][1];
+      // return this.revTypesList[log[3]-1][1];
+      return this.revTypesList.find(rt => rt[0] === log[3]) ? this.revTypesList.find(rt => rt[0] === log[3])[1] : 'Unknown Rev Type';
     },
     machine: (log: any[]): string => {
-      return this.machinesList[log[1]][2];
+      // return this.machinesList[log[1]][2];
+      return this.machinesList.find(m => m[0] === log[1]) ? this.machinesList.find(m => m[0] === log[1])[2] : 'Unknown Machine';
     },
     machineInNum: (log: any[]): string => {
-      return this.machinesList[log[1]][1];
+      // return this.machinesList[log[1]][1];
+      return this.machinesList.find(m => m[0] === log[1]) ? this.machinesList.find(m => m[0] === log[1])[1] : 'Unknown Inventory Number';
     },
     employeeFromLog: (log: any[]): string => {
       const employees = this.employeesList;

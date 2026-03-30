@@ -61,10 +61,12 @@ export class PeriodicitiesComponent {
   // cross table getters
   periodGet = {
     revType: (periodicity: any[]): string => {
-      return this.revTypesList[periodicity[1]-1]
+      // return this.revTypesList[periodicity[1]-1]
+      return this.revTypesList.find(rt => rt[0] === periodicity[1]) || ['','','',''];
     },
     machine: (periodicity: any[]): string => {
-      return this.machinesList[periodicity[2]]
+      // return this.machinesList[periodicity[2]]
+      return this.machinesList.find(m => m[0] === periodicity[2]) || ['','','','','',[],'',[]];
     }
   };
 
