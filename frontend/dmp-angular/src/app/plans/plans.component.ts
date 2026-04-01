@@ -216,11 +216,11 @@ export class PlansComponent {
     }
 
     if (nextMonth){
-      this.next_month_cal = calendar
+      this.next_month_cal = calendar;
       this.markOverflowWeeks(this.limitGlobal, true);
     } else {
-      this.calendar = calendar
-      this.markOverflowWeeks(this.limitGlobal-1, false); //note: use 0 to test overflow marks
+      this.calendar = calendar;
+      this.markOverflowWeeks(this.limitGlobal, false); //note: use 0 to test overflow marks
     }
   }
 

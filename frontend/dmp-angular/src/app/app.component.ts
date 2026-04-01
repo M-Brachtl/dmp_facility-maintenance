@@ -17,6 +17,7 @@ declare const eel: any;
 export class AppComponent {
   title = 'Hlavní menu';
   mode!: 'list' | 'add' | 'remove';
+  dropdown_changing = false; // to prevent glitching, on when css transition is being carried out
 
   constructor(private router: Router, private modeService: ModeService) {}
 
@@ -71,7 +72,10 @@ export class AppComponent {
 
   btnsShown = false;
   toggleBtns() {
-    this.btnsShown = !this.btnsShown;
+    if (!this.dropdown_changing){
+      this.btnsShown = !this.btnsShown;
+      this.dropdown_changing = true;
+    }
   }
 }
 
