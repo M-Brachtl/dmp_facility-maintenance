@@ -25,6 +25,25 @@
   </div>
 </main>
 
+@if (showDialog) {
+  <app-dialog-container (closeDialog)="closeDialogCallback()">
+    @switch (dialogContent) {
+      @default {
+          <p>Tohle by se zobrazit nemělo.</p>
+          <p>dialogContent: {{ dialogContent }}</p>
+      }
+      @case ('exportSuccess') {
+        <h2 class="text-xl font-bold mb-4">Úspěch</h2>
+        <p>Data byla úspěšně exportována.</p>
+      }
+      @case ('exportFailure') {
+        <h2 class="text-xl font-bold mb-4">Chyba</h2>
+        <p>Export selhal. Více informací v konzoli.</p>
+      }
+    }
+  </app-dialog-container>
+}
+
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->

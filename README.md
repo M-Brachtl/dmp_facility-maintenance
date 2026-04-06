@@ -1,6 +1,10 @@
 # Aplikace pro plánování údržby strojů a školení zaměstnanců
 ## Odkaz na prezentaci
 [Odkaz na prezentaci DMP](https://gamma.app/docs/Vyvoj-aplikace-pro-planovani-udrzby-stroju-a-skoleni-zamestnancu-mpsvevtk5awkbpb)
+## Instalace
+- Rozbalte `full-v[verze].zip` do požadovaného umístění.
+- Spusťte soubor `program.exe`.
+- Exportovaná data se uloží do složky `./export` v adresáři, kde je umístěn `program.exe`.
 ## Nastavení pracovního prostředí
 ### Backend - Python Eel
 #### Předpoklady
