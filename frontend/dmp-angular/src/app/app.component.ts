@@ -18,7 +18,7 @@ declare const eel: any;
 export class AppComponent {
   title = 'Hlavní menu';
   mode!: 'list' | 'add' | 'remove';
-  dropdown_changing = false; // to prevent glitching, on when css transition is being carried out
+  //dropdown_changing = false; // to prevent glitching, on when css transition is being carried out
   showDialog = false; // to control the visibility of the dialog container
   dialogContent: string = ''; // to hold the content of the dialog, e.g. the result of export
 
@@ -80,10 +80,10 @@ export class AppComponent {
 
   btnsShown = false;
   toggleBtns() {
-    if (!this.dropdown_changing){
+    //if (!this.dropdown_changing){
       this.btnsShown = !this.btnsShown;
-      this.dropdown_changing = true;
-    }
+      //this.dropdown_changing = true;
+    //}
   }
 
   closeDialogCallback() {

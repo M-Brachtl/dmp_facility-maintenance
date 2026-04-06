@@ -49,6 +49,7 @@ export class TrainingsComponent {
     });
     this.modeService.mode$.subscribe(mode => {
       this.mode = mode;
+      this.filterI.hiddenStyleUpdate();
     });
     this.modeService.eel_on$.subscribe(status => {
       this.eel_on = status;
